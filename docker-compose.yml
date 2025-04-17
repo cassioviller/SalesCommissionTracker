@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://comissoes_user:senha123forte@estruturas_comissoes:5432/comissoes?sslmode=disable
+    depends_on:
+      - estruturas_comissoes
+    restart: always
+    networks:
+      - app-network
+
+  estruturas_comissoes:
+    image: postgres:15
+    container_name: estruturas_comissoes
+    environment:
+      - POSTGRES_USER=comissoes_user
+      - POSTGRES_PASSWORD=senha123forte
+      - POSTGRES_DB=comissoes
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    restart: always
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
