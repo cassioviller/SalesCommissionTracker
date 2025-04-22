@@ -13,7 +13,6 @@ export default function Login() {
   const [adminPassword, setAdminPassword] = useState("");
   const [partnerUsername, setPartnerUsername] = useState("");
   const [partnerPassword, setPartnerPassword] = useState("");
-  const [partnerId, setPartnerId] = useState("");
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const auth = useAuth();
@@ -61,7 +60,7 @@ export default function Login() {
   const handlePartnerLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!partnerUsername || !partnerPassword || !partnerId) {
+    if (!partnerUsername || !partnerPassword) {
       toast({
         title: "Erro de Login",
         description: "Preencha todos os campos.",
@@ -70,7 +69,7 @@ export default function Login() {
       return;
     }
     
-    const success = auth.login(partnerUsername, partnerPassword, partnerId);
+    const success = auth.login(partnerUsername, partnerPassword);
     
     if (success) {
       toast({
@@ -232,16 +231,7 @@ export default function Login() {
                         onChange={(e) => setPartnerPassword(e.target.value)}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="partner-id">ID do Parceiro</Label>
-                      <Input
-                        id="partner-id"
-                        type="text"
-                        placeholder="Ex: PARTNER-1234"
-                        value={partnerId}
-                        onChange={(e) => setPartnerId(e.target.value)}
-                      />
-                    </div>
+
                   </CardContent>
                   <CardFooter>
                     <Button type="submit" className="w-full">Entrar</Button>

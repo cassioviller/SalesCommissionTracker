@@ -13,6 +13,7 @@ type UserRole = "admin" | "partner" | null;
 // Carregar os componentes administrativos e de parceiro de forma dinâmica
 const AdminDashboard = lazy(() => import('./pages/admin/dashboard'));
 const CriarParceiro = lazy(() => import('./pages/admin/criar-parceiro'));
+const GerenciarParceiros = lazy(() => import('./pages/admin/gerenciar-parceiros'));
 const PartnerDashboard = lazy(() => import('./pages/partner-dashboard'));
 
 // Componente fallback para carregamento
@@ -55,6 +56,7 @@ function AppRouter() {
         <Route path="/" component={Login} />
         <ProtectedRoute path="/admin" component={AdminDashboard} requiredRole="admin" />
         <ProtectedRoute path="/admin/criar-parceiro" component={CriarParceiro} requiredRole="admin" />
+        <ProtectedRoute path="/admin/gerenciar-parceiros" component={GerenciarParceiros} requiredRole="admin" />
         <ProtectedRoute path="/partner" component={PartnerDashboard} requiredRole="partner" />
         <Route component={NotFound} />
       </Switch>

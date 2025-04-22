@@ -59,7 +59,7 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Link href="/admin/criar-parceiro">
+            <Link href="/admin/gerenciar-parceiros">
               <Button variant="outline" size="sm">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
                   <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
                   <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
-                Criar Parceiro
+                Gerenciar Parceiros
               </Button>
             </Link>
             <Button variant="ghost" size="sm" onClick={handleLogout}>

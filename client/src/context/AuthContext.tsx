@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
   
   // Função de login
-  const login = (username: string, password: string, partnerIdParam?: string): boolean => {
+  const login = (username: string, password: string): boolean => {
     // Login de admin
     if (username === "estruturasdv" && password === "Opala1979") {
       const authData = { role: "admin" };
@@ -44,14 +44,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return true;
     } 
     // Login de parceiro (simplificado - seria validado contra banco de dados)
-    else if (username && password && partnerIdParam) {
-      const authData = { role: "partner", partnerId: partnerIdParam };
+    // Simulação de parceiros no sistema - no mundo real, isso viria do banco de dados
+    const partners = [
+      { username: "parceiro1", password: "senha123", id: "PARTNER-1001" },
+      { username: "parceiro2", password: "senha123", id: "PARTNER-1002" }
+    ];
+    
+    const partner = partners.find(p => p.username === username && p.password === password);
+    
+    if (partner) {
+      const authData = { role: "partner", partnerId: partner.id };
       localStorage.setItem("auth", JSON.stringify(authData));
       setIsAuthenticated(true);
       setUserRole("partner");
-      setPartnerId(partnerIdParam);
+      setPartnerId(partner.id);
       return true;
     }
+    
     return false;
   };
   
