@@ -16,7 +16,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/proposals", async (_req, res) => {
     try {
       const proposals = await storage.getAllProposals();
-      res.json(proposals);
+      
+      // Calcular campos adicionais para cada proposta
+      const proposalsWithCalculations = proposals.map(proposal => {
+        const valorTotal = Number(proposal.valorTotal);
+        const valorPago = Number(proposal.valorPago);
+        const percentComissao = Number(proposal.percentComissao);
+        const valorComissaoPaga = Number(proposal.valorComissaoPaga);
+        
+        // Calcular saldo em aberto
+        const saldoAberto = valorTotal - valorPago;
+        
+        // Calcular valor total da comissão
+        const valorComissaoTotal = valorTotal * (percentComissao / 100);
+        
+        // Calcular comissão em aberto
+        const valorComissaoEmAberto = valorComissaoTotal - valorComissaoPaga;
+        
+        // Calcular percentual de comissão paga
+        const percentComissaoPaga = valorComissaoTotal > 0 
+          ? (valorComissaoPaga / valorComissaoTotal) * 100 
+          : 0;
+          
+        return {
+          ...proposal,
+          saldoAberto,
+          valorComissaoTotal,
+          valorComissaoEmAberto,
+          percentComissaoPaga
+        };
+      });
+      
+      res.json(proposalsWithCalculations);
     } catch (error) {
       console.error('Error fetching proposals:', error);
       res.status(500).json({ message: "Failed to fetch proposals" });

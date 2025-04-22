@@ -160,6 +160,7 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
               <TableHead className="font-medium text-xs text-neutral-600 uppercase">% Comissão</TableHead>
               <TableHead className="font-medium text-xs text-neutral-600 uppercase">Valor Comissão Total</TableHead>
               <TableHead className="font-medium text-xs text-neutral-600 uppercase">Valor Comissão Paga</TableHead>
+              <TableHead className="font-medium text-xs text-neutral-600 uppercase">Comissão em Aberto</TableHead>
               <TableHead className="font-medium text-xs text-neutral-600 uppercase">% Comissão Paga</TableHead>
               <TableHead className="font-medium text-xs text-neutral-600 uppercase">Ações</TableHead>
             </TableRow>
@@ -218,6 +219,7 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
                       className="w-24 py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </TableCell>
+                  <TableCell className="text-sm">{formatCurrency(Number(proposal.valorComissaoEmAberto))}</TableCell>
                   <TableCell className="text-sm">{formatIntegerPercentage(Number(proposal.percentComissaoPaga))}</TableCell>
                   <TableCell>
                     <DropdownMenu>
@@ -282,6 +284,7 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
               <TableCell className="font-semibold text-sm">-</TableCell>
               <TableCell className="font-semibold text-sm">{formatCurrency(totalComissao)}</TableCell>
               <TableCell className="font-semibold text-sm">{formatCurrency(totalComissaoPaga)}</TableCell>
+              <TableCell className="font-semibold text-sm">{formatCurrency(totalComissaoEmAberto)}</TableCell>
               <TableCell className="font-semibold text-sm">{formatIntegerPercentage(percentComissaoPaga)}</TableCell>
               <TableCell className="font-semibold text-sm">-</TableCell>
             </TableRow>

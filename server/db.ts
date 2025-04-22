@@ -14,11 +14,23 @@ console.log(`Conectando ao banco de dados: ${process.env.DATABASE_URL.replace(/:
 const queryClient = postgres(process.env.DATABASE_URL, {
   ssl: process.env.DATABASE_URL.includes('sslmode=require'),
   max: 10, // Máximo de conexões no pool
+  connect_timeout: 10, // Timeout de conexão em segundos
+  idle_timeout: 30 // Timeout de inatividade
 });
 
 export const db = drizzle(queryClient, { schema });
 
-// Verificar conexão ao iniciar
-queryClient`SELECT 1`
-  .then(() => console.log('✅ Conexão com banco de dados estabelecida'))
-  .catch((err) => console.error('❌ Erro ao conectar ao banco de dados:', err));
+// Função para verificar conexão
+async function testDatabaseConnection() {
+  try {
+    await queryClient`SELECT 1`;
+    console.log('✅ Conexão com banco de dados estabelecida');
+    return true;
+  } catch (err) {
+    console.error('❌ Erro ao conectar ao banco de dados:', err);
+    return false;
+  }
+}
+
+// Iniciar verificação, mas não bloqueie a inicialização do servidor
+testDatabaseConnection();
