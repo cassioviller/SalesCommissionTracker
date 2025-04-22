@@ -42,7 +42,7 @@ export default function AdminDashboard() {
   };
   
   return (
-    <div className="h-screen overflow-hidden bg-neutral-100">
+    <div className="flex flex-col min-h-screen bg-neutral-100">
       {/* Header/Navbar */}
       <header className="bg-white shadow-sm py-3 px-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -105,7 +105,7 @@ export default function AdminDashboard() {
       </header>
 
       {/* Main content */}
-      <main className="h-full overflow-auto bg-neutral-100 pt-6">
+      <main className="flex-1 pt-6 pb-20">
         {/* Page header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
@@ -145,7 +145,7 @@ export default function AdminDashboard() {
       {/* Footer */}
       <footer className="bg-white border-t py-4 mt-auto">
         <div className="container mx-auto text-center">
-          <p className="text-sm text-gray-600">Estruturas do Vale</p>
+          <p className="text-sm font-medium text-gray-600">Estruturas do Vale</p>
         </div>
       </footer>
       

@@ -138,10 +138,10 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
   }
   
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
-      <div className="overflow-x-auto" style={{ minHeight: "200px", maxHeight: "60vh" }}>
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div className="overflow-x-auto">
         <table className="w-full border-collapse">
-          <thead className="sticky top-0 bg-white z-10">
+          <thead className="bg-white">
             <tr className="border-b">
               <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Proposta</th>
               <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Valor Total</th>
@@ -265,7 +265,7 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
               ))
             )}
           </tbody>
-          <tfoot className="sticky bottom-0 bg-gray-50 font-semibold">
+          <tfoot className="bg-gray-50 font-semibold">
             <tr className="border-t">
               <td className="py-3 px-4 text-sm">Total</td>
               <td className="py-3 px-4 text-sm">{formatCurrency(totalValor)}</td>
