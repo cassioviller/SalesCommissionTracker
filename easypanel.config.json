@@ -1,0 +1,13 @@
+{
+  "name": "comissoes-vendas",
+  "description": "Sistema de Gerenciamento de Comissões de Vendas",
+  "port": 5000,
+  "env": {
+    "DATABASE_URL": "postgres://comissoes_user:senha123forte@estruturas_comissoes:5432/comissoes?sslmode=disable",
+    "NODE_ENV": "production"
+  },
+  "buildCommand": "npm ci && npm run build",
+  "startCommand": "npm run db:push && npm run start",
+  "healthCheckPath": "/api/proposals",
+  "volumes": []
+}
