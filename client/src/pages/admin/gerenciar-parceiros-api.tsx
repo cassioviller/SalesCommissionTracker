@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
+import { Link } from "wouter";
 
 // Interface para parceiros
 interface Partner {
@@ -18,7 +19,7 @@ interface Partner {
   proposalIds: number[];
 }
 
-export default function GerenciarParceirosApi() {
+export default function GerenciarParceiros() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
@@ -254,11 +255,79 @@ export default function GerenciarParceirosApi() {
   }
   
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gerenciar Parceiros</h1>
-        <Button onClick={handleStartAdd}>Adicionar Parceiro</Button>
-      </div>
+    <div className="flex flex-col min-h-screen bg-neutral-100">
+      {/* Header/Navbar */}
+      <header className="bg-white shadow-sm py-3 px-6">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center">
+            <div className="bg-primary rounded-md text-white h-8 w-8 flex items-center justify-center mr-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 6.37v11.26a.9.9 0 0 1-1.33.83l-1.47-.87a1.17 1.17 0 0 0-1.21.04l-3.11 2.14a1.17 1.17 0 0 1-1.21.04L7.6 17.9a1.17 1.17 0 0 0-1.21.04l-2.72 1.87A.9.9 0 0 1 2 19V5.5a.9.9 0 0 1 .33-.7l2.72-1.87a1.17 1.17 0 0 1 1.21-.04l3.07 1.91a1.17 1.17 0 0 0 1.21-.04l3.11-2.14a1.17 1.17 0 0 1 1.21-.04l1.47.87a.9.9 0 0 1 .67.92z" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="font-bold text-primary text-md">Sistema de Comissões</h1>
+              <p className="text-xs text-neutral-500">Gerenciamento de Parceiros</p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <Link href="/admin">
+              <Button variant="outline" size="sm">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="16" 
+                  height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className="mr-2"
+                >
+                  <rect x="3" y="3" width="7" height="9" />
+                  <rect x="14" y="3" width="7" height="5" />
+                  <rect x="14" y="12" width="7" height="9" />
+                  <rect x="3" y="16" width="7" height="5" />
+                </svg>
+                Dashboard
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+      
+      {/* Main content */}
+      <main className="flex-1 pt-6 pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h1 className="text-2xl font-semibold text-neutral-800">Gerenciar Parceiros</h1>
+                <p className="text-neutral-500 text-sm">Adicione, edite ou remova parceiros do sistema</p>
+              </div>
+              <Button onClick={handleStartAdd} className="bg-primary hover:bg-primary/90">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="16" 
+                  height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className="mr-2"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 12h-4" />
+                  <path d="M20 10v4" />
+                </svg>
+                Adicionar Parceiro
+              </Button>
+            </div>
       
       {partners?.length === 0 ? (
         <div className="text-center p-8 bg-gray-50 rounded-lg">
