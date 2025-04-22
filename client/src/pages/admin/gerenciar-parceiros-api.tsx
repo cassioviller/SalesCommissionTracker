@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -308,55 +308,47 @@ export default function GerenciarParceiros() {
                 <p className="text-neutral-500 text-sm">Adicione, edite ou remova parceiros do sistema</p>
               </div>
               <Button onClick={handleStartAdd} className="bg-primary hover:bg-primary/90">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                  className="mr-2"
-                >
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 12h-4" />
-                  <path d="M20 10v4" />
-                </svg>
+                <Plus className="h-4 w-4 mr-2" />
                 Adicionar Parceiro
               </Button>
             </div>
-      
-      {partners?.length === 0 ? (
-        <div className="text-center p-8 bg-gray-50 rounded-lg">
-          <p className="text-gray-500">Nenhum parceiro cadastrado. Clique em "Adicionar Parceiro" para começar.</p>
+            
+            {partners?.length === 0 ? (
+              <div className="text-center p-8 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">Nenhum parceiro cadastrado. Clique em "Adicionar Parceiro" para começar.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {partners?.map((partner: Partner) => (
+                  <Card key={partner.id} className="transition-all hover:shadow-lg">
+                    <CardHeader>
+                      <CardTitle>{partner.name}</CardTitle>
+                      <CardDescription>{partner.email}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="mb-4">
+                        <p className="text-sm text-muted-foreground">Usuário: {partner.username}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Propostas associadas: {partner.proposalIds?.length || 0}
+                        </p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm" onClick={() => handleStartEdit(partner)}>Editar</Button>
+                        <Button variant="destructive" size="sm" onClick={() => handleStartDelete(partner)}>Excluir</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* Footer com logo da Estruturas do Vale */}
+          <div className="mt-16 border-t pt-6 text-center text-gray-500">
+            <p className="text-sm">© {new Date().getFullYear()} - Estruturas do Vale - Sistema de Gerenciamento de Comissões</p>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {partners?.map((partner: Partner) => (
-            <Card key={partner.id} className="transition-all hover:shadow-lg">
-              <CardHeader>
-                <CardTitle>{partner.name}</CardTitle>
-                <CardDescription>{partner.email}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-4">
-                  <p className="text-sm text-muted-foreground">Usuário: {partner.username}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Propostas associadas: {partner.proposalIds?.length || 0}
-                  </p>
-                </div>
-                <div className="flex space-x-2">
-                  <Button variant="outline" size="sm" onClick={() => handleStartEdit(partner)}>Editar</Button>
-                  <Button variant="destructive" size="sm" onClick={() => handleStartDelete(partner)}>Excluir</Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      </main>
       
       {/* Dialog para adicionar parceiro */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -477,11 +469,6 @@ export default function GerenciarParceiros() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      {/* Footer com logo da Estruturas do Vale */}
-      <div className="mt-16 border-t pt-6 text-center text-gray-500">
-        <p className="text-sm">© {new Date().getFullYear()} - Estruturas do Vale - Sistema de Gerenciamento de Comissões</p>
-      </div>
     </div>
   );
 }

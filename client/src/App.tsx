@@ -13,7 +13,7 @@ type UserRole = "admin" | "partner" | null;
 // Carregar os componentes administrativos e de parceiro de forma dinâmica
 const AdminDashboard = lazy(() => import('./pages/admin/dashboard'));
 const CriarParceiro = lazy(() => import('./pages/admin/criar-parceiro'));
-const GerenciarParceiros = lazy(() => import('./pages/admin/gerenciar-parceiros-api')); // Usando a versão que integra com a API
+const GerenciarParceiros = lazy(() => import('./pages/admin/gerenciar-parceiros')); // Versão unificada com API
 const PartnerDashboard = lazy(() => import('./pages/partner-dashboard'));
 
 // Componente fallback para carregamento
