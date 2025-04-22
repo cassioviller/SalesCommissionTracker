@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import CommissionTable from "@/components/commission/table";
 import ChartPanel from "@/components/commission/chart-panel";
 import AddProposalModal from "@/components/commission/add-proposal-modal";
 import type { SalesProposal, ProposalWithCalculations } from "@shared/schema";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "wouter";
+import { SearchFilter } from "@/components/ui/search-filter";
 
 export default function AdminDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const auth = useAuth();
   
   // Fetch proposals from API
@@ -35,6 +37,17 @@ export default function AdminDashboard() {
       percentComissaoPaga
     };
   });
+
+  // Filtrar propostas baseado na busca
+  const filteredProposals = useMemo(() => {
+    if (!searchQuery.trim()) return proposalsWithCalculations;
+    
+    return proposalsWithCalculations.filter(proposal => 
+      proposal.proposta.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      proposal.parceiro?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      String(proposal.valorTotal).includes(searchQuery)
+    );
+  }, [proposalsWithCalculations, searchQuery]);
 
   const handleLogout = () => {
     auth.logout();
@@ -129,13 +142,26 @@ export default function AdminDashboard() {
           <div className="flex flex-col gap-6 mb-6">
             {/* Chart Panel - now on top horizontally */}
             <div>
-              <ChartPanel proposals={proposalsWithCalculations} />
+              <ChartPanel proposals={filteredProposals} />
+            </div>
+            
+            {/* Search Filter */}
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+                <h2 className="text-lg font-medium text-neutral-800">Lista de Propostas</h2>
+                <SearchFilter
+                  placeholder="Buscar por proposta, parceiro ou valor..."
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  className="md:w-80"
+                />
+              </div>
             </div>
             
             {/* Commission Table - takes full width */}
             <div>
               <CommissionTable 
-                proposals={proposalsWithCalculations} 
+                proposals={filteredProposals} 
                 isLoading={isLoading} 
               />
             </div>
