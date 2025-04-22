@@ -1,21 +1,11 @@
 import { useState, useEffect } from "react";
 import { 
-  Table, 
-  TableBody, 
-  TableCaption, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow,
-  TableFooter
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatIntegerPercentage, parseCurrencyToNumber } from "@/lib/utils/format";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -150,54 +140,54 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
-        <Table className="w-full table-fixed">
-          <TableHeader>
-            <TableRow className="bg-neutral-50">
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[12%]">Proposta</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[10%] text-right">Valor Total</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[10%] text-right">Valor Pago</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[10%] text-right">Saldo Aberto</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[8%] text-right">% Comissão</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[12%] text-right">Comissão Total</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[12%] text-right">Comissão Paga</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[12%] text-right">Comis. em Aberto</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[8%] text-right">% Comis. Paga</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[6%] text-center">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        <table className="w-full">
+          <thead>
+            <tr className="border-b">
+              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Proposta</th>
+              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Valor Total</th>
+              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Valor Pago</th>
+              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Saldo Aberto</th>
+              <th className="py-3 px-3 text-center text-sm uppercase font-medium text-gray-600">% Comissão</th>
+              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Valor Comissão Total</th>
+              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Valor Comissão Paga</th>
+              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Comissão em Aberto</th>
+              <th className="py-3 px-3 text-center text-sm uppercase font-medium text-gray-600">% Paga</th>
+              <th className="py-3 px-2 text-center text-sm uppercase font-medium text-gray-600">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
             {localProposals.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={9} className="text-center py-6 text-sm text-neutral-500">
+              <tr>
+                <td colSpan={10} className="text-center py-6 text-sm text-neutral-500">
                   Nenhuma proposta encontrada
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ) : (
               localProposals.map((proposal) => (
-                <TableRow key={proposal.id}>
-                  <TableCell className="font-medium text-sm">{proposal.proposta}</TableCell>
-                  <TableCell>
+                <tr key={proposal.id} className="border-b hover:bg-gray-50">
+                  <td className="py-3 px-4 font-medium text-sm">{proposal.proposta}</td>
+                  <td className="py-3 px-4">
                     <Input
                       type="number"
                       min="0"
                       step="0.01"
                       value={proposal.valorTotal}
                       onChange={(e) => handleFieldChange(proposal.id, 'valorTotal', e.target.value)}
-                      className="w-full py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="w-[110px] py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
                     />
-                  </TableCell>
-                  <TableCell>
+                  </td>
+                  <td className="py-3 px-4">
                     <Input
                       type="number"
                       min="0"
                       step="0.01"
                       value={proposal.valorPago}
                       onChange={(e) => handleFieldChange(proposal.id, 'valorPago', e.target.value)}
-                      className="w-full py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="w-[110px] py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
                     />
-                  </TableCell>
-                  <TableCell className="text-sm text-right">{formatCurrency(Number(proposal.saldoAberto))}</TableCell>
-                  <TableCell>
+                  </td>
+                  <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.saldoAberto))}</td>
+                  <td className="py-3 px-3 text-center">
                     <Input
                       type="number"
                       min="0"
@@ -205,23 +195,23 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
                       step="0.1"
                       value={proposal.percentComissao}
                       onChange={(e) => handleFieldChange(proposal.id, 'percentComissao', e.target.value)}
-                      className="w-full py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="w-[60px] py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-center focus:outline-none focus:ring-1 focus:ring-primary"
                     />
-                  </TableCell>
-                  <TableCell className="text-sm text-right">{formatCurrency(Number(proposal.valorComissaoTotal))}</TableCell>
-                  <TableCell>
+                  </td>
+                  <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.valorComissaoTotal))}</td>
+                  <td className="py-3 px-4">
                     <Input
                       type="number"
                       min="0"
                       step="0.01"
                       value={proposal.valorComissaoPaga}
                       onChange={(e) => handleFieldChange(proposal.id, 'valorComissaoPaga', e.target.value)}
-                      className="w-full py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="w-[110px] py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
                     />
-                  </TableCell>
-                  <TableCell className="text-sm text-right">{formatCurrency(Number(proposal.valorComissaoEmAberto))}</TableCell>
-                  <TableCell className="text-sm text-right">{formatIntegerPercentage(Number(proposal.percentComissaoPaga))}</TableCell>
-                  <TableCell>
+                  </td>
+                  <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.valorComissaoEmAberto))}</td>
+                  <td className="py-3 px-3 text-center text-sm">{formatIntegerPercentage(Number(proposal.percentComissaoPaga))}</td>
+                  <td className="py-3 px-2 text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -270,26 +260,24 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               ))
             )}
-          </TableBody>
-          <TableFooter className="bg-neutral-50">
-            <TableRow>
-              <TableCell className="font-semibold text-sm">Total</TableCell>
-              <TableCell className="font-semibold text-sm text-right">{formatCurrency(totalValor)}</TableCell>
-              <TableCell className="font-semibold text-sm text-right">{formatCurrency(totalPago)}</TableCell>
-              <TableCell className="font-semibold text-sm text-right">{formatCurrency(totalAberto)}</TableCell>
-              <TableCell className="font-semibold text-sm text-center">-</TableCell>
-              <TableCell className="font-semibold text-sm text-right">{formatCurrency(totalComissao)}</TableCell>
-              <TableCell className="font-semibold text-sm text-right">{formatCurrency(totalComissaoPaga)}</TableCell>
-              <TableCell className="font-semibold text-sm text-right">{formatCurrency(totalComissaoEmAberto)}</TableCell>
-              <TableCell className="font-semibold text-sm text-right">{formatIntegerPercentage(percentComissaoPaga)}</TableCell>
-              <TableCell className="font-semibold text-sm text-center">-</TableCell>
-            </TableRow>
-          </TableFooter>
-        </Table>
+            <tr className="bg-gray-50 border-t">
+              <td className="py-3 px-4 font-semibold text-sm">Total</td>
+              <td className="py-3 px-4 font-semibold text-sm">{formatCurrency(totalValor)}</td>
+              <td className="py-3 px-4 font-semibold text-sm">{formatCurrency(totalPago)}</td>
+              <td className="py-3 px-4 font-semibold text-sm">{formatCurrency(totalAberto)}</td>
+              <td className="py-3 px-3 font-semibold text-sm text-center">-</td>
+              <td className="py-3 px-4 font-semibold text-sm">{formatCurrency(totalComissao)}</td>
+              <td className="py-3 px-4 font-semibold text-sm">{formatCurrency(totalComissaoPaga)}</td>
+              <td className="py-3 px-4 font-semibold text-sm">{formatCurrency(totalComissaoEmAberto)}</td>
+              <td className="py-3 px-3 font-semibold text-sm text-center">{formatIntegerPercentage(percentComissaoPaga)}</td>
+              <td className="py-3 px-2 font-semibold text-sm text-center">-</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );
