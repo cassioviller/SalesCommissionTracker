@@ -1,11 +1,32 @@
-import { salesProposals, type SalesProposal, type InsertProposal, type UpdateProposal, type User, type InsertUser, users } from "@shared/schema";
+import { 
+  salesProposals, 
+  type SalesProposal, 
+  type InsertProposal, 
+  type UpdateProposal, 
+  type User, 
+  type InsertUser, 
+  users,
+  partners,
+  type Partner,
+  type InsertPartner,
+  type UpdatePartner
+} from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
 
 export interface IStorage {
+  // User Methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  
+  // Partner Methods
+  getAllPartners(): Promise<Partner[]>;
+  getPartner(id: number): Promise<Partner | undefined>;
+  getPartnerByUsername(username: string): Promise<Partner | undefined>;
+  createPartner(partner: InsertPartner): Promise<Partner>;
+  updatePartner(id: number, partner: Partial<UpdatePartner>): Promise<Partner | undefined>;
+  deletePartner(id: number): Promise<boolean>;
   
   // Sales Proposals Methods
   getAllProposals(): Promise<SalesProposal[]>;
@@ -32,6 +53,51 @@ export class DatabaseStorage implements IStorage {
       .values(insertUser)
       .returning();
     return user;
+  }
+
+  // Partner methods implementation
+  async getAllPartners(): Promise<Partner[]> {
+    return await db.select().from(partners);
+  }
+
+  async getPartner(id: number): Promise<Partner | undefined> {
+    const [partner] = await db.select().from(partners).where(eq(partners.id, id));
+    return partner || undefined;
+  }
+
+  async getPartnerByUsername(username: string): Promise<Partner | undefined> {
+    const [partner] = await db.select().from(partners).where(eq(partners.username, username));
+    return partner || undefined;
+  }
+
+  async createPartner(insertPartner: InsertPartner): Promise<Partner> {
+    const [partner] = await db
+      .insert(partners)
+      .values({
+        ...insertPartner,
+        proposalIds: insertPartner.proposalIds || []
+      })
+      .returning();
+    return partner;
+  }
+
+  async updatePartner(id: number, updateData: Partial<UpdatePartner>): Promise<Partner | undefined> {
+    const [updatedPartner] = await db
+      .update(partners)
+      .set(updateData)
+      .where(eq(partners.id, id))
+      .returning();
+    
+    return updatedPartner;
+  }
+
+  async deletePartner(id: number): Promise<boolean> {
+    const result = await db
+      .delete(partners)
+      .where(eq(partners.id, id))
+      .returning({ id: partners.id });
+    
+    return result.length > 0;
   }
 
   async getAllProposals(): Promise<SalesProposal[]> {
