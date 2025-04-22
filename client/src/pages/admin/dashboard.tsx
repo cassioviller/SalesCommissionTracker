@@ -142,6 +142,13 @@ export default function AdminDashboard() {
         </div>
       </main>
       
+      {/* Footer */}
+      <footer className="bg-white border-t py-4 mt-auto">
+        <div className="container mx-auto text-center">
+          <p className="text-sm text-gray-600">Estruturas do Vale</p>
+        </div>
+      </footer>
+      
       {/* Add Proposal Modal */}
       <AddProposalModal 
         isOpen={isModalOpen} 

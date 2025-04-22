@@ -265,7 +265,7 @@ export default function PartnerDashboard() {
       <footer className="bg-white border-t mt-12 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-sm text-center text-gray-500">
-            © {new Date().getFullYear()} Sistema de Gerenciamento de Comissões. Todos os direitos reservados.
+            Estruturas do Vale
           </p>
         </div>
       </footer>

@@ -138,10 +138,10 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
   }
   
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
+      <div className="overflow-x-auto" style={{ minHeight: "200px", maxHeight: "60vh" }}>
+        <table className="w-full border-collapse">
+          <thead className="sticky top-0 bg-white z-10">
             <tr className="border-b">
               <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Proposta</th>
               <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Valor Total</th>
@@ -264,19 +264,21 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
                 </tr>
               ))
             )}
-            <tr className="bg-gray-50 border-t">
-              <td className="py-3 px-4 font-semibold text-sm">Total</td>
-              <td className="py-3 px-4 font-semibold text-sm">{formatCurrency(totalValor)}</td>
-              <td className="py-3 px-4 font-semibold text-sm">{formatCurrency(totalPago)}</td>
-              <td className="py-3 px-4 font-semibold text-sm">{formatCurrency(totalAberto)}</td>
-              <td className="py-3 px-3 font-semibold text-sm text-center">-</td>
-              <td className="py-3 px-4 font-semibold text-sm">{formatCurrency(totalComissao)}</td>
-              <td className="py-3 px-4 font-semibold text-sm">{formatCurrency(totalComissaoPaga)}</td>
-              <td className="py-3 px-4 font-semibold text-sm">{formatCurrency(totalComissaoEmAberto)}</td>
-              <td className="py-3 px-3 font-semibold text-sm text-center">{formatIntegerPercentage(percentComissaoPaga)}</td>
-              <td className="py-3 px-2 font-semibold text-sm text-center">-</td>
-            </tr>
           </tbody>
+          <tfoot className="sticky bottom-0 bg-gray-50 font-semibold">
+            <tr className="border-t">
+              <td className="py-3 px-4 text-sm">Total</td>
+              <td className="py-3 px-4 text-sm">{formatCurrency(totalValor)}</td>
+              <td className="py-3 px-4 text-sm">{formatCurrency(totalPago)}</td>
+              <td className="py-3 px-4 text-sm">{formatCurrency(totalAberto)}</td>
+              <td className="py-3 px-3 text-sm text-center">-</td>
+              <td className="py-3 px-4 text-sm">{formatCurrency(totalComissao)}</td>
+              <td className="py-3 px-4 text-sm">{formatCurrency(totalComissaoPaga)}</td>
+              <td className="py-3 px-4 text-sm">{formatCurrency(totalComissaoEmAberto)}</td>
+              <td className="py-3 px-3 text-sm text-center">{formatIntegerPercentage(percentComissaoPaga)}</td>
+              <td className="py-3 px-2 text-sm text-center">-</td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>
