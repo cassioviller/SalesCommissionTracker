@@ -44,7 +44,6 @@ export default function AdminDashboard() {
     
     return proposalsWithCalculations.filter(proposal => 
       proposal.proposta.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      proposal.parceiro?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       String(proposal.valorTotal).includes(searchQuery)
     );
   }, [proposalsWithCalculations, searchQuery]);

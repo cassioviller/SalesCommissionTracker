@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
 import { Link } from "wouter";
+import { SearchFilter } from "@/components/ui/search-filter";
+import { ProposalCombobox } from "@/components/ui/proposal-combobox";
+import { SalesProposal } from "@shared/schema";
 
 // Interface para parceiros
 interface Partner {
@@ -28,6 +31,7 @@ export default function GerenciarParceiros() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentPartner, setCurrentPartner] = useState<Partner | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   
   // Dados do formulário de adicionar/editar
   const [formData, setFormData] = useState({
@@ -36,6 +40,9 @@ export default function GerenciarParceiros() {
     email: "",
     password: ""
   });
+  
+  // Estado para as propostas selecionadas
+  const [selectedProposalIds, setSelectedProposalIds] = useState<number[]>([]);
   
   // Fetch da lista de parceiros
   const { data: partners, isLoading, error } = useQuery({
@@ -236,6 +243,17 @@ export default function GerenciarParceiros() {
     setFormData({ ...formData, [name]: value });
   };
   
+  // Filtrar parceiros baseado na busca
+  const filteredPartners = useMemo(() => {
+    if (!searchQuery.trim() || !partners) return partners;
+    
+    return partners.filter((partner: Partner) => 
+      partner.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      partner.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      partner.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [partners, searchQuery]);
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -302,24 +320,41 @@ export default function GerenciarParceiros() {
       <main className="flex-1 pt-6 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h1 className="text-2xl font-semibold text-neutral-800">Gerenciar Parceiros</h1>
-                <p className="text-neutral-500 text-sm">Adicione, edite ou remova parceiros do sistema</p>
+            <div className="flex flex-col gap-6 mb-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h1 className="text-2xl font-semibold text-neutral-800">Gerenciar Parceiros</h1>
+                  <p className="text-neutral-500 text-sm">Adicione, edite ou remova parceiros do sistema</p>
+                </div>
+                <Button onClick={handleStartAdd} className="bg-primary hover:bg-primary/90">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Parceiro
+                </Button>
               </div>
-              <Button onClick={handleStartAdd} className="bg-primary hover:bg-primary/90">
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar Parceiro
-              </Button>
+              
+              {/* Search Filter */}
+              <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+                <h2 className="text-lg font-medium text-neutral-800">Lista de Parceiros</h2>
+                <SearchFilter
+                  placeholder="Buscar por nome, usuário ou email..."
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  className="md:w-80"
+                />
+              </div>
             </div>
             
             {partners?.length === 0 ? (
               <div className="text-center p-8 bg-gray-50 rounded-lg">
                 <p className="text-gray-500">Nenhum parceiro cadastrado. Clique em "Adicionar Parceiro" para começar.</p>
               </div>
+            ) : filteredPartners?.length === 0 ? (
+              <div className="text-center p-8 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">Nenhum parceiro encontrado para essa busca.</p>
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {partners?.map((partner: Partner) => (
+                {filteredPartners?.map((partner: Partner) => (
                   <Card key={partner.id} className="transition-all hover:shadow-lg">
                     <CardHeader>
                       <CardTitle>{partner.name}</CardTitle>
