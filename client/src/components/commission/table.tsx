@@ -43,6 +43,7 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
   const totalAberto = localProposals.reduce((sum, proposal) => sum + Number(proposal.saldoAberto), 0);
   const totalComissao = localProposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoTotal), 0);
   const totalComissaoPaga = localProposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoPaga), 0);
+  const totalComissaoEmAberto = localProposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoEmAberto), 0);
   const percentComissaoPaga = totalComissao > 0 ? (totalComissaoPaga / totalComissao) * 100 : 0;
   
   // Update field mutation
@@ -113,6 +114,7 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
             
             if (field === 'valorTotal' || field === 'percentComissao' || field === 'valorComissaoPaga') {
               const valorComissaoTotal = Number(updatedProposal.valorTotal) * (Number(updatedProposal.percentComissao) / 100);
+              updatedProposal.valorComissaoEmAberto = valorComissaoTotal - Number(updatedProposal.valorComissaoPaga);
               updatedProposal.percentComissaoPaga = valorComissaoTotal > 0 
                 ? (Number(updatedProposal.valorComissaoPaga) / valorComissaoTotal) * 100
                 : 0;

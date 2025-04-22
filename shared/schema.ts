@@ -51,5 +51,6 @@ export type UpdateProposal = z.infer<typeof updateProposalSchema>;
 export interface ProposalWithCalculations extends SalesProposal {
   saldoAberto: number;
   valorComissaoTotal: number;
+  valorComissaoEmAberto: number;
   percentComissaoPaga: number;
 }
