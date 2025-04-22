@@ -261,6 +261,13 @@ export class DatabaseStorage implements IStorage {
         // Agora tentamos inserir os parceiros de exemplo
         const samplePartners = [
           {
+            name: "Admin Estruturas Vale",
+            username: "estruturasdv",
+            email: "admin@estruturasdovale.com",
+            password: "Opala1979",
+            proposal_ids: JSON.stringify([])
+          },
+          {
             name: "Parceiro 1",
             username: "parceiro1",
             email: "parceiro1@exemplo.com",
