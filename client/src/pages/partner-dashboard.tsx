@@ -13,38 +13,49 @@ export default function PartnerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
-  // Fetch proposals from API
-  const { data: allProposals, isLoading } = useQuery<ProposalWithCalculations[]>({
-    queryKey: ['/api/proposals'],
+  // Fetch partner data to get assigned proposals
+  const { data: partner, isLoading: isLoadingPartner } = useQuery({
+    queryKey: ['/api/partners', auth.partnerId],
+    queryFn: async () => {
+      if (!auth.partnerId) return null;
+      const response = await fetch(`/api/partners/${auth.partnerId}`);
+      if (!response.ok) throw new Error('Falha ao carregar dados do parceiro');
+      return await response.json();
+    },
+    enabled: !!auth.partnerId,
+    // Refetch sempre que houver qualquer alteração nas propostas
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000 // Refetch a cada 30 segundos para manter dados atualizados
   });
   
-  // Use effect para filtrar apenas as propostas do parceiro
-  // (em um sistema real, isso seria feito no backend com uma rota específica)
+  // Fetch all proposals
+  const { data: allProposals, isLoading: isLoadingProposals } = useQuery<ProposalWithCalculations[]>({
+    queryKey: ['/api/proposals'],
+    // Refetch para manter atualizado
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000 // Refetch a cada 30 segundos
+  });
+  
+  // Filter proposals based on partner data
   useEffect(() => {
-    if (allProposals && !isLoading) {
-      // Neste exemplo simplificado, estamos apenas filtrando uma proposta
-      // com base no ID do parceiro. Em um sistema real, haveria uma tabela
-      // de associação no banco de dados.
+    if (partner && allProposals && !isLoadingPartner && !isLoadingProposals) {
       const partnerId = auth.partnerId;
       
-      // Simulando uma lógica de filtro. Em um sistema real, isso seria
-      // determinado pelo relacionamento no banco de dados.
-      const filteredProposals = allProposals.filter(proposal => 
-        // Exemplo simples: a proposta contém parte do ID do parceiro
-        partnerId && proposal.proposta.toLowerCase().includes(partnerId.toLowerCase().substring(0, 5))
-      );
-      
-      if (filteredProposals.length === 0) {
-        // Se não encontrarmos propostas, pegar a primeira como exemplo
-        // (isto é apenas para demonstração, em um sistema real seria diferente)
-        setProposals(allProposals.slice(0, 1));
-      } else {
+      if (partner.proposalIds && partner.proposalIds.length > 0) {
+        // Filter proposals that are assigned to this partner
+        const filteredProposals = allProposals.filter(proposal => 
+          partner.proposalIds.includes(proposal.id)
+        );
+        
         setProposals(filteredProposals);
+      } else {
+        // If no proposals are assigned, show empty list
+        setProposals([]);
       }
       
       setLoading(false);
     }
-  }, [allProposals, isLoading, auth.partnerId]);
+  }, [allProposals, isLoadingProposals, partner, isLoadingPartner, auth.partnerId]);
   
   const handleLogout = () => {
     auth.logout();
@@ -59,7 +70,10 @@ export default function PartnerDashboard() {
   const totalComissaoEmAberto = proposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoEmAberto), 0);
   const percentComissaoPaga = totalComissao > 0 ? (totalComissaoPaga / totalComissao) * 100 : 0;
   
-  if (loading) {
+  // Verificamos todos os estados de carregamento
+  const isLoading = loading || isLoadingPartner || isLoadingProposals;
+  
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
