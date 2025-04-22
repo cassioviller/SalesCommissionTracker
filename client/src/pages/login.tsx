@@ -28,7 +28,7 @@ export default function Login() {
     }
   }, [auth.isAuthenticated, auth.userRole, navigate]);
   
-  const handleAdminLogin = (e: React.FormEvent) => {
+  const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!adminUsername || !adminPassword) {
@@ -40,7 +40,7 @@ export default function Login() {
       return;
     }
     
-    const success = auth.login(adminUsername, adminPassword);
+    const success = await auth.login(adminUsername, adminPassword);
     
     if (success) {
       toast({
@@ -57,7 +57,7 @@ export default function Login() {
     }
   };
   
-  const handlePartnerLogin = (e: React.FormEvent) => {
+  const handlePartnerLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!partnerUsername || !partnerPassword) {
@@ -69,7 +69,7 @@ export default function Login() {
       return;
     }
     
-    const success = auth.login(partnerUsername, partnerPassword);
+    const success = await auth.login(partnerUsername, partnerPassword);
     
     if (success) {
       toast({

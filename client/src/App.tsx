@@ -14,6 +14,7 @@ type UserRole = "admin" | "partner" | null;
 const AdminDashboard = lazy(() => import('./pages/admin/dashboard'));
 const CriarParceiro = lazy(() => import('./pages/admin/criar-parceiro'));
 const GerenciarParceiros = lazy(() => import('./pages/admin/gerenciar-parceiros'));
+const GerenciarParceirosApi = lazy(() => import('./pages/admin/gerenciar-parceiros-api'));
 const PartnerDashboard = lazy(() => import('./pages/partner-dashboard'));
 
 // Componente fallback para carregamento
@@ -57,6 +58,7 @@ function AppRouter() {
         <ProtectedRoute path="/admin" component={AdminDashboard} requiredRole="admin" />
         <ProtectedRoute path="/admin/criar-parceiro" component={CriarParceiro} requiredRole="admin" />
         <ProtectedRoute path="/admin/gerenciar-parceiros" component={GerenciarParceiros} requiredRole="admin" />
+        <ProtectedRoute path="/admin/gerenciar-parceiros-api" component={GerenciarParceirosApi} requiredRole="admin" />
         <ProtectedRoute path="/partner" component={PartnerDashboard} requiredRole="partner" />
         <Route component={NotFound} />
       </Switch>
