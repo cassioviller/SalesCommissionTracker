@@ -1,69 +1,63 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, formatPercentage } from "@/lib/utils/format";
-import { ProposalWithCalculations } from "@shared/schema";
+import type { ProposalWithCalculations } from "@shared/schema";
+import { useAuth } from "../App";
 
 export default function PartnerDashboard() {
-  const [location] = useLocation();
-  const { toast } = useToast();
-  const [proposal, setProposal] = useState<ProposalWithCalculations | null>(null);
+  const auth = useAuth();
+  const [proposals, setProposals] = useState<ProposalWithCalculations[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
-  // Extrair o parâmetro "proposta" da URL
-  const params = new URLSearchParams(window.location.search);
-  const propostaParam = params.get("proposta");
+  // Fetch proposals from API
+  const { data: allProposals, isLoading } = useQuery<ProposalWithCalculations[]>({
+    queryKey: ['/api/proposals'],
+  });
   
+  // Use effect para filtrar apenas as propostas do parceiro
+  // (em um sistema real, isso seria feito no backend com uma rota específica)
   useEffect(() => {
-    const fetchProposal = async () => {
-      if (!propostaParam) {
-        setError("Número de proposta não fornecido");
-        setLoading(false);
-        return;
+    if (allProposals && !isLoading) {
+      // Neste exemplo simplificado, estamos apenas filtrando uma proposta
+      // com base no ID do parceiro. Em um sistema real, haveria uma tabela
+      // de associação no banco de dados.
+      const partnerId = auth.partnerId;
+      
+      // Simulando uma lógica de filtro. Em um sistema real, isso seria
+      // determinado pelo relacionamento no banco de dados.
+      const filteredProposals = allProposals.filter(proposal => 
+        // Exemplo simples: a proposta contém parte do ID do parceiro
+        partnerId && proposal.proposta.toLowerCase().includes(partnerId.toLowerCase().substring(0, 5))
+      );
+      
+      if (filteredProposals.length === 0) {
+        // Se não encontrarmos propostas, pegar a primeira como exemplo
+        // (isto é apenas para demonstração, em um sistema real seria diferente)
+        setProposals(allProposals.slice(0, 1));
+      } else {
+        setProposals(filteredProposals);
       }
       
-      try {
-        setLoading(true);
-        const response = await apiRequest("GET", "/api/proposals");
-        const proposals: ProposalWithCalculations[] = await response.json();
-        
-        // Encontrar a proposta correspondente
-        const matchedProposal = proposals.find(p => 
-          p.proposta.toLowerCase().includes(propostaParam.toLowerCase())
-        );
-        
-        if (matchedProposal) {
-          setProposal(matchedProposal);
-        } else {
-          setError("Proposta não encontrada");
-          toast({
-            title: "Proposta não encontrada",
-            description: "Não foi possível encontrar dados para esta proposta.",
-            variant: "destructive",
-          });
-        }
-      } catch (err) {
-        setError("Erro ao buscar dados da proposta");
-        toast({
-          title: "Erro ao carregar dados",
-          description: "Não foi possível carregar os dados da proposta.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchProposal();
-  }, [propostaParam, toast]);
+      setLoading(false);
+    }
+  }, [allProposals, isLoading, auth.partnerId]);
   
   const handleLogout = () => {
-    window.location.href = "/partner-login";
+    auth.logout();
+    window.location.href = "/";
   };
+  
+  // Calcular totais para o resumo
+  const totalValor = proposals.reduce((sum, proposal) => sum + Number(proposal.valorTotal), 0);
+  const totalPago = proposals.reduce((sum, proposal) => sum + Number(proposal.valorPago), 0);
+  const totalComissao = proposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoTotal), 0);
+  const totalComissaoPaga = proposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoPaga), 0);
+  const totalComissaoEmAberto = proposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoEmAberto), 0);
+  const percentComissaoPaga = totalComissao > 0 ? (totalComissaoPaga / totalComissao) * 100 : 0;
   
   if (loading) {
     return (
@@ -75,40 +69,6 @@ export default function PartnerDashboard() {
       </div>
     );
   }
-  
-  if (error || !proposal) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-xl text-center">Erro</CardTitle>
-            <CardDescription className="text-center">
-              {error || "Não foi possível carregar os dados da proposta"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500 mb-4">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="15" y1="9" x2="9" y2="15" />
-              <line x1="9" y1="9" x2="15" y2="15" />
-            </svg>
-            <p className="text-center mb-4">
-              Verifique o número da proposta e tente novamente.
-            </p>
-            <Button onClick={() => window.location.href = "/partner-login"} className="w-full">
-              Voltar ao Login
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-  
-  // Calcular o valor de comissão em aberto
-  const valorComissaoEmAberto = proposal.valorComissaoTotal - Number(proposal.valorComissaoPaga);
-  const percentComissaoPaga = proposal.valorComissaoTotal > 0 
-    ? (Number(proposal.valorComissaoPaga) / proposal.valorComissaoTotal) * 100 
-    : 0;
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -132,26 +92,24 @@ export default function PartnerDashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Detalhes da Proposta: {proposal.proposta}
+            Suas Comissões
           </h2>
           <p className="text-gray-500">
-            Consulte abaixo os detalhes de sua comissão e valores em aberto.
+            Consulte abaixo os detalhes de suas comissões e valores em aberto.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-500">
-                Valor Total da Proposta
+                Valor Total das Propostas
               </CardTitle>
-              <CardDescription className="text-2xl font-bold text-gray-900">
-                {formatCurrency(Number(proposal.valorTotal))}
-              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-xs text-gray-500">
-                Valor total contratado pelo cliente
+              <div className="text-2xl font-bold">{formatCurrency(totalValor)}</div>
+              <div className="text-xs text-gray-500 mt-1">
+                {proposals.length} proposta(s) ativa(s)
               </div>
             </CardContent>
           </Card>
@@ -161,13 +119,25 @@ export default function PartnerDashboard() {
               <CardTitle className="text-sm font-medium text-gray-500">
                 Comissão Total
               </CardTitle>
-              <CardDescription className="text-2xl font-bold text-gray-900">
-                {formatCurrency(proposal.valorComissaoTotal)}
-              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-xs text-gray-500">
-                {formatPercentage(Number(proposal.percentComissao))} do valor total
+              <div className="text-2xl font-bold">{formatCurrency(totalComissao)}</div>
+              <div className="text-xs text-gray-500 mt-1">
+                Valor total de comissões
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500">
+                Comissão Paga
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatCurrency(totalComissaoPaga)}</div>
+              <div className="text-xs text-gray-500 mt-1">
+                {formatPercentage(percentComissaoPaga)} do total
               </div>
             </CardContent>
           </Card>
@@ -177,114 +147,155 @@ export default function PartnerDashboard() {
               <CardTitle className="text-sm font-medium text-gray-500">
                 Comissão em Aberto
               </CardTitle>
-              <CardDescription className="text-2xl font-bold text-primary">
-                {formatCurrency(valorComissaoEmAberto)}
-              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-xs text-gray-500">
-                Valor que ainda será recebido
+              <div className="text-2xl font-bold text-primary">{formatCurrency(totalComissaoEmAberto)}</div>
+              <div className="text-xs text-gray-500 mt-1">
+                Valor para receber
               </div>
             </CardContent>
           </Card>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Detalhes do Pagamento</CardTitle>
-              <CardDescription>
-                Informações sobre os valores pagos e a receber
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center border-b pb-2">
-                  <span className="text-sm text-gray-500">Valor Pago ao Cliente:</span>
-                  <span className="font-medium">{formatCurrency(Number(proposal.valorPago))}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Detalhes das Propostas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-3 px-2 font-medium">Proposta</th>
+                        <th className="text-right py-3 px-2 font-medium">Valor Total</th>
+                        <th className="text-right py-3 px-2 font-medium">Valor Pago</th>
+                        <th className="text-right py-3 px-2 font-medium">Saldo Aberto</th>
+                        <th className="text-right py-3 px-2 font-medium">% Comissão</th>
+                        <th className="text-right py-3 px-2 font-medium">Comissão Total</th>
+                        <th className="text-right py-3 px-2 font-medium">Comissão Paga</th>
+                        <th className="text-right py-3 px-2 font-medium">Comissão em Aberto</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {proposals.map((proposal) => (
+                        <tr key={proposal.id} className="border-b hover:bg-gray-50">
+                          <td className="py-3 px-2">{proposal.proposta}</td>
+                          <td className="py-3 px-2 text-right">{formatCurrency(Number(proposal.valorTotal))}</td>
+                          <td className="py-3 px-2 text-right">{formatCurrency(Number(proposal.valorPago))}</td>
+                          <td className="py-3 px-2 text-right">{formatCurrency(Number(proposal.saldoAberto))}</td>
+                          <td className="py-3 px-2 text-right">{formatPercentage(Number(proposal.percentComissao))}</td>
+                          <td className="py-3 px-2 text-right">{formatCurrency(Number(proposal.valorComissaoTotal))}</td>
+                          <td className="py-3 px-2 text-right">{formatCurrency(Number(proposal.valorComissaoPaga))}</td>
+                          <td className="py-3 px-2 text-right font-medium text-primary">
+                            {formatCurrency(Number(proposal.valorComissaoEmAberto))}
+                          </td>
+                        </tr>
+                      ))}
+                      
+                      {proposals.length === 0 && (
+                        <tr>
+                          <td colSpan={8} className="py-4 text-center text-gray-500">
+                            Nenhuma proposta encontrada.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
-                <div className="flex justify-between items-center border-b pb-2">
-                  <span className="text-sm text-gray-500">Saldo Aberto do Cliente:</span>
-                  <span className="font-medium">{formatCurrency(Number(proposal.saldoAberto))}</span>
-                </div>
-                <div className="flex justify-between items-center border-b pb-2">
-                  <span className="text-sm text-gray-500">Percentual de Comissão:</span>
-                  <span className="font-medium">{formatPercentage(Number(proposal.percentComissao))}</span>
-                </div>
-                <div className="flex justify-between items-center border-b pb-2">
-                  <span className="text-sm text-gray-500">Comissão Total:</span>
-                  <span className="font-medium">{formatCurrency(proposal.valorComissaoTotal)}</span>
-                </div>
-                <div className="flex justify-between items-center border-b pb-2">
-                  <span className="text-sm text-gray-500">Comissão Já Paga:</span>
-                  <span className="font-medium">{formatCurrency(Number(proposal.valorComissaoPaga))}</span>
-                </div>
-                <div className="flex justify-between items-center border-b pb-2">
-                  <span className="text-sm text-gray-500">Comissão em Aberto:</span>
-                  <span className="font-medium text-primary">{formatCurrency(valorComissaoEmAberto)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">Percentual de Comissão Pago:</span>
-                  <span className="font-medium">{formatPercentage(percentComissaoPaga)}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
           
-          <Card>
-            <CardHeader>
-              <CardTitle>Status do Pagamento</CardTitle>
-              <CardDescription>
-                Visualize o progresso do pagamento da sua comissão
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center">
-              <div className="relative w-48 h-48 mb-4">
-                <svg viewBox="0 0 100 100" className="w-full h-full">
-                  {/* Círculo de fundo */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="none"
-                    stroke="#e5e7eb"
-                    strokeWidth="8"
-                  />
-                  {/* Círculo de progresso */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="8"
-                    strokeLinecap="round"
-                    strokeDasharray={`${percentComissaoPaga * 2.51} 251.2`}
-                    strokeDashoffset="0"
-                    className="text-primary"
-                    transform="rotate(-90 50 50)"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-3xl font-bold">{Math.round(percentComissaoPaga)}%</span>
-                  <span className="text-sm text-gray-500">Recebido</span>
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Status do Pagamento</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center">
+                <div className="relative w-48 h-48 mb-6">
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    {/* Círculo de fundo */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      fill="none"
+                      stroke="#e5e7eb"
+                      strokeWidth="8"
+                    />
+                    {/* Círculo de progresso */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="8"
+                      strokeLinecap="round"
+                      strokeDasharray={`${percentComissaoPaga * 2.51} 251.2`}
+                      strokeDashoffset="0"
+                      className="text-primary"
+                      transform="rotate(-90 50 50)"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-3xl font-bold">{Math.round(percentComissaoPaga)}%</span>
+                    <span className="text-sm text-gray-500">Recebido</span>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="text-center">
-                <p className="text-sm text-gray-500 mb-2">
-                  {percentComissaoPaga < 100 
-                    ? `Falta receber ${formatCurrency(valorComissaoEmAberto)} de comissão`
-                    : "Comissão totalmente recebida!"}
-                </p>
-                <div className="text-xs text-gray-400">
-                  {percentComissaoPaga < 100 
-                    ? "Os pagamentos são realizados conforme cronograma financeiro"
-                    : "Todos os pagamentos foram concluídos"}
+                
+                <div className="text-center">
+                  <p className="text-sm text-gray-500 mb-2">
+                    {percentComissaoPaga < 100 
+                      ? `Falta receber ${formatCurrency(totalComissaoEmAberto)} de comissão`
+                      : "Comissão totalmente recebida!"}
+                  </p>
+                  <div className="text-xs text-gray-400">
+                    {percentComissaoPaga < 100 
+                      ? "Os pagamentos são realizados conforme cronograma financeiro"
+                      : "Todos os pagamentos foram concluídos"}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+            
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Histórico de Pagamentos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {proposals.map((proposal) => (
+                    <div key={`history-${proposal.id}`} className="border-b pb-4">
+                      <div className="flex justify-between mb-1">
+                        <span className="font-medium">{proposal.proposta}</span>
+                        <span>{formatCurrency(Number(proposal.valorComissaoPaga))}</span>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Último pagamento em {new Date().toLocaleDateString('pt-BR')}
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full" 
+                          style={{ 
+                            width: `${Math.min(100, Number(proposal.percentComissaoPaga))}%` 
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {proposals.length === 0 && (
+                    <div className="py-4 text-center text-gray-500">
+                      Nenhum histórico de pagamento disponível.
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
       
