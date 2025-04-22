@@ -14,14 +14,14 @@ const SidebarItem = ({ href, icon, label, active }: SidebarItemProps) => {
       <Link href={href}>
         <a
           className={cn(
-            "flex items-center p-2 rounded-md hover:bg-neutral-100",
+            "flex items-center py-1.5 px-2 rounded-md hover:bg-neutral-100 text-sm",
             active 
               ? "bg-primary bg-opacity-10 text-primary font-medium" 
               : "text-neutral-600"
           )}
         >
-          <span className="mr-3">{icon}</span>
-          <span>{label}</span>
+          <span className="mr-2">{icon}</span>
+          <span className="truncate">{label}</span>
         </a>
       </Link>
     </li>
@@ -32,22 +32,22 @@ export default function Sidebar() {
   const [location] = useLocation();
   
   return (
-    <aside className="w-64 bg-white shadow-md h-screen hidden lg:block">
-      <div className="p-4 border-b border-neutral-200">
+    <aside className="w-48 bg-white shadow-md h-screen hidden lg:block">
+      <div className="py-3 px-2 border-b border-neutral-200">
         <div className="flex items-center">
           <div className="bg-primary rounded-md text-white h-8 w-8 flex items-center justify-center mr-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 6.37v11.26a.9.9 0 0 1-1.33.83l-1.47-.87a1.17 1.17 0 0 0-1.21.04l-3.11 2.14a1.17 1.17 0 0 1-1.21.04L7.6 17.9a1.17 1.17 0 0 0-1.21.04l-2.72 1.87A.9.9 0 0 1 2 19V5.5a.9.9 0 0 1 .33-.7l2.72-1.87a1.17 1.17 0 0 1 1.21-.04l3.07 1.91a1.17 1.17 0 0 0 1.21-.04l3.11-2.14a1.17 1.17 0 0 1 1.21-.04l1.47.87a.9.9 0 0 1 .67.92z" />
             </svg>
           </div>
           <div>
-            <h1 className="font-bold text-primary text-lg">iDURAR</h1>
+            <h1 className="font-bold text-primary text-sm">iDURAR</h1>
             <p className="text-xs text-neutral-500">CRM/ERP</p>
           </div>
         </div>
       </div>
       
-      <nav className="p-2">
+      <nav className="p-1">
         <ul className="space-y-1">
           <SidebarItem 
             href="/" 
@@ -60,7 +60,7 @@ export default function Sidebar() {
               </svg>
             } 
             label="Dashboard" 
-            active={location === "/" && location !== "/comissoes"}
+            active={location === "/"}
           />
           <SidebarItem 
             href="/customers" 
