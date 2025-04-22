@@ -170,8 +170,6 @@ export default function PartnerDashboard() {
                       <tr className="border-b">
                         <th className="text-left py-3 px-2 font-medium">Proposta</th>
                         <th className="text-right py-3 px-2 font-medium">Valor Total</th>
-                        <th className="text-right py-3 px-2 font-medium">Valor Pago</th>
-                        <th className="text-right py-3 px-2 font-medium">Saldo Aberto</th>
                         <th className="text-right py-3 px-2 font-medium">% Comissão</th>
                         <th className="text-right py-3 px-2 font-medium">Comissão Total</th>
                         <th className="text-right py-3 px-2 font-medium">Comissão Paga</th>
@@ -183,8 +181,6 @@ export default function PartnerDashboard() {
                         <tr key={proposal.id} className="border-b hover:bg-gray-50">
                           <td className="py-3 px-2">{proposal.proposta}</td>
                           <td className="py-3 px-2 text-right">{formatCurrency(Number(proposal.valorTotal))}</td>
-                          <td className="py-3 px-2 text-right">{formatCurrency(Number(proposal.valorPago))}</td>
-                          <td className="py-3 px-2 text-right">{formatCurrency(Number(proposal.saldoAberto))}</td>
                           <td className="py-3 px-2 text-right">{formatPercentage(Number(proposal.percentComissao))}</td>
                           <td className="py-3 px-2 text-right">{formatCurrency(Number(proposal.valorComissaoTotal))}</td>
                           <td className="py-3 px-2 text-right">{formatCurrency(Number(proposal.valorComissaoPaga))}</td>
@@ -196,7 +192,7 @@ export default function PartnerDashboard() {
                       
                       {proposals.length === 0 && (
                         <tr>
-                          <td colSpan={8} className="py-4 text-center text-gray-500">
+                          <td colSpan={6} className="py-4 text-center text-gray-500">
                             Nenhuma proposta encontrada.
                           </td>
                         </tr>
@@ -261,40 +257,7 @@ export default function PartnerDashboard() {
               </CardContent>
             </Card>
             
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>Histórico de Pagamentos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {proposals.map((proposal) => (
-                    <div key={`history-${proposal.id}`} className="border-b pb-4">
-                      <div className="flex justify-between mb-1">
-                        <span className="font-medium">{proposal.proposta}</span>
-                        <span>{formatCurrency(Number(proposal.valorComissaoPaga))}</span>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Último pagamento em {new Date().toLocaleDateString('pt-BR')}
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                        <div 
-                          className="bg-primary h-2 rounded-full" 
-                          style={{ 
-                            width: `${Math.min(100, Number(proposal.percentComissaoPaga))}%` 
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {proposals.length === 0 && (
-                    <div className="py-4 text-center text-gray-500">
-                      Nenhum histórico de pagamento disponível.
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+
           </div>
         </div>
       </main>

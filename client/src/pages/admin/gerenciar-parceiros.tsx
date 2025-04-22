@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MultiCombobox } from "@/components/ui/combobox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "../../context/AuthContext";
 import type { SalesProposal, ProposalWithCalculations } from "@shared/schema";
@@ -293,31 +294,24 @@ export default function GerenciarParceiros() {
                                 />
                               </TableCell>
                               <TableCell>
-                                <div className="max-h-40 overflow-y-auto border rounded-md p-2">
-                                  {isLoading ? (
-                                    <div className="p-2 text-center text-neutral-500">Carregando propostas...</div>
-                                  ) : proposals?.length === 0 ? (
-                                    <div className="p-2 text-center text-neutral-500">Nenhuma proposta disponível</div>
-                                  ) : (
-                                    <div className="space-y-1">
-                                      {proposals?.map((proposal) => (
-                                        <div key={proposal.id} className="flex items-center space-x-2">
-                                          <Checkbox
-                                            id={`edit-proposal-${proposal.id}`}
-                                            checked={editProposalIds.includes(proposal.id)}
-                                            onCheckedChange={() => toggleProposalSelection(proposal.id, true)}
-                                          />
-                                          <Label
-                                            htmlFor={`edit-proposal-${proposal.id}`}
-                                            className="text-sm cursor-pointer"
-                                          >
-                                            {proposal.proposta}
-                                          </Label>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
+                                {isLoading ? (
+                                  <div className="p-2 text-center text-neutral-500">Carregando propostas...</div>
+                                ) : proposals?.length === 0 ? (
+                                  <div className="p-2 text-center text-neutral-500">Nenhuma proposta disponível</div>
+                                ) : (
+                                  <MultiCombobox
+                                    options={proposals?.map(p => ({
+                                      value: p.id.toString(),
+                                      label: p.proposta
+                                    })) || []}
+                                    values={editProposalIds.map(id => id.toString())}
+                                    onChange={(values) => 
+                                      setEditProposalIds(values.map(v => parseInt(v)))
+                                    }
+                                    placeholder="Selecione as propostas"
+                                    emptyMessage="Nenhuma proposta encontrada"
+                                  />
+                                )}
                               </TableCell>
                               <TableCell className="text-right">
                                 <div className="flex space-x-2 justify-end">
@@ -445,39 +439,48 @@ export default function GerenciarParceiros() {
                       </div>
                       
                       <div>
-                        <Label className="block mb-2">Selecione as propostas</Label>
-                        <div className="border rounded-md p-3 h-64 overflow-y-auto">
+                        <div className="space-y-2">
+                          <Label htmlFor="new-proposals">Selecione as propostas</Label>
                           {isLoading ? (
-                            <div className="flex justify-center items-center h-full">
+                            <div className="flex justify-center items-center h-20">
                               <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
                             </div>
+                          ) : proposals?.length === 0 ? (
+                            <div className="text-center py-4 text-gray-500 border rounded-md p-4">
+                              Nenhuma proposta disponível.
+                            </div>
                           ) : (
-                            <div className="space-y-2">
-                              {proposals?.map((proposal) => (
-                                <div key={proposal.id} className="flex items-start space-x-2 p-2 hover:bg-gray-50 rounded">
-                                  <Checkbox
-                                    id={`new-proposal-${proposal.id}`}
-                                    checked={newProposalIds.includes(proposal.id)}
-                                    onCheckedChange={() => toggleProposalSelection(proposal.id, false)}
-                                  />
-                                  <div className="grid grid-cols-1 gap-1 flex-1">
-                                    <Label
-                                      htmlFor={`new-proposal-${proposal.id}`}
-                                      className="font-medium cursor-pointer"
-                                    >
-                                      {proposal.proposta}
-                                    </Label>
-                                    <div className="flex gap-6 text-xs text-gray-500">
-                                      <span>Valor: R$ {Number(proposal.valorTotal).toLocaleString('pt-BR')}</span>
-                                      <span>Comissão: {proposal.percentComissao}%</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
+                            <div className="space-y-4">
+                              <MultiCombobox
+                                options={proposals?.map(p => ({
+                                  value: p.id.toString(),
+                                  label: p.proposta
+                                })) || []}
+                                values={newProposalIds.map(id => id.toString())}
+                                onChange={(values) => 
+                                  setNewProposalIds(values.map(v => parseInt(v)))
+                                }
+                                placeholder="Selecione as propostas"
+                                emptyMessage="Nenhuma proposta encontrada"
+                              />
                               
-                              {proposals?.length === 0 && (
-                                <div className="text-center py-4 text-gray-500">
-                                  Nenhuma proposta disponível.
+                              {newProposalIds.length > 0 && proposals && (
+                                <div className="border rounded-md p-3 mt-2">
+                                  <p className="text-sm font-medium mb-2">Propostas selecionadas:</p>
+                                  <div className="grid grid-cols-1 gap-2">
+                                    {newProposalIds.map(id => {
+                                      const proposal = proposals.find(p => p.id === id);
+                                      return proposal ? (
+                                        <div key={`selected-${id}`} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                                          <span>{proposal.proposta}</span>
+                                          <div className="text-xs text-gray-500">
+                                            <span className="mr-3">Valor: R$ {Number(proposal.valorTotal).toLocaleString('pt-BR')}</span>
+                                            <span>Comissão: {proposal.percentComissao}%</span>
+                                          </div>
+                                        </div>
+                                      ) : null;
+                                    })}
+                                  </div>
                                 </div>
                               )}
                             </div>
