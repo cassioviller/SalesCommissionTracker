@@ -12,9 +12,9 @@ const SidebarItem = ({ href, icon, label, active }: SidebarItemProps) => {
   return (
     <li>
       <Link href={href}>
-        <a
+        <div
           className={cn(
-            "flex items-center py-1.5 px-2 rounded-md hover:bg-neutral-100 text-sm",
+            "flex items-center py-1.5 px-2 rounded-md hover:bg-neutral-100 text-sm cursor-pointer",
             active 
               ? "bg-primary bg-opacity-10 text-primary font-medium" 
               : "text-neutral-600"
@@ -22,7 +22,7 @@ const SidebarItem = ({ href, icon, label, active }: SidebarItemProps) => {
         >
           <span className="mr-2">{icon}</span>
           <span className="truncate">{label}</span>
-        </a>
+        </div>
       </Link>
     </li>
   );

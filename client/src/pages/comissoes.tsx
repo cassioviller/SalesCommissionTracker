@@ -19,6 +19,7 @@ export default function Comissoes() {
   const proposalsWithCalculations: ProposalWithCalculations[] = (proposals || []).map(proposal => {
     const saldoAberto = Number(proposal.valorTotal) - Number(proposal.valorPago);
     const valorComissaoTotal = Number(proposal.valorTotal) * (Number(proposal.percentComissao) / 100);
+    const valorComissaoEmAberto = valorComissaoTotal - Number(proposal.valorComissaoPaga);
     const percentComissaoPaga = valorComissaoTotal > 0 
       ? (Number(proposal.valorComissaoPaga) / valorComissaoTotal) * 100
       : 0;
@@ -27,6 +28,7 @@ export default function Comissoes() {
       ...proposal,
       saldoAberto,
       valorComissaoTotal,
+      valorComissaoEmAberto,
       percentComissaoPaga
     };
   });
@@ -40,6 +42,11 @@ export default function Comissoes() {
           <div>
             <h1 className="text-2xl font-semibold text-neutral-800">Comissões de Vendas</h1>
             <p className="text-neutral-500 text-sm">Gerenciamento de comissões sobre vendas</p>
+            <div className="mt-2 flex gap-2">
+              <a href="/admin-login" className="text-primary text-sm hover:underline">Login Administrador</a>
+              <span className="text-gray-300">|</span>
+              <a href="/partner-login" className="text-primary text-sm hover:underline">Portal do Parceiro</a>
+            </div>
           </div>
           <Button 
             onClick={() => setIsModalOpen(true)}

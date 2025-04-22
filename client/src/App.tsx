@@ -5,9 +5,10 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Comissoes from "@/pages/comissoes";
 import Sidebar from "@/components/sidebar";
-import AdminLogin from "@/pages/admin-login";
-import PartnerLogin from "@/pages/partner-login";
-import PartnerDashboard from "@/pages/partner-dashboard";
+// Importações com caminhos relativos em vez de alias
+import AdminLogin from "./pages/admin-login";
+import PartnerLogin from "./pages/partner-login";
+import PartnerDashboard from "./pages/partner-dashboard";
 
 function Router() {
   const [location] = useLocation();
