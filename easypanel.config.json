@@ -4,10 +4,21 @@
   "port": 5000,
   "env": {
     "DATABASE_URL": "postgres://comissoes_user:senha123forte@estruturas_comissoes:5432/comissoes?sslmode=disable",
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "PORT": "5000"
   },
-  "buildCommand": "npm ci && npm run build",
-  "startCommand": "npm run db:push && npm run start",
+  "dockerfile": "./Dockerfile",
   "healthCheckPath": "/api/proposals",
-  "volumes": []
+  "volumes": [],
+  "resources": {
+    "cpu": 1,
+    "memory": 1024
+  },
+  "dependencies": [
+    {
+      "type": "postgres",
+      "name": "estruturas_comissoes",
+      "version": "15"
+    }
+  ]
 }
