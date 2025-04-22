@@ -3,7 +3,7 @@ FROM node:20-slim
 WORKDIR /app
 
 # Instalar ferramentas necessárias (inclui postgresql-client para scripts de inicialização)
-RUN apt-get update && apt-get install -y postgresql-client wget && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y postgresql-client wget curl && rm -rf /var/lib/apt/lists/*
 
 # Copiar arquivos de dependências
 COPY package*.json ./

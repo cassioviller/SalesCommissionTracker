@@ -17,7 +17,28 @@ echo "Verificando conexão com o banco de dados..."
 MAX_ATTEMPTS=30
 COUNTER=0
 
-until pg_isready -h $(echo $DATABASE_URL | sed -E 's/^.*@([^:]+):.*/\1/') -p $(echo $DATABASE_URL | sed -E 's/^.*:([0-9]+).*/\1/') -U $(echo $DATABASE_URL | sed -E 's/^.*:\/\/([^:]+):.*/\1/') || [ $COUNTER -eq $MAX_ATTEMPTS ]
+# Tenta extrair informações de conexão do DATABASE_URL
+PGHOST=$(echo $DATABASE_URL | sed -E 's/^.*@([^:]+):.*/\1/' 2>/dev/null || echo "localhost")
+PGPORT=$(echo $DATABASE_URL | sed -E 's/^.*:([0-9]+).*/\1/' 2>/dev/null || echo "5432")
+PGUSER=$(echo $DATABASE_URL | sed -E 's/^.*:\/\/([^:]+):.*/\1/' 2>/dev/null || echo "postgres")
+
+echo "Tentando conectar a: Host=$PGHOST, Porta=$PGPORT, Usuário=$PGUSER"
+
+# Função para verificar conexão de forma segura
+check_db_connection() {
+  # Se tiver SSL, usamos curl para testar
+  if [[ "$DATABASE_URL" == *"sslmode=require"* ]]; then
+    curl -s "https://$PGHOST:$PGPORT" > /dev/null 2>&1
+    return $?
+  else
+    # Se não tiver SSL, usamos pg_isready
+    pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" > /dev/null 2>&1
+    return $?
+  fi
+}
+
+# Loop de tentativas
+until check_db_connection || [ $COUNTER -eq $MAX_ATTEMPTS ]
 do
   echo "Aguardando banco de dados... ($COUNTER/$MAX_ATTEMPTS)"
   sleep 2
@@ -26,6 +47,7 @@ done
 
 if [ $COUNTER -eq $MAX_ATTEMPTS ]; then
   echo "Falha ao conectar ao banco de dados!"
+  echo "URL do banco: ${DATABASE_URL//:*@/:***@}"
   exit 1
 fi
 
