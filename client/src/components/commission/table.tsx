@@ -150,19 +150,19 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
-        <Table>
+        <Table className="w-full table-fixed">
           <TableHeader>
             <TableRow className="bg-neutral-50">
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase">Proposta</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase">Valor Total</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase">Valor Pago</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase">Saldo Aberto</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase">% Comissão</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase">Valor Comissão Total</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase">Valor Comissão Paga</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase">Comissão em Aberto</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase">% Comissão Paga</TableHead>
-              <TableHead className="font-medium text-xs text-neutral-600 uppercase">Ações</TableHead>
+              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[12%]">Proposta</TableHead>
+              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[10%] text-right">Valor Total</TableHead>
+              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[10%] text-right">Valor Pago</TableHead>
+              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[10%] text-right">Saldo Aberto</TableHead>
+              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[8%] text-right">% Comissão</TableHead>
+              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[12%] text-right">Comissão Total</TableHead>
+              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[12%] text-right">Comissão Paga</TableHead>
+              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[12%] text-right">Comis. em Aberto</TableHead>
+              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[8%] text-right">% Comis. Paga</TableHead>
+              <TableHead className="font-medium text-xs text-neutral-600 uppercase w-[6%] text-center">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -183,7 +183,7 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
                       step="0.01"
                       value={proposal.valorTotal}
                       onChange={(e) => handleFieldChange(proposal.id, 'valorTotal', e.target.value)}
-                      className="w-24 py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="w-full py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </TableCell>
                   <TableCell>
@@ -193,10 +193,10 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
                       step="0.01"
                       value={proposal.valorPago}
                       onChange={(e) => handleFieldChange(proposal.id, 'valorPago', e.target.value)}
-                      className="w-24 py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="w-full py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </TableCell>
-                  <TableCell className="text-sm">{formatCurrency(Number(proposal.saldoAberto))}</TableCell>
+                  <TableCell className="text-sm text-right">{formatCurrency(Number(proposal.saldoAberto))}</TableCell>
                   <TableCell>
                     <Input
                       type="number"
@@ -205,10 +205,10 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
                       step="0.1"
                       value={proposal.percentComissao}
                       onChange={(e) => handleFieldChange(proposal.id, 'percentComissao', e.target.value)}
-                      className="w-16 py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="w-full py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </TableCell>
-                  <TableCell className="text-sm">{formatCurrency(Number(proposal.valorComissaoTotal))}</TableCell>
+                  <TableCell className="text-sm text-right">{formatCurrency(Number(proposal.valorComissaoTotal))}</TableCell>
                   <TableCell>
                     <Input
                       type="number"
@@ -216,11 +216,11 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
                       step="0.01"
                       value={proposal.valorComissaoPaga}
                       onChange={(e) => handleFieldChange(proposal.id, 'valorComissaoPaga', e.target.value)}
-                      className="w-24 py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="w-full py-1 px-2 border border-neutral-300 rounded-md bg-neutral-50 text-right focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </TableCell>
-                  <TableCell className="text-sm">{formatCurrency(Number(proposal.valorComissaoEmAberto))}</TableCell>
-                  <TableCell className="text-sm">{formatIntegerPercentage(Number(proposal.percentComissaoPaga))}</TableCell>
+                  <TableCell className="text-sm text-right">{formatCurrency(Number(proposal.valorComissaoEmAberto))}</TableCell>
+                  <TableCell className="text-sm text-right">{formatIntegerPercentage(Number(proposal.percentComissaoPaga))}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -278,15 +278,15 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
           <TableFooter className="bg-neutral-50">
             <TableRow>
               <TableCell className="font-semibold text-sm">Total</TableCell>
-              <TableCell className="font-semibold text-sm">{formatCurrency(totalValor)}</TableCell>
-              <TableCell className="font-semibold text-sm">{formatCurrency(totalPago)}</TableCell>
-              <TableCell className="font-semibold text-sm">{formatCurrency(totalAberto)}</TableCell>
-              <TableCell className="font-semibold text-sm">-</TableCell>
-              <TableCell className="font-semibold text-sm">{formatCurrency(totalComissao)}</TableCell>
-              <TableCell className="font-semibold text-sm">{formatCurrency(totalComissaoPaga)}</TableCell>
-              <TableCell className="font-semibold text-sm">{formatCurrency(totalComissaoEmAberto)}</TableCell>
-              <TableCell className="font-semibold text-sm">{formatIntegerPercentage(percentComissaoPaga)}</TableCell>
-              <TableCell className="font-semibold text-sm">-</TableCell>
+              <TableCell className="font-semibold text-sm text-right">{formatCurrency(totalValor)}</TableCell>
+              <TableCell className="font-semibold text-sm text-right">{formatCurrency(totalPago)}</TableCell>
+              <TableCell className="font-semibold text-sm text-right">{formatCurrency(totalAberto)}</TableCell>
+              <TableCell className="font-semibold text-sm text-center">-</TableCell>
+              <TableCell className="font-semibold text-sm text-right">{formatCurrency(totalComissao)}</TableCell>
+              <TableCell className="font-semibold text-sm text-right">{formatCurrency(totalComissaoPaga)}</TableCell>
+              <TableCell className="font-semibold text-sm text-right">{formatCurrency(totalComissaoEmAberto)}</TableCell>
+              <TableCell className="font-semibold text-sm text-right">{formatIntegerPercentage(percentComissaoPaga)}</TableCell>
+              <TableCell className="font-semibold text-sm text-center">-</TableCell>
             </TableRow>
           </TableFooter>
         </Table>
