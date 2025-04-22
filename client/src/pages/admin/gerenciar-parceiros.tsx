@@ -45,12 +45,24 @@ export default function GerenciarParceiros() {
   const [selectedProposalIds, setSelectedProposalIds] = useState<number[]>([]);
   
   // Fetch da lista de parceiros
-  const { data: partners, isLoading, error } = useQuery({
+  const { data: partners, isLoading: isLoadingPartners, error: partnersError } = useQuery({
     queryKey: ['/api/partners'],
     queryFn: async () => {
       const response = await fetch('/api/partners');
       if (!response.ok) {
         throw new Error('Erro ao buscar parceiros');
+      }
+      return response.json();
+    }
+  });
+  
+  // Fetch da lista de propostas
+  const { data: proposals, isLoading: isLoadingProposals } = useQuery({
+    queryKey: ['/api/proposals'],
+    queryFn: async () => {
+      const response = await fetch('/api/proposals');
+      if (!response.ok) {
+        throw new Error('Erro ao buscar propostas');
       }
       return response.json();
     }
@@ -160,6 +172,7 @@ export default function GerenciarParceiros() {
   
   const handleStartAdd = () => {
     setFormData({ name: "", username: "", email: "", password: "" });
+    setSelectedProposalIds([]);
     setIsAddDialogOpen(true);
   };
   
@@ -171,7 +184,16 @@ export default function GerenciarParceiros() {
       email: partner.email,
       password: "" // Não queremos preencher a senha para editar
     });
+    setSelectedProposalIds(partner.proposalIds || []);
     setIsEditDialogOpen(true);
+  };
+  
+  const handleSelectProposal = (id: number) => {
+    setSelectedProposalIds(prev => [...prev, id]);
+  };
+  
+  const handleUnselectProposal = (id: number) => {
+    setSelectedProposalIds(prev => prev.filter(propId => propId !== id));
   };
   
   const handleStartDelete = (partner: Partner) => {
@@ -196,7 +218,7 @@ export default function GerenciarParceiros() {
       username: formData.username,
       email: formData.email,
       password: formData.password,
-      proposalIds: []
+      proposalIds: selectedProposalIds
     };
     
     addPartnerMutation.mutate(newPartner);
@@ -220,6 +242,7 @@ export default function GerenciarParceiros() {
       name: formData.name,
       username: formData.username,
       email: formData.email,
+      proposalIds: selectedProposalIds,
     };
     
     // Apenas incluir a senha se houver alguma coisa no campo
@@ -254,7 +277,9 @@ export default function GerenciarParceiros() {
     );
   }, [partners, searchQuery]);
   
-  if (isLoading) {
+  const isLoading = isLoadingPartners || isLoadingProposals;
+  
+  if (isLoadingPartners) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -263,11 +288,11 @@ export default function GerenciarParceiros() {
     );
   }
   
-  if (error) {
+  if (partnersError) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 m-6">
         <h3 className="text-lg font-semibold">Erro ao carregar parceiros</h3>
-        <p>{(error as Error).message}</p>
+        <p>{(partnersError as Error).message}</p>
       </div>
     );
   }
@@ -412,6 +437,15 @@ export default function GerenciarParceiros() {
               <Label htmlFor="password">Senha</Label>
               <Input id="password" name="password" type="password" value={formData.password} onChange={handleInputChange} />
             </div>
+            <div className="space-y-2">
+              <Label>Propostas Associadas</Label>
+              <ProposalCombobox
+                proposals={proposals || []}
+                selectedProposalIds={selectedProposalIds}
+                onSelectProposal={handleSelectProposal}
+                onUnselectProposal={handleUnselectProposal}
+              />
+            </div>
           </div>
           
           <DialogFooter>
@@ -457,6 +491,15 @@ export default function GerenciarParceiros() {
             <div className="space-y-2">
               <Label htmlFor="edit-password">Nova Senha (deixe em branco para manter)</Label>
               <Input id="edit-password" name="password" type="password" value={formData.password} onChange={handleInputChange} />
+            </div>
+            <div className="space-y-2">
+              <Label>Propostas Associadas</Label>
+              <ProposalCombobox
+                proposals={proposals || []}
+                selectedProposalIds={selectedProposalIds}
+                onSelectProposal={handleSelectProposal}
+                onUnselectProposal={handleUnselectProposal}
+              />
             </div>
           </div>
           
