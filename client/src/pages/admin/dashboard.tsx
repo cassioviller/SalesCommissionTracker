@@ -125,18 +125,18 @@ export default function AdminDashboard() {
           </div>
           
           {/* Content area */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
-            {/* Commission Table - takes up 2/3 of the space on large screens */}
-            <div className="xl:col-span-2">
+          <div className="flex flex-col gap-6 mb-6">
+            {/* Chart Panel - now on top horizontally */}
+            <div>
+              <ChartPanel proposals={proposalsWithCalculations} />
+            </div>
+            
+            {/* Commission Table - takes full width */}
+            <div>
               <CommissionTable 
                 proposals={proposalsWithCalculations} 
                 isLoading={isLoading} 
               />
-            </div>
-            
-            {/* Chart Panel - takes up 1/3 of the space on large screens */}
-            <div>
-              <ChartPanel proposals={proposalsWithCalculations} />
             </div>
           </div>
         </div>
