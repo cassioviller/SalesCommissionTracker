@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiRequest } from "@/lib/queryClient";
 import { formatCurrency, formatPercentage } from "@/lib/utils/format";
 import type { ProposalWithCalculations } from "@shared/schema";
-import { useAuth } from "../App";
+import { useAuth } from "../context/AuthContext";
 
 export default function PartnerDashboard() {
   const auth = useAuth();

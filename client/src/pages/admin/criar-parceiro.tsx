@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "../../App";
+import { useAuth } from "../../context/AuthContext";
 import type { SalesProposal, ProposalWithCalculations } from "@shared/schema";
 
 export default function CriarParceiro() {
