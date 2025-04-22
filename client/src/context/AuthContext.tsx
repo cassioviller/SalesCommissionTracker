@@ -7,7 +7,7 @@ type UserRole = "admin" | "partner" | null;
 type AuthContextType = {
   isAuthenticated: boolean;
   userRole: UserRole;
-  login: (username: string, password: string, partnerId?: string) => boolean;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   partnerId?: string;
 };
@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
   
   // Função de login
-  const login = (username: string, password: string): boolean => {
+  const login = async (username: string, password: string): Promise<boolean> => {
     // Login de admin
     if (username === "estruturasdv" && password === "Opala1979") {
       const authData = { role: "admin" };
@@ -43,22 +43,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPartnerId(undefined);
       return true;
     } 
-    // Login de parceiro (simplificado - seria validado contra banco de dados)
-    // Simulação de parceiros no sistema - no mundo real, isso viria do banco de dados
-    const partners = [
-      { username: "parceiro1", password: "senha123", id: "PARTNER-1001" },
-      { username: "parceiro2", password: "senha123", id: "PARTNER-1002" }
-    ];
     
-    const partner = partners.find(p => p.username === username && p.password === password);
-    
-    if (partner) {
-      const authData = { role: "partner", partnerId: partner.id };
-      localStorage.setItem("auth", JSON.stringify(authData));
-      setIsAuthenticated(true);
-      setUserRole("partner");
-      setPartnerId(partner.id);
-      return true;
+    // Login de parceiro - verificamos na API
+    try {
+      // Primeiro tentamos obter a lista de parceiros
+      const response = await fetch("/api/partners");
+      if (!response.ok) {
+        console.error("Erro ao obter parceiros da API");
+        return false;
+      }
+      
+      const partners = await response.json();
+      // Verificamos se existe um parceiro com as credenciais fornecidas
+      const partner = partners.find((p: any) => 
+        p.username === username && p.password === password
+      );
+      
+      if (partner) {
+        const authData = { role: "partner", partnerId: partner.id.toString() };
+        localStorage.setItem("auth", JSON.stringify(authData));
+        setIsAuthenticated(true);
+        setUserRole("partner");
+        setPartnerId(partner.id.toString());
+        return true;
+      }
+    } catch (error) {
+      console.error("Erro na autenticação do parceiro:", error);
     }
     
     return false;
