@@ -197,7 +197,12 @@ export class DatabaseStorage implements IStorage {
   async addPagamentoProposta(pagamento: InsertPagamentoProposta): Promise<PagamentoProposta> {
     const [result] = await db
       .insert(pagamentoPropostas)
-      .values(pagamento)
+      .values({
+        propostaId: pagamento.propostaId,
+        valor: pagamento.valor.toString(),
+        dataPagamento: pagamento.dataPagamento,
+        observacao: pagamento.observacao
+      })
       .returning();
     
     // Atualiza o valor pago total na proposta
@@ -255,7 +260,12 @@ export class DatabaseStorage implements IStorage {
   async addPagamentoComissao(pagamento: InsertPagamentoComissao): Promise<PagamentoComissao> {
     const [result] = await db
       .insert(pagamentoComissoes)
-      .values(pagamento)
+      .values({
+        propostaId: pagamento.propostaId,
+        valor: pagamento.valor.toString(),
+        dataPagamento: pagamento.dataPagamento,
+        observacao: pagamento.observacao
+      })
       .returning();
     
     // Atualiza o valor de comissão paga total na proposta

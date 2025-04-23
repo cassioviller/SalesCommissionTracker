@@ -74,7 +74,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Proposal not found" });
       }
 
-      res.json(proposal);
+      // Calcular campos adicionais
+      const valorTotal = Number(proposal.valorTotal);
+      const valorPago = Number(proposal.valorPago);
+      const percentComissao = Number(proposal.percentComissao);
+      const valorComissaoPaga = Number(proposal.valorComissaoPaga);
+      
+      // Calcular saldo em aberto
+      const saldoAberto = valorTotal - valorPago;
+      
+      // Calcular valor total da comissão
+      const valorComissaoTotal = valorTotal * (percentComissao / 100);
+      
+      // Calcular comissão em aberto
+      const valorComissaoEmAberto = valorComissaoTotal - valorComissaoPaga;
+      
+      // Calcular percentual de comissão paga
+      const percentComissaoPaga = valorComissaoTotal > 0 
+        ? (valorComissaoPaga / valorComissaoTotal) * 100 
+        : 0;
+
+      // Obter histórico de pagamentos (parcelas)
+      const pagamentosProposta = await storage.getPagamentosPropostaByPropostaId(id);
+      
+      // Obter histórico de pagamentos de comissões
+      const pagamentosComissao = await storage.getPagamentosComissaoByPropostaId(id);
+      
+      const proposalWithDetails = {
+        ...proposal,
+        saldoAberto,
+        valorComissaoTotal,
+        valorComissaoEmAberto,
+        percentComissaoPaga,
+        pagamentosProposta,
+        pagamentosComissao
+      };
+
+      res.json(proposalWithDetails);
     } catch (error) {
       console.error('Error fetching proposal:', error);
       res.status(500).json({ message: "Failed to fetch proposal" });
@@ -245,6 +281,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting partner:', error);
       res.status(500).json({ message: "Failed to delete partner" });
+    }
+  });
+
+  // PAGAMENTOS DE PROPOSTA ROUTES
+  // Get pagamentos for a proposal
+  app.get("/api/propostas/:id/pagamentos", async (req, res) => {
+    try {
+      const propostaId = parseInt(req.params.id);
+      if (isNaN(propostaId)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+
+      const pagamentos = await storage.getPagamentosPropostaByPropostaId(propostaId);
+      res.json(pagamentos);
+    } catch (error) {
+      console.error('Error fetching pagamentos:', error);
+      res.status(500).json({ message: "Failed to fetch pagamentos" });
+    }
+  });
+
+  // Add pagamento for a proposal
+  app.post("/api/propostas/:id/pagamentos", async (req, res) => {
+    try {
+      const propostaId = parseInt(req.params.id);
+      if (isNaN(propostaId)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+
+      const data = insertPagamentoPropostaSchema.parse({
+        ...req.body,
+        propostaId
+      });
+
+      const novoPagamento = await storage.addPagamentoProposta({
+        ...data,
+        propostaId,
+        valor: Number(data.valor),
+      });
+
+      res.status(201).json(novoPagamento);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid pagamento data", 
+          errors: error.errors 
+        });
+      }
+      console.error('Error creating pagamento:', error);
+      res.status(500).json({ message: "Failed to create pagamento" });
+    }
+  });
+
+  // Delete pagamento
+  app.delete("/api/propostas/pagamentos/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+
+      const success = await storage.deletePagamentoProposta(id);
+      if (!success) {
+        return res.status(404).json({ message: "Pagamento not found" });
+      }
+
+      res.status(204).end();
+    } catch (error) {
+      console.error('Error deleting pagamento:', error);
+      res.status(500).json({ message: "Failed to delete pagamento" });
+    }
+  });
+
+  // PAGAMENTOS DE COMISSÃO ROUTES
+  // Get pagamentos de comissão for a proposal
+  app.get("/api/propostas/:id/comissoes", async (req, res) => {
+    try {
+      const propostaId = parseInt(req.params.id);
+      if (isNaN(propostaId)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+
+      const pagamentos = await storage.getPagamentosComissaoByPropostaId(propostaId);
+      res.json(pagamentos);
+    } catch (error) {
+      console.error('Error fetching pagamentos de comissão:', error);
+      res.status(500).json({ message: "Failed to fetch pagamentos de comissão" });
+    }
+  });
+
+  // Add pagamento de comissão for a proposal
+  app.post("/api/propostas/:id/comissoes", async (req, res) => {
+    try {
+      const propostaId = parseInt(req.params.id);
+      if (isNaN(propostaId)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+
+      const data = insertPagamentoComissaoSchema.parse({
+        ...req.body,
+        propostaId
+      });
+
+      const novoPagamento = await storage.addPagamentoComissao({
+        ...data,
+        propostaId,
+        valor: Number(data.valor),
+      });
+
+      res.status(201).json(novoPagamento);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid pagamento de comissão data", 
+          errors: error.errors 
+        });
+      }
+      console.error('Error creating pagamento de comissão:', error);
+      res.status(500).json({ message: "Failed to create pagamento de comissão" });
+    }
+  });
+
+  // Delete pagamento de comissão
+  app.delete("/api/propostas/comissoes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+
+      const success = await storage.deletePagamentoComissao(id);
+      if (!success) {
+        return res.status(404).json({ message: "Pagamento de comissão not found" });
+      }
+
+      res.status(204).end();
+    } catch (error) {
+      console.error('Error deleting pagamento de comissão:', error);
+      res.status(500).json({ message: "Failed to delete pagamento de comissão" });
     }
   });
 
