@@ -5,7 +5,9 @@ import {
   insertProposalSchema, 
   updateProposalSchema, 
   insertPartnerSchema, 
-  updatePartnerSchema 
+  updatePartnerSchema,
+  insertPagamentoPropostaSchema,
+  insertPagamentoComissaoSchema
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { DatabaseStorage } from "./storage";

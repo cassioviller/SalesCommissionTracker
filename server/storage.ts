@@ -9,7 +9,13 @@ import {
   partners,
   type Partner,
   type InsertPartner,
-  type UpdatePartner
+  type UpdatePartner,
+  pagamentoPropostas,
+  pagamentoComissoes,
+  type PagamentoProposta,
+  type PagamentoComissao,
+  type InsertPagamentoProposta,
+  type InsertPagamentoComissao
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
@@ -34,6 +40,16 @@ export interface IStorage {
   createProposal(proposal: InsertProposal): Promise<SalesProposal>;
   updateProposal(id: number, proposal: Partial<UpdateProposal>): Promise<SalesProposal | undefined>;
   deleteProposal(id: number): Promise<boolean>;
+  
+  // Pagamentos de Propostas (Parcelas pagas pelo cliente)
+  getPagamentosPropostaByPropostaId(propostaId: number): Promise<PagamentoProposta[]>;
+  addPagamentoProposta(pagamento: InsertPagamentoProposta): Promise<PagamentoProposta>;
+  deletePagamentoProposta(id: number): Promise<boolean>;
+  
+  // Pagamentos de Comissão (pagamentos ao parceiro)
+  getPagamentosComissaoByPropostaId(propostaId: number): Promise<PagamentoComissao[]>;
+  addPagamentoComissao(pagamento: InsertPagamentoComissao): Promise<PagamentoComissao>;
+  deletePagamentoComissao(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -167,6 +183,122 @@ export class DatabaseStorage implements IStorage {
       .returning({ id: salesProposals.id });
     
     return result.length > 0;
+  }
+  
+  // Métodos para Pagamentos de Propostas (parcelas pagas pelo cliente)
+  async getPagamentosPropostaByPropostaId(propostaId: number): Promise<PagamentoProposta[]> {
+    return await db
+      .select()
+      .from(pagamentoPropostas)
+      .where(eq(pagamentoPropostas.propostaId, propostaId))
+      .orderBy(pagamentoPropostas.dataPagamento);
+  }
+  
+  async addPagamentoProposta(pagamento: InsertPagamentoProposta): Promise<PagamentoProposta> {
+    const [result] = await db
+      .insert(pagamentoPropostas)
+      .values(pagamento)
+      .returning();
+    
+    // Atualiza o valor pago total na proposta
+    const pagamentos = await this.getPagamentosPropostaByPropostaId(pagamento.propostaId);
+    const valorPagoTotal = pagamentos.reduce((sum, p) => sum + Number(p.valor), 0);
+    
+    await this.updateProposal(pagamento.propostaId, {
+      valorPago: valorPagoTotal
+    });
+    
+    return result;
+  }
+  
+  async deletePagamentoProposta(id: number): Promise<boolean> {
+    // Primeiro, obtemos o pagamento para saber qual proposta atualizar depois
+    const [pagamento] = await db
+      .select()
+      .from(pagamentoPropostas)
+      .where(eq(pagamentoPropostas.id, id));
+    
+    if (!pagamento) {
+      return false;
+    }
+    
+    // Excluímos o pagamento
+    const result = await db
+      .delete(pagamentoPropostas)
+      .where(eq(pagamentoPropostas.id, id))
+      .returning({ id: pagamentoPropostas.id });
+    
+    if (result.length > 0) {
+      // Atualizamos o valor pago total na proposta
+      const pagamentos = await this.getPagamentosPropostaByPropostaId(pagamento.propostaId);
+      const valorPagoTotal = pagamentos.reduce((sum, p) => sum + Number(p.valor), 0);
+      
+      await this.updateProposal(pagamento.propostaId, {
+        valorPago: valorPagoTotal
+      });
+      
+      return true;
+    }
+    
+    return false;
+  }
+  
+  // Métodos para Pagamentos de Comissões (pagamentos ao parceiro)
+  async getPagamentosComissaoByPropostaId(propostaId: number): Promise<PagamentoComissao[]> {
+    return await db
+      .select()
+      .from(pagamentoComissoes)
+      .where(eq(pagamentoComissoes.propostaId, propostaId))
+      .orderBy(pagamentoComissoes.dataPagamento);
+  }
+  
+  async addPagamentoComissao(pagamento: InsertPagamentoComissao): Promise<PagamentoComissao> {
+    const [result] = await db
+      .insert(pagamentoComissoes)
+      .values(pagamento)
+      .returning();
+    
+    // Atualiza o valor de comissão paga total na proposta
+    const pagamentos = await this.getPagamentosComissaoByPropostaId(pagamento.propostaId);
+    const valorComissaoPagoTotal = pagamentos.reduce((sum, p) => sum + Number(p.valor), 0);
+    
+    await this.updateProposal(pagamento.propostaId, {
+      valorComissaoPaga: valorComissaoPagoTotal
+    });
+    
+    return result;
+  }
+  
+  async deletePagamentoComissao(id: number): Promise<boolean> {
+    // Primeiro, obtemos o pagamento para saber qual proposta atualizar depois
+    const [pagamento] = await db
+      .select()
+      .from(pagamentoComissoes)
+      .where(eq(pagamentoComissoes.id, id));
+    
+    if (!pagamento) {
+      return false;
+    }
+    
+    // Excluímos o pagamento
+    const result = await db
+      .delete(pagamentoComissoes)
+      .where(eq(pagamentoComissoes.id, id))
+      .returning({ id: pagamentoComissoes.id });
+    
+    if (result.length > 0) {
+      // Atualizamos o valor de comissão paga total na proposta
+      const pagamentos = await this.getPagamentosComissaoByPropostaId(pagamento.propostaId);
+      const valorComissaoPagoTotal = pagamentos.reduce((sum, p) => sum + Number(p.valor), 0);
+      
+      await this.updateProposal(pagamento.propostaId, {
+        valorComissaoPaga: valorComissaoPagoTotal
+      });
+      
+      return true;
+    }
+    
+    return false;
   }
 
   // Helper method to seed the database with initial data if needed

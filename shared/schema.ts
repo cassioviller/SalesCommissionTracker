@@ -1,4 +1,4 @@
-import { pgTable, text, serial, numeric, integer, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, numeric, integer, json, date, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -79,9 +79,53 @@ export type SalesProposal = typeof salesProposals.$inferSelect;
 export type UpdateProposal = z.infer<typeof updateProposalSchema>;
 
 // Extended proposal type with calculated fields for frontend use
+// Histórico de pagamentos de proposta (parcelas pagas pelo cliente)
+export const pagamentoPropostas = pgTable("pagamento_propostas", {
+  id: serial("id").primaryKey(),
+  propostaId: integer("proposta_id").notNull(),
+  valor: numeric("valor", { precision: 10, scale: 2 }).notNull(),
+  dataPagamento: date("data_pagamento").notNull(),
+  observacao: text("observacao"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Histórico de pagamentos de comissão (pagamentos ao parceiro)
+export const pagamentoComissoes = pgTable("pagamento_comissoes", {
+  id: serial("id").primaryKey(),
+  propostaId: integer("proposta_id").notNull(),
+  valor: numeric("valor", { precision: 10, scale: 2 }).notNull(),
+  dataPagamento: date("data_pagamento").notNull(),
+  observacao: text("observacao"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Esquemas de inserção/atualização
+export const insertPagamentoPropostaSchema = z.object({
+  propostaId: z.number(),
+  valor: z.number().nonnegative(),
+  dataPagamento: z.string(),
+  observacao: z.string().optional(),
+});
+
+export const insertPagamentoComissaoSchema = z.object({
+  propostaId: z.number(),
+  valor: z.number().nonnegative(),
+  dataPagamento: z.string(),
+  observacao: z.string().optional(),
+});
+
+// Tipos
+export type InsertPagamentoProposta = z.infer<typeof insertPagamentoPropostaSchema>;
+export type PagamentoProposta = typeof pagamentoPropostas.$inferSelect;
+
+export type InsertPagamentoComissao = z.infer<typeof insertPagamentoComissaoSchema>;
+export type PagamentoComissao = typeof pagamentoComissoes.$inferSelect;
+
 export interface ProposalWithCalculations extends SalesProposal {
   saldoAberto: number;
   valorComissaoTotal: number;
   valorComissaoEmAberto: number;
   percentComissaoPaga: number;
+  pagamentosProposta?: PagamentoProposta[];
+  pagamentosComissao?: PagamentoComissao[];
 }
