@@ -17,11 +17,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { formatCurrency, formatIntegerPercentage, parseCurrencyToNumber } from "@/lib/utils/format";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, PlusCircle } from "lucide-react";
+import { Loader2, PlusCircle, History } from "lucide-react";
 import type { SalesProposal, ProposalWithCalculations } from "@shared/schema";
+import PaymentHistoryModal from "./payment-history-modal";
 
 interface CommissionTableProps {
   proposals: ProposalWithCalculations[];
@@ -43,10 +44,31 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
     dataPagamento: ""
   });
   const [comissaoAPagar, setComissaoAPagar] = useState("0");
+  const [isPaymentHistoryModalOpen, setIsPaymentHistoryModalOpen] = useState(false);
+  const [selectedProposalId, setSelectedProposalId] = useState<number | null>(null);
+  const [selectedProposalName, setSelectedProposalName] = useState("");
+  
+  // Estado para armazenar os dados da proposta selecionada com os pagamentos
+  const { data: selectedProposalDetails } = useQuery({
+    queryKey: ['/api/proposals', selectedProposalId],
+    queryFn: async () => {
+      if (!selectedProposalId) return null;
+      const res = await apiRequest('GET', `/api/proposals/${selectedProposalId}`);
+      return res.json();
+    },
+    enabled: !!selectedProposalId && isPaymentHistoryModalOpen,
+  });
   
   useEffect(() => {
     setLocalProposals(proposals);
   }, [proposals]);
+  
+  // Função para abrir o modal de histórico de pagamentos
+  const handleOpenPaymentHistory = (proposal: ProposalWithCalculations) => {
+    setSelectedProposalId(proposal.id);
+    setSelectedProposalName(proposal.proposta);
+    setIsPaymentHistoryModalOpen(true);
+  };
   
   // Função para abrir o diálogo de edição
   const handleEdit = (proposal: ProposalWithCalculations) => {
@@ -259,6 +281,18 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
   
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      {/* Modal de histórico de pagamentos */}
+      {selectedProposalDetails && (
+        <PaymentHistoryModal 
+          isOpen={isPaymentHistoryModalOpen}
+          onClose={() => setIsPaymentHistoryModalOpen(false)}
+          propostaId={selectedProposalId}
+          propostaNome={selectedProposalName}
+          pagamentosProposta={selectedProposalDetails.pagamentosProposta || []}
+          pagamentosComissao={selectedProposalDetails.pagamentosComissao || []}
+        />
+      )}
+      
       {/* Dialog de edição */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
@@ -466,6 +500,13 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
                             <path d="m15 5 4 4" />
                           </svg>
                           <span>Editar</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="text-neutral-700 cursor-pointer"
+                          onClick={() => handleOpenPaymentHistory(proposal)}
+                        >
+                          <History className="mr-2 text-green-500 h-4 w-4" />
+                          <span>Histórico de Pagamentos</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="text-neutral-700 cursor-pointer"
