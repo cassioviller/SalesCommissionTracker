@@ -438,6 +438,28 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
   
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      {/* Barra de ferramentas */}
+      <div className="flex justify-end items-center gap-2 p-3 border-b">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-1 text-sm"
+          onClick={exportToCSV}
+        >
+          <FileText className="h-4 w-4" />
+          Exportar CSV
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-1 text-sm"
+          onClick={exportToPDF}
+        >
+          <Download className="h-4 w-4" />
+          Exportar PDF
+        </Button>
+      </div>
+      
       {/* Modal de histórico de pagamentos */}
       {selectedProposalDetails && (
         <PaymentHistoryModal 
