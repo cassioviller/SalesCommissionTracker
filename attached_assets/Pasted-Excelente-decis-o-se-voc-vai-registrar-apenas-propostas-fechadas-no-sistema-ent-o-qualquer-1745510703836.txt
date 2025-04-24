@@ -1,0 +1,62 @@
+Excelente decisão — se você **vai registrar apenas propostas fechadas** no sistema, então **qualquer KPI que dependa de “propostas emitidas” precisa de um campo ou fonte adicional**, porque esse dado **não estará disponível automaticamente**.
+
+Aqui está exatamente **como resolver isso**, mantendo controle e coerência dos KPIs:
+
+---
+
+## 🧱 Solução: Campo Manual para Propostas Emitidas
+
+### Campo a ser adicionado:
+| Campo                        | Tipo     | Local onde aparece                | Finalidade                          |
+|-----------------------------|----------|-----------------------------------|-------------------------------------|
+| Número de Propostas Emitidas | Número   | Campo manual em cada mês ou período | Servirá como denominador para KPIs |
+
+---
+
+## 🧮 KPIs afetadas e como recalcular com campo manual
+
+| KPI                                         | Como calcular com campo manual                                      |
+|--------------------------------------------|----------------------------------------------------------------------|
+| Taxa de Conversão                          | Número de propostas fechadas ÷ Número de propostas emitidas         |
+| Ticket Médio por Proposta Emitida          | Total faturado ÷ Número de propostas emitidas                       |
+| Propostas Fechadas por Arquiteto (%)       | (Propostas fechadas por arquiteto ÷ propostas emitidas) * 100       |
+| Propostas com RECOMPRA (%)                 | (Propostas com recompra ÷ propostas emitidas) * 100                 |
+
+---
+
+## 📍 Onde registrar esse número manualmente?
+
+### Opção 1: Campo manual por mês
+Adicionar uma tabela chamada `IndicadoresMensais` com:
+
+| Mês      | Propostas Emitidas | Observações |
+|----------|--------------------|-------------|
+| 2024-01  | 42                 |             |
+| 2024-02  | 37                 |             |
+| ...      | ...                |             |
+
+### Opção 2: Campo dentro de uma página de “Configuração de KPIs”
+- Um painel onde você insere:
+  - Propostas emitidas por período
+  - Total de clientes prospectados
+  - Outras metas ou valores auxiliares
+
+---
+
+## 🧩 Sugestão de estrutura para banco de dados (exemplo em JSON)
+
+```json
+{
+  "mes": "2024-04",
+  "propostas_emitidas": 47,
+  "observacao": "Inclui contatos por WhatsApp e visitas técnicas"
+}
+```
+
+---
+
+## ✅ Conclusão
+
+Sim, **você precisará registrar manualmente o total de propostas emitidas**, se quiser manter esses KPIs comerciais de conversão. E com isso, consegue continuar tendo um **painel gerencial completo**, mesmo que sua base de dados contenha **apenas propostas fechadas**.
+
+Deseja que eu monte a estrutura de formulário para registrar essas informações mensais agora?

@@ -1,0 +1,54 @@
+Abaixo estão todas as **KPIs (indicadores-chave de desempenho)** que você pode exibir no seu painel com base nas propostas, pagamentos e comissões:
+
+---
+
+## KPIs Gerais (Admin)
+
+| Indicador                                   | Cálculo                                                                 |
+|---------------------------------------------|-------------------------------------------------------------------------|
+| Total de Propostas Emitidas                 | Contagem de todas as propostas registradas                             |
+| Total Faturado                              | Soma do campo "Valor Total da Proposta"                                |
+| Total Pago pelos Clientes                   | Soma do campo "Valor Pago pelo Cliente"                                |
+| Total em Aberto (Recebível)                 | Soma de "Saldo Aberto"                                                 |
+| Ticket Médio                                | Média de "Valor Total da Proposta"                                     |
+| Peso Total Vendido                          | Soma de "Peso da Estrutura"                                            |
+| Preço Médio por Quilo                       | Média de "Valor por Quilo"                                             |
+| Tempo Médio de Negociação                   | Média da coluna "Tempo Médio de Negociação (dias)"                    |
+| Total de Comissões Geradas                 | Soma do campo "Valor Total da Comissão"                                |
+| Total de Comissões Pagas                   | Soma do campo "Valor de Comissão Paga"                                 |
+| Total de Comissões em Aberto               | Soma do campo "Valor de Comissão em Aberto"                            |
+| Percentual Médio de Comissão Paga           | Média do campo "Percentual de Comissão Paga"                           |
+| Propostas com Comissão 100% Paga (%)        | (nº propostas com 100% pago ÷ total de propostas) * 100                 |
+| Propostas com Comissão em Aberto (%)        | (nº propostas com comissão > 0 em aberto ÷ total de propostas) * 100    |
+| Propostas por Tipo de Cliente               | Contagem agrupada por "Tipo de Cliente" (Arquiteto, Construtor, etc.)  |
+| Propostas por Tipo de Projeto               | Contagem agrupada por "Tipo de Projeto" (PE, PE + PC, Nenhum)          |
+| Propostas com RECOMPRA                      | Contagem de propostas com "Cliente de Recompra" = Sim                  |
+| % de Propostas com RECOMPRA                 | (Qtd de RECOMPRA Sim ÷ total de propostas) * 100                       |
+| Vendas por Canal                            | Percentual por Tipo de Cliente (Arquiteto, Construtor, Cliente Final)  |
+| Vendas por Origem                           | Percentual com RD = Sim, FD = Sim                                      |
+
+---
+
+## KPIs por Período (ex: mês, trimestre, ano)
+
+| Indicador                                  | Cálculo                                                                |
+|--------------------------------------------|------------------------------------------------------------------------|
+| Faturamento por mês                        | Soma de "Valor Total da Proposta" agrupado por mês da "Data da Proposta" |
+| Total de propostas por mês                 | Contagem agrupada por mês                                             |
+| Ticket médio mensal                        | Média do valor das propostas por mês                                  |
+| Evolução de comissão paga mês a mês        | Soma de "Valor de Comissão Paga" agrupada por mês                     |
+
+---
+
+## KPIs Visuais (gráficos)
+
+- **Pizza:** Distribuição por Tipo de Cliente
+- **Pizza:** Distribuição por Tipo de Projeto
+- **Barras:** Top 10 Propostas por Valor Total
+- **Barras:** Faturamento por Mês
+- **Donut:** Comissão Paga vs Comissão Total
+- **Donut:** Valor Pago vs Valor Total da Proposta
+
+---
+
+Se quiser, posso montar um modelo de painel com esses KPIs como cards e gráficos. Deseja que eu gere isso agora?

@@ -1,0 +1,104 @@
+Página: Propostas
+Tabela de Propostas
+
+Campo	Tipo de dado	Detalhamento
+Número da Proposta	Número	Código identificador único da proposta
+Nome do Cliente	Texto	Nome do arquiteto, construtor ou cliente final
+Tipo de Cliente	Seleção única	Arquiteto, Construtor, Cliente Final
+Tipos de Serviço	Seleção múltipla	Estrutura, Telha, Manta PVC, Manta Termo Plástica, Cobertura Metálica, Cobertura Policarbonato, Escada Metálica, Pergolado, Beiral, Escada Helicoidal, Mezanino, Reforço Metálico, Laje
+Data da Proposta	Data	Data de fechamento ou emissão da proposta
+Tipo de Projeto	Seleção única	PE, PE + PC, Nenhum
+Tipo de Contrato	Seleção única	MP, MO, MP + MO
+Peso da Estrutura	Número (quilogramas)	Peso total da estrutura, em quilos
+Valor por Quilo	Número (moeda)	Valor do quilo da estrutura
+Valor Total da Proposta	Número (moeda)	Valor bruto da proposta
+Valor Pago pelo Cliente	Número (moeda)	Valor efetivamente pago
+Saldo Aberto	Número (moeda)	Valor Total da Proposta - Valor Pago pelo Cliente
+Percentual de Comissão	Número (porcentagem)	Percentual acordado da comissão
+Valor Total da Comissão	Número (moeda)	Valor Total da Proposta * Percentual de Comissão
+Valor de Comissão Paga	Número (moeda)	Total de comissão já paga ao parceiro
+Valor de Comissão em Aberto	Número (moeda)	Valor Total da Comissão - Valor de Comissão Paga
+Percentual de Comissão Paga	Número (porcentagem)	(Valor de Comissão Paga / Valor Total da Comissão) * 100
+Recomendação Direta	Seleção única	Sim, Não
+Faturamento Direto	Seleção única	Sim, Não
+Tempo Médio de Negociação (dias)	Número (dias)	Diferença entre o primeiro contato e a venda
+Cliente de Recompra	Seleção única	Sim, Não
+Filtros Aplicáveis
+Filtro por Número da Proposta
+
+Filtro por Nome do Cliente
+
+Filtro por Tipo de Cliente (Arquiteto, Construtor, Cliente Final)
+
+Filtro por Tipos de Serviço (seleção múltipla entre os tipos disponíveis)
+
+Filtro por Tipo de Projeto (PE, PE + PC, Nenhum)
+
+Filtro por Tipo de Contrato (MP, MO, MP + MO)
+
+Filtro por Data da Proposta (intervalo de datas)
+
+Filtro por Peso da Estrutura (intervalo numérico)
+
+Filtro por Valor por Quilo (intervalo numérico)
+
+Filtro por Valor Total da Proposta (intervalo monetário)
+
+Filtro por Valor Pago pelo Cliente (intervalo monetário)
+
+Filtro por Saldo Aberto (intervalo monetário)
+
+Filtro por Percentual de Comissão (intervalo porcentual)
+
+Filtro por Valor Total da Comissão (intervalo monetário)
+
+Filtro por Valor de Comissão Paga (intervalo monetário)
+
+Filtro por Valor de Comissão em Aberto (intervalo monetário)
+
+Filtro por Percentual de Comissão Paga (intervalo porcentual)
+
+Filtro por Recomendação Direta (Sim, Não)
+
+Filtro por Faturamento Direto (Sim, Não)
+
+Filtro por Tempo Médio de Negociação (intervalo numérico)
+
+Filtro por Cliente de Recompra (Sim, Não)
+
+Filtro por Status da Comissão:
+
+Comissão totalmente paga
+
+Comissão parcialmente paga
+
+Comissão não paga
+
+Funcionalidades da Página
+Botão "Adicionar Nova Proposta"
+
+Campo de busca textual (cliente, serviço, proposta, etc.)
+
+Botão "Exportar para CSV"
+
+Botão "Exportar para PDF"
+
+Ordenação por qualquer coluna
+
+Paginação da tabela
+
+Coluna de Ações:
+
+Botão "Editar Proposta"
+
+Botão "Ver Histórico de Pagamentos"
+
+Botão "Excluir Proposta"
+
+Exibição de barra de progresso com cor na coluna de Percentual de Comissão Paga:
+
+Verde para 100% pago
+
+Amarelo para entre 1% e 99%
+
+Vermelho para 0% pago

@@ -47,7 +47,29 @@ export const salesProposals = pgTable("sales_proposals", {
   valorPago: numeric("valor_pago", { precision: 10, scale: 2 }).notNull(),
   percentComissao: numeric("percent_comissao", { precision: 5, scale: 2 }).notNull(),
   valorComissaoPaga: numeric("valor_comissao_paga", { precision: 10, scale: 2 }).notNull(),
+  
+  // Novos campos para proposta detalhada
+  nomeCliente: text("nome_cliente"),
+  tipoCliente: text("tipo_cliente"), // "Arquiteto", "Construtor", "Cliente Final"
+  tiposServico: json("tipos_servico").$type<string[]>().default([]), // Array de serviços
+  dataProposta: date("data_proposta"),
+  tipoProjeto: text("tipo_projeto"), // "PE", "PE + PC", "Nenhum"
+  tipoContrato: text("tipo_contrato"), // "MP", "MO", "MP + MO"
+  pesoEstrutura: numeric("peso_estrutura", { precision: 10, scale: 2 }),
+  valorPorQuilo: numeric("valor_por_quilo", { precision: 10, scale: 2 }),
+  recomendacaoDireta: text("recomendacao_direta").default("nao"), // sim/nao
+  faturamentoDireto: text("faturamento_direto").default("nao"), // sim/nao
+  tempoNegociacao: integer("tempo_negociacao"), // em dias
+  clienteRecompra: text("cliente_recompra").default("nao"), // sim/nao
 });
+
+// Constantes para opções selecionáveis
+export const TIPOS_CLIENTE = ["Arquiteto", "Construtor", "Cliente Final"] as const;
+export const TIPOS_SERVICO = ["Estrutura", "Telha", "Manta PVC", "Manta Termo Plástica", "Cobertura Metálica", 
+                              "Cobertura Policarbonato", "Escada Metálica", "Pergolado", "Beiral", 
+                              "Escada Helicoidal", "Mezanino", "Reforço Metálico", "Laje"] as const;
+export const TIPOS_PROJETO = ["PE", "PE + PC", "Nenhum"] as const;
+export const TIPOS_CONTRATO = ["MP", "MO", "MP + MO"] as const;
 
 // For frontend use: we still accept strings for the form input
 export const insertProposalSchema = z.object({
@@ -56,6 +78,20 @@ export const insertProposalSchema = z.object({
   valorPago: z.string(),
   percentComissao: z.string(),
   valorComissaoPaga: z.string(),
+  
+  // Campos opcionais para proposta detalhada
+  nomeCliente: z.string().optional(),
+  tipoCliente: z.enum(TIPOS_CLIENTE).optional(),
+  tiposServico: z.array(z.enum(TIPOS_SERVICO)).optional(),
+  dataProposta: z.string().optional(), // data em formato string
+  tipoProjeto: z.enum(TIPOS_PROJETO).optional(),
+  tipoContrato: z.enum(TIPOS_CONTRATO).optional(),
+  pesoEstrutura: z.string().optional(), // número em formato string
+  valorPorQuilo: z.string().optional(), // número em formato string
+  recomendacaoDireta: z.enum(["sim", "nao"]).optional(),
+  faturamentoDireto: z.enum(["sim", "nao"]).optional(),
+  tempoNegociacao: z.string().optional(), // número em formato string
+  clienteRecompra: z.enum(["sim", "nao"]).optional(),
 });
 
 // Create a custom validation schema for updates - using numbers as database expects them

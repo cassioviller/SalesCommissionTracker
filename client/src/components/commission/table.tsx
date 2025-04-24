@@ -45,20 +45,20 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
 
   // Função para determinar a classe de cor da linha com base na porcentagem de comissão paga
   const getRowColorClass = (percentComissaoPaga: number): string => {
-    if (percentComissaoPaga <= 0) return 'bg-red-100'; // Increased vibrancy
-    if (percentComissaoPaga >= 100) return 'bg-green-100'; // Increased vibrancy
-    if (percentComissaoPaga > 70) return 'bg-green-100/50'; // Increased vibrancy
-    if (percentComissaoPaga > 30) return 'bg-yellow-100'; // Increased vibrancy
-    return 'bg-orange-100'; // Increased vibrancy
+    if (percentComissaoPaga <= 0) return 'bg-red-50'; // Vermelho só quando 0%
+    if (percentComissaoPaga >= 100) return 'bg-green-50'; // Verde só quando 100%
+    return 'bg-yellow-50'; // Amarelo para todos os valores entre 1% e 99%
   };
 
   // Função para determinar a classe de cor do texto da porcentagem
   const getPercentageColorClass = (percentComissaoPaga: number): string => {
     if (percentComissaoPaga <= 0) return 'text-red-600 font-medium';
     if (percentComissaoPaga >= 100) return 'text-green-600 font-medium';
-    if (percentComissaoPaga > 70) return 'text-green-500 font-medium';
-    if (percentComissaoPaga > 30) return 'text-yellow-600 font-medium';
-    return 'text-orange-500 font-medium';
+    // Tons sutis de amarelo para valores parciais
+    if (percentComissaoPaga > 75) return 'text-amber-600 font-medium';
+    if (percentComissaoPaga > 50) return 'text-amber-500 font-medium';
+    if (percentComissaoPaga > 25) return 'text-yellow-600 font-medium';
+    return 'text-yellow-700 font-medium';
   };
   const { toast } = useToast();
   const queryClient = useQueryClient();
