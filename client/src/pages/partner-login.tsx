@@ -26,7 +26,7 @@ export default function PartnerLogin() {
     
     // Em um cenário real, validaríamos as credenciais contra o banco de dados
     // Para fins de demonstração, aceitamos qualquer credencial válida
-    navigate(`/partner-dashboard?proposta=${encodeURIComponent(proposta)}`);
+    navigate(`/propostas`); // Redireciona diretamente para a página de propostas
     
     toast({
       title: "Login realizado com sucesso",

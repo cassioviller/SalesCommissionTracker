@@ -17,16 +17,12 @@ export default function Login() {
   const { toast } = useToast();
   const auth = useAuth();
   
-  // Se já estiver autenticado, redirecionar para o dashboard apropriado
+  // Se já estiver autenticado, redirecionar para a página de propostas
   useEffect(() => {
     if (auth.isAuthenticated) {
-      if (auth.userRole === "admin") {
-        navigate("/admin");
-      } else if (auth.userRole === "partner") {
-        navigate("/partner");
-      }
+      navigate("/propostas");
     }
-  }, [auth.isAuthenticated, auth.userRole, navigate]);
+  }, [auth.isAuthenticated, navigate]);
   
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +43,7 @@ export default function Login() {
         title: "Login bem-sucedido",
         description: "Bem-vindo ao painel de administração.",
       });
-      navigate("/admin");
+      navigate("/propostas");
     } else {
       toast({
         title: "Erro de Login",
@@ -76,7 +72,7 @@ export default function Login() {
         title: "Login bem-sucedido",
         description: "Bem-vindo ao portal de parceiros.",
       });
-      navigate("/partner");
+      navigate("/propostas");
     } else {
       toast({
         title: "Erro de Login",

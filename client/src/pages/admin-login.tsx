@@ -24,7 +24,7 @@ export default function AdminLogin() {
         description: "Redirecionando para o painel de administração...",
         variant: "default",
       });
-      navigate("/admin");  // Redireciona para a rota /admin (que atualmente vai para NotFound)
+      navigate("/propostas");  // Redireciona diretamente para a página de propostas
     } else {
       setError("Usuário ou senha inválidos");
       toast({
