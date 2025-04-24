@@ -47,10 +47,8 @@ export default function AddProposalModal({ isOpen, onClose, onShowPaymentHistory
       resetForm();
       onClose();
       
-      // Redirecionar para o histórico de pagamentos após criar a proposta
-      if (data && data.id) {
-        onShowPaymentHistory(data.id, data.proposta);
-      }
+      // Não mostrar histórico automaticamente após criar proposta
+      // O usuário pode acessar pelo menu de três pontos quando desejar
     },
     onError: (error: any) => {
       console.error("Erro ao adicionar proposta:", error);
