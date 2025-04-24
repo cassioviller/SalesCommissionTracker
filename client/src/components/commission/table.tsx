@@ -20,10 +20,13 @@ import { formatCurrency, formatIntegerPercentage, parseCurrencyToNumber } from "
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, MoreHorizontal, History, Edit, Trash, Eye } from "lucide-react";
+import { Loader2, MoreHorizontal, History, Edit, Trash, Eye, FileText, Download } from "lucide-react";
 import type { SalesProposal, ProposalWithCalculations } from "@shared/schema";
 import PaymentHistoryModal from "./payment-history-modal";
 import { useAuth } from "@/context/AuthContext";
+import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Interface para as propriedades da tabela
 interface CommissionTableProps {
@@ -42,11 +45,11 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
   
   // Função para determinar a classe de cor da linha com base na porcentagem de comissão paga
   const getRowColorClass = (percentComissaoPaga: number): string => {
-    if (percentComissaoPaga <= 0) return 'bg-opacity-5 bg-red-100';
-    if (percentComissaoPaga >= 100) return 'bg-opacity-5 bg-green-100';
-    if (percentComissaoPaga > 70) return 'bg-opacity-5 bg-green-50';
-    if (percentComissaoPaga > 30) return 'bg-opacity-5 bg-yellow-50';
-    return 'bg-opacity-5 bg-orange-50';
+    if (percentComissaoPaga <= 0) return 'bg-red-50';
+    if (percentComissaoPaga >= 100) return 'bg-green-50';
+    if (percentComissaoPaga > 70) return 'bg-green-50/50';
+    if (percentComissaoPaga > 30) return 'bg-yellow-50';
+    return 'bg-orange-50';
   };
   
   // Função para determinar a classe de cor do texto da porcentagem
@@ -265,6 +268,163 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
     if (window.confirm("Tem certeza que deseja remover esta proposta?")) {
       deleteProposalMutation.mutate(id);
     }
+  };
+  
+  // Função para exportar dados para CSV
+  const exportToCSV = () => {
+    if (localProposals.length === 0) {
+      toast({
+        title: "Sem dados",
+        description: "Não há dados para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Cabeçalhos do CSV
+    const headers = [
+      "Proposta",
+      "Valor Total",
+      "Valor Pago",
+      "Saldo Aberto",
+      "% Comissão",
+      "Valor Comissão",
+      "Comissão Paga",
+      "Comissão em Aberto",
+      "% Comissão Paga"
+    ];
+    
+    // Preparar dados
+    const csvData = localProposals.map(proposal => [
+      proposal.proposta,
+      Number(proposal.valorTotal).toFixed(2),
+      Number(proposal.valorPago).toFixed(2),
+      Number(proposal.saldoAberto).toFixed(2),
+      Number(proposal.percentComissao).toFixed(2),
+      Number(proposal.valorComissaoTotal).toFixed(2),
+      Number(proposal.valorComissaoPaga).toFixed(2),
+      Number(proposal.valorComissaoEmAberto).toFixed(2),
+      Number(proposal.percentComissaoPaga).toFixed(2),
+    ]);
+    
+    // Adicionar linha de totais
+    csvData.push([
+      "TOTAL",
+      totalValor.toFixed(2),
+      totalPago.toFixed(2),
+      totalAberto.toFixed(2),
+      "-",
+      totalComissao.toFixed(2),
+      totalComissaoPaga.toFixed(2),
+      totalComissaoEmAberto.toFixed(2),
+      percentComissaoPaga.toFixed(2),
+    ]);
+    
+    // Converter para string CSV
+    const csvContent = 
+      headers.join(",") + "\n" + 
+      csvData.map(row => row.join(",")).join("\n");
+    
+    // Criar blob e salvar
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+    saveAs(blob, `comissoes_${new Date().toISOString().split('T')[0]}.csv`);
+    
+    toast({
+      title: "Exportação concluída",
+      description: "Os dados foram exportados para CSV com sucesso",
+      variant: "default",
+    });
+  };
+  
+  // Função para exportar dados para PDF
+  const exportToPDF = () => {
+    if (localProposals.length === 0) {
+      toast({
+        title: "Sem dados",
+        description: "Não há dados para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Criar documento PDF
+    const doc = new jsPDF('landscape');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Adicionar título
+    doc.setFontSize(18);
+    doc.text("Relatório de Comissões", pageWidth / 2, 15, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth / 2, 22, { align: 'center' });
+    
+    // Preparar dados para a tabela
+    const tableData = localProposals.map(proposal => [
+      proposal.proposta,
+      formatCurrency(Number(proposal.valorTotal)),
+      formatCurrency(Number(proposal.valorPago)),
+      formatCurrency(Number(proposal.saldoAberto)),
+      formatIntegerPercentage(Number(proposal.percentComissao)),
+      formatCurrency(Number(proposal.valorComissaoTotal)),
+      formatCurrency(Number(proposal.valorComissaoPaga)),
+      formatCurrency(Number(proposal.valorComissaoEmAberto)),
+      formatIntegerPercentage(Number(proposal.percentComissaoPaga)),
+    ]);
+    
+    // Adicionar linha de totais
+    tableData.push([
+      "TOTAL",
+      formatCurrency(totalValor),
+      formatCurrency(totalPago),
+      formatCurrency(totalAberto),
+      "-",
+      formatCurrency(totalComissao),
+      formatCurrency(totalComissaoPaga),
+      formatCurrency(totalComissaoEmAberto),
+      formatIntegerPercentage(percentComissaoPaga),
+    ]);
+    
+    // Definir cabeçalhos
+    const headers = [
+      "Proposta",
+      "Valor Total",
+      "Valor Pago",
+      "Saldo Aberto",
+      "% Comissão",
+      "Valor Comissão",
+      "Comissão Paga",
+      "Comissão em Aberto",
+      "% Comissão Paga"
+    ];
+    
+    // Criar a tabela
+    autoTable(doc, {
+      head: [headers],
+      body: tableData,
+      startY: 30,
+      theme: 'grid',
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontStyle: 'bold',
+      },
+      footStyles: {
+        fillColor: [200, 200, 200],
+        fontStyle: 'bold',
+      }
+    });
+    
+    // Salvar o PDF
+    doc.save(`comissoes_${new Date().toISOString().split('T')[0]}.pdf`);
+    
+    toast({
+      title: "Exportação concluída",
+      description: "Os dados foram exportados para PDF com sucesso",
+      variant: "default",
+    });
   };
   
   if (isLoading) {
