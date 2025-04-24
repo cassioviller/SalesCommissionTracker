@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "wouter";
-import { BarChart2, FileText, FileTextIcon, Home, LogOut, Users, Grid } from "lucide-react";
+import { BarChart2, FileText, LogOut, Users } from "lucide-react";
 
 export default function NavigationHeader() {
   const { userRole, logout } = useAuth();
@@ -17,63 +17,27 @@ export default function NavigationHeader() {
         
         <div className="flex flex-wrap gap-2">
           {userRole === "admin" && (
-            <>
-              <Button 
-                variant={location === "/admin" ? "default" : "outline"} 
-                size="sm" 
-                asChild
-              >
-                <a href="/admin">
-                  <Home className="h-4 w-4 mr-1" />
-                  Dashboard
-                </a>
-              </Button>
-              
-              <Button 
-                variant={location.includes("/admin/gerenciar-parceiros") ? "default" : "outline"} 
-                size="sm" 
-                asChild
-              >
-                <a href="/admin/gerenciar-parceiros">
-                  <Users className="h-4 w-4 mr-1" />
-                  Parceiros
-                </a>
-              </Button>
-            </>
-          )}
-          
-          {userRole === "partner" && (
             <Button 
-              variant={location === "/partner" ? "default" : "outline"} 
+              variant={location.includes("/admin/gerenciar-parceiros") ? "default" : "outline"} 
               size="sm" 
               asChild
             >
-              <a href="/partner">
-                <Home className="h-4 w-4 mr-1" />
-                Dashboard
+              <a href="/admin/gerenciar-parceiros">
+                <Users className="h-4 w-4 mr-1" />
+                Parceiros
               </a>
             </Button>
           )}
           
           <Button 
-            variant={location === "/propostas" || location.includes("/edit-proposal") || location === "/add-proposal" ? "default" : "outline"} 
+            variant={location === "/propostas" || location === "/propostas-cards" || 
+                    location.includes("/edit-proposal") || location === "/add-proposal" ? "default" : "outline"} 
             size="sm" 
             asChild
           >
             <a href="/propostas">
               <FileText className="h-4 w-4 mr-1" />
               Propostas
-            </a>
-          </Button>
-          
-          <Button 
-            variant={location === "/comissoes" ? "default" : "outline"} 
-            size="sm" 
-            asChild
-          >
-            <a href="/comissoes">
-              <FileTextIcon className="h-4 w-4 mr-1" />
-              Comissões
             </a>
           </Button>
           
@@ -85,17 +49,6 @@ export default function NavigationHeader() {
             <a href="/kpis">
               <BarChart2 className="h-4 w-4 mr-1" />
               KPIs
-            </a>
-          </Button>
-          
-          <Button 
-            variant={location === "/propostas-cards" ? "default" : "outline"} 
-            size="sm" 
-            asChild
-          >
-            <a href="/propostas-cards">
-              <Grid className="h-4 w-4 mr-1" />
-              Cards
             </a>
           </Button>
           
