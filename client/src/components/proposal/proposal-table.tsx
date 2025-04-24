@@ -155,15 +155,28 @@ export default function ProposalTable({ proposals, isLoading }: ProposalTablePro
   const handleEdit = (proposal: ProposalWithCalculations) => {
     setCurrentProposal(proposal);
     
+    // Verificamos se o tipo é válido ou usamos o primeiro valor do array
+    const tipoClienteValue = proposal.tipoCliente && TIPOS_CLIENTE.includes(proposal.tipoCliente as any) 
+      ? proposal.tipoCliente as any
+      : TIPOS_CLIENTE[0];
+      
+    const tipoProjetoValue = proposal.tipoProjeto && TIPOS_PROJETO.includes(proposal.tipoProjeto as any)
+      ? proposal.tipoProjeto as any
+      : TIPOS_PROJETO[0];
+      
+    const tipoContratoValue = proposal.tipoContrato && TIPOS_CONTRATO.includes(proposal.tipoContrato as any)
+      ? proposal.tipoContrato as any
+      : TIPOS_CONTRATO[0];
+    
     // Preparar dados do formulário
     setFormData({
       proposta: proposal.proposta,
       nomeCliente: proposal.nomeCliente || "",
-      tipoCliente: proposal.tipoCliente || TIPOS_CLIENTE[0],
+      tipoCliente: tipoClienteValue,
       tiposServico: proposal.tiposServico || [],
       dataProposta: proposal.dataProposta ? new Date(proposal.dataProposta).toISOString().split('T')[0] : "",
-      tipoProjeto: proposal.tipoProjeto || TIPOS_PROJETO[0],
-      tipoContrato: proposal.tipoContrato || TIPOS_CONTRATO[0],
+      tipoProjeto: tipoProjetoValue,
+      tipoContrato: tipoContratoValue,
       pesoEstrutura: proposal.pesoEstrutura?.toString() || "",
       valorPorQuilo: proposal.valorPorQuilo?.toString() || "",
       valorTotal: proposal.valorTotal.toString(),
