@@ -42,16 +42,16 @@ interface TableRefHandle {
 const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ proposals, isLoading }, ref) => {
   // Obter o papel do usuário para mostrar controles diferentes baseado no papel
   const { userRole } = useAuth();
-  
+
   // Função para determinar a classe de cor da linha com base na porcentagem de comissão paga
   const getRowColorClass = (percentComissaoPaga: number): string => {
-    if (percentComissaoPaga <= 0) return 'bg-red-50';
-    if (percentComissaoPaga >= 100) return 'bg-green-50';
-    if (percentComissaoPaga > 70) return 'bg-green-50/50';
-    if (percentComissaoPaga > 30) return 'bg-yellow-50';
-    return 'bg-orange-50';
+    if (percentComissaoPaga <= 0) return 'bg-red-100'; // Increased vibrancy
+    if (percentComissaoPaga >= 100) return 'bg-green-100'; // Increased vibrancy
+    if (percentComissaoPaga > 70) return 'bg-green-100/50'; // Increased vibrancy
+    if (percentComissaoPaga > 30) return 'bg-yellow-100'; // Increased vibrancy
+    return 'bg-orange-100'; // Increased vibrancy
   };
-  
+
   // Função para determinar a classe de cor do texto da porcentagem
   const getPercentageColorClass = (percentComissaoPaga: number): string => {
     if (percentComissaoPaga <= 0) return 'text-red-600 font-medium';
@@ -73,7 +73,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
   const [isPaymentHistoryModalOpen, setIsPaymentHistoryModalOpen] = useState(false);
   const [selectedProposalId, setSelectedProposalId] = useState<number | null>(null);
   const [selectedProposalName, setSelectedProposalName] = useState("");
-  
+
   // Estado para armazenar os dados da proposta selecionada com os pagamentos
   const { data: selectedProposalDetails } = useQuery({
     queryKey: ['/api/proposals', selectedProposalId],
@@ -84,30 +84,30 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
     },
     enabled: !!selectedProposalId && isPaymentHistoryModalOpen,
   });
-  
+
   useEffect(() => {
     setLocalProposals(proposals);
   }, [proposals]);
-  
+
   // Funções para abrir o modal de histórico de pagamentos
   const handleOpenPaymentHistory = (proposal: ProposalWithCalculations) => {
     setSelectedProposalId(proposal.id);
     setSelectedProposalName(proposal.proposta);
     setIsPaymentHistoryModalOpen(true);
   };
-  
+
   // Função para abrir o histórico de pagamentos pelo ID (usada pelo componente pai)
   const handleOpenPaymentHistoryById = (proposalId: number, proposalName: string) => {
     setSelectedProposalId(proposalId);
     setSelectedProposalName(proposalName);
     setIsPaymentHistoryModalOpen(true);
   };
-  
+
   // Expondo funções para o componente pai
   useImperativeHandle(ref, () => ({
     handleOpenPaymentHistoryById
   }));
-  
+
   // Função para abrir o diálogo de edição
   const handleEdit = (proposal: ProposalWithCalculations) => {
     setCurrentProposal(proposal);
@@ -118,7 +118,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
     });
     setIsEditDialogOpen(true);
   };
-  
+
   // Calculate totals for the footer
   const totalValor = localProposals.reduce((sum, proposal) => sum + Number(proposal.valorTotal), 0);
   const totalPago = localProposals.reduce((sum, proposal) => sum + Number(proposal.valorPago), 0);
@@ -127,7 +127,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
   const totalComissaoPaga = localProposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoPaga), 0);
   const totalComissaoEmAberto = localProposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoEmAberto), 0);
   const percentComissaoPaga = totalComissao > 0 ? (totalComissaoPaga / totalComissao) * 100 : 0;
-  
+
   // Update field mutation
   const updateProposalMutation = useMutation({
     mutationFn: async ({ id, field, value }: { id: number, field: string, value: number }) => {
@@ -150,7 +150,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
       });
     }
   });
-  
+
   // Delete proposal mutation
   const deleteProposalMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -173,27 +173,27 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
       });
     }
   });
-  
+
   // Handle field value change
   const handleFieldChange = (id: number, field: string, value: string) => {
     const numValue = parseFloat(value);
-    
+
     if (!isNaN(numValue) && numValue >= 0) {
       // Update locally first for immediate feedback
       setLocalProposals(prev => 
         prev.map(proposal => {
           if (proposal.id === id) {
             const updatedProposal = { ...proposal, [field]: numValue };
-            
+
             // Recalculate derived fields
             if (field === 'valorTotal' || field === 'valorPago') {
               updatedProposal.saldoAberto = Number(updatedProposal.valorTotal) - Number(updatedProposal.valorPago);
             }
-            
+
             if (field === 'valorTotal' || field === 'percentComissao') {
               updatedProposal.valorComissaoTotal = Number(updatedProposal.valorTotal) * (Number(updatedProposal.percentComissao) / 100);
             }
-            
+
             if (field === 'valorTotal' || field === 'percentComissao' || field === 'valorComissaoPaga') {
               const valorComissaoTotal = Number(updatedProposal.valorTotal) * (Number(updatedProposal.percentComissao) / 100);
               updatedProposal.valorComissaoEmAberto = valorComissaoTotal - Number(updatedProposal.valorComissaoPaga);
@@ -201,32 +201,32 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
                 ? (Number(updatedProposal.valorComissaoPaga) / valorComissaoTotal) * 100
                 : 0;
             }
-            
+
             return updatedProposal;
           }
           return proposal;
         })
       );
-      
+
       // Then update on the server
       updateProposalMutation.mutate({ id, field, value: numValue });
     }
   };
-  
+
   // Handle input change in the edit form
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   // Handle saving the edited proposal
   const handleSaveProposal = () => {
     if (!currentProposal) return;
-    
+
     // Validar dados do formulário
     const valorTotal = parseFloat(formData.valorTotal);
     const percentComissao = parseFloat(formData.percentComissao);
-    
+
     if (isNaN(valorTotal) || valorTotal < 0 ||
         isNaN(percentComissao) || percentComissao < 0 || percentComissao > 100) {
       toast({
@@ -236,14 +236,14 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
       });
       return;
     }
-    
+
     // Atualizar a proposta
     const updateData = {
       proposta: formData.proposta,
       valorTotal,
       percentComissao,
     };
-    
+
     apiRequest("PATCH", `/api/proposals/${currentProposal.id}`, updateData)
       .then(() => {
         queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
@@ -262,14 +262,14 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
         });
       });
   };
-  
+
   // Handle delete proposal
   const handleDelete = (id: number) => {
     if (window.confirm("Tem certeza que deseja remover esta proposta?")) {
       deleteProposalMutation.mutate(id);
     }
   };
-  
+
   // Função para exportar dados para CSV
   const exportToCSV = () => {
     if (localProposals.length === 0) {
@@ -280,7 +280,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
       });
       return;
     }
-    
+
     // Cabeçalhos do CSV
     const headers = [
       "Proposta",
@@ -293,7 +293,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
       "Comissão em Aberto",
       "% Comissão Paga"
     ];
-    
+
     // Preparar dados
     const csvData = localProposals.map(proposal => [
       proposal.proposta,
@@ -306,7 +306,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
       Number(proposal.valorComissaoEmAberto).toFixed(2),
       Number(proposal.percentComissaoPaga).toFixed(2),
     ]);
-    
+
     // Adicionar linha de totais
     csvData.push([
       "TOTAL",
@@ -319,23 +319,23 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
       totalComissaoEmAberto.toFixed(2),
       percentComissaoPaga.toFixed(2),
     ]);
-    
+
     // Converter para string CSV
     const csvContent = 
       headers.join(",") + "\n" + 
       csvData.map(row => row.join(",")).join("\n");
-    
+
     // Criar blob e salvar
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
     saveAs(blob, `comissoes_${new Date().toISOString().split('T')[0]}.csv`);
-    
+
     toast({
       title: "Exportação concluída",
       description: "Os dados foram exportados para CSV com sucesso",
       variant: "default",
     });
   };
-  
+
   // Função para exportar dados para PDF
   const exportToPDF = () => {
     if (localProposals.length === 0) {
@@ -346,17 +346,17 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
       });
       return;
     }
-    
+
     // Criar documento PDF
     const doc = new jsPDF('landscape');
     const pageWidth = doc.internal.pageSize.getWidth();
-    
+
     // Adicionar título
     doc.setFontSize(18);
     doc.text("Relatório de Comissões", pageWidth / 2, 15, { align: 'center' });
     doc.setFontSize(12);
     doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth / 2, 22, { align: 'center' });
-    
+
     // Preparar dados para a tabela
     const tableData = localProposals.map(proposal => [
       proposal.proposta,
@@ -369,7 +369,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
       formatCurrency(Number(proposal.valorComissaoEmAberto)),
       formatIntegerPercentage(Number(proposal.percentComissaoPaga)),
     ]);
-    
+
     // Adicionar linha de totais
     tableData.push([
       "TOTAL",
@@ -382,7 +382,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
       formatCurrency(totalComissaoEmAberto),
       formatIntegerPercentage(percentComissaoPaga),
     ]);
-    
+
     // Definir cabeçalhos
     const headers = [
       "Proposta",
@@ -395,7 +395,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
       "Comissão em Aberto",
       "% Comissão Paga"
     ];
-    
+
     // Criar a tabela
     autoTable(doc, {
       head: [headers],
@@ -416,17 +416,17 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
         fontStyle: 'bold',
       }
     });
-    
+
     // Salvar o PDF
     doc.save(`comissoes_${new Date().toISOString().split('T')[0]}.pdf`);
-    
+
     toast({
       title: "Exportação concluída",
       description: "Os dados foram exportados para PDF com sucesso",
       variant: "default",
     });
   };
-  
+
   if (isLoading) {
     return (
       <div className="p-8 text-center">
@@ -435,7 +435,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
       </div>
     );
   }
-  
+
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       {/* Barra de ferramentas */}
@@ -459,7 +459,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
           Exportar PDF
         </Button>
       </div>
-      
+
       {/* Modal de histórico de pagamentos */}
       {selectedProposalDetails && (
         <PaymentHistoryModal 
@@ -471,7 +471,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
           pagamentosComissao={selectedProposalDetails.pagamentosComissao || []}
         />
       )}
-      
+
       {/* Dialog de edição */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
@@ -481,7 +481,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
               Edite os detalhes da proposta e registre pagamentos de comissão.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -507,7 +507,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="valorTotal">Valor Total do Contrato (R$)</Label>
               <Input 
@@ -520,7 +520,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
                 onChange={handleInputChange} 
               />
             </div>
-            
+
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="percentComissao">Percentual de Comissão (%)</Label>
@@ -531,16 +531,16 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
                 </span>
               </div>
             </div>
-            
+
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancelar</Button>
             <Button onClick={handleSaveProposal}>Salvar Alterações</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead className="bg-white">
@@ -614,7 +614,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
                           <History className="mr-2 text-green-500 h-4 w-4" />
                           <span>Histórico de Pagamentos</span>
                         </DropdownMenuItem>
-                        
+
                         {/* Items apenas para administradores */}
                         {(userRole === 'admin' || !userRole) && (
                           <>
