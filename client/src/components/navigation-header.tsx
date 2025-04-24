@@ -16,6 +16,19 @@ export default function NavigationHeader() {
         </div>
         
         <div className="flex flex-wrap gap-2">
+          {userRole === "admin" && (
+            <Button 
+              variant={location === "/admin/gerenciar-parceiros" ? "default" : "outline"} 
+              size="sm" 
+              asChild
+            >
+              <a href="/admin/gerenciar-parceiros">
+                <Users className="h-4 w-4 mr-1" />
+                Parceiros
+              </a>
+            </Button>
+          )}
+          
           {userRole === "partner" && (
             <Button 
               variant={location === "/partner-dashboard" ? "default" : "outline"} 
