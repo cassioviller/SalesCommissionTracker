@@ -403,8 +403,12 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
                   min="0"
                   step="0.01"
                   placeholder="0.00"
+                  disabled
+                  title="Este valor só pode ser editado no Histórico de Pagamentos"
+                  className="bg-gray-50"
                   {...form.register("valorPago")}
                 />
+                <p className="text-xs text-neutral-500 italic">Valor editável apenas no histórico de pagamentos</p>
               </div>
             </div>
 
@@ -430,8 +434,12 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
                   min="0"
                   step="0.01"
                   placeholder="0.00"
+                  disabled
+                  title="Este valor só pode ser editado no Histórico de Pagamentos"
+                  className="bg-gray-50"
                   {...form.register("valorComissaoPaga")}
                 />
+                <p className="text-xs text-neutral-500 italic">Valor editável apenas no histórico de pagamentos</p>
               </div>
             </div>
 

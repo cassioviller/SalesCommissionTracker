@@ -65,7 +65,7 @@ export const salesProposals = pgTable("sales_proposals", {
 });
 
 // Constantes para opções selecionáveis
-export const TIPOS_CLIENTE = ["Arquiteto", "Construtor", "Cliente Final"] as const;
+export const TIPOS_CLIENTE = ["Arquiteto", "Construtor", "Cliente Final", "Trafego Pago/Redes Sociais"] as const;
 export const TIPOS_SERVICO = ["Estrutura", "Telha", "Manta PVC", "Manta Termo Plástica", "Cobertura Metálica", 
                               "Cobertura Policarbonato", "Escada Metálica", "Pergolado", "Beiral", 
                               "Escada Helicoidal", "Mezanino", "Reforço Metálico", "Laje"] as const;

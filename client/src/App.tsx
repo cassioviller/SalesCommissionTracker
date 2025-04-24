@@ -20,6 +20,7 @@ const Propostas = lazy(() => import('./pages/propostas'));
 const PropostasCards = lazy(() => import('./pages/propostas-cards'));
 const AddProposal = lazy(() => import('./pages/add-proposal'));
 const EditProposal = lazy(() => import('./pages/edit-proposal'));
+const KPIs = lazy(() => import('./pages/kpis'));
 
 // Componente fallback para carregamento
 const LoadingFallback = () => (
@@ -69,6 +70,7 @@ function AppRouter() {
         <ProtectedRoute path="/propostas-cards" component={PropostasCards} />
         <ProtectedRoute path="/add-proposal" component={AddProposal} />
         <ProtectedRoute path="/edit-proposal/:id" component={EditProposal} />
+        <ProtectedRoute path="/kpis" component={KPIs} />
         <Route component={NotFound} />
       </Switch>
     </div>

@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { formatCurrency } from "@/lib/utils/format";
 import type { ProposalWithCalculations } from "@shared/schema";
 import { Link, useLocation } from "wouter";
+import NavigationHeader from "@/components/navigation-header";
 
 export default function Propostas() {
   const { toast } = useToast();
@@ -81,8 +82,9 @@ export default function Propostas() {
 
   return (
     <div className="h-screen overflow-hidden bg-neutral-100">
+      <NavigationHeader />
       {/* Main content */}
-      <main className="h-full overflow-auto bg-neutral-100">
+      <main className="h-[calc(100vh-64px)] overflow-auto bg-neutral-100">
         {/* Page header */}
         <header className="bg-white shadow-sm py-4 px-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
           <div>
