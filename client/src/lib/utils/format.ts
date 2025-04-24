@@ -44,6 +44,13 @@ export function formatDecimalPercentage(value: number): string {
 }
 
 /**
+ * Formata um número como percentual (alias para formatIntegerPercentage para compatibilidade)
+ */
+export function formatPercentage(value: number): string {
+  return formatIntegerPercentage(value);
+}
+
+/**
  * Formata uma data no formato brasileiro (dd/mm/aaaa)
  */
 export function formatDate(date: Date | string): string {
