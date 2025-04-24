@@ -48,7 +48,7 @@ function ProtectedRoute({
           <Component />
         </Suspense>
       ) : (
-        <Redirect to="/" />
+        <Redirect to="/login" />
       )}
     </Route>
   );
@@ -59,7 +59,7 @@ function AppRouter() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Switch>
-        <Route path="/" component={Login} />
+        <Route path="/login" component={Login} />
         <ProtectedRoute path="/admin" component={AdminDashboard} requiredRole="admin" />
         <ProtectedRoute path="/admin/criar-parceiro" component={CriarParceiro} requiredRole="admin" />
         <ProtectedRoute path="/admin/gerenciar-parceiros" component={GerenciarParceiros} requiredRole="admin" />
@@ -71,6 +71,7 @@ function AppRouter() {
         <ProtectedRoute path="/add-proposal" component={AddProposal} />
         <ProtectedRoute path="/edit-proposal/:id" component={EditProposal} />
         <ProtectedRoute path="/kpis" component={KPIs} />
+        <Route path="/" component={Login} />
         <Route component={NotFound} />
       </Switch>
     </div>

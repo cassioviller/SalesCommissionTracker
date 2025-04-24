@@ -41,8 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAuthenticated(true);
       setUserRole("admin");
       setPartnerId(undefined);
-      // Redirecionar para a página de propostas após login bem-sucedido
-      window.location.href = '/propostas';
+      // Login bem-sucedido, não redirecionamos aqui para evitar redirect duplo
       return true;
     } 
     
@@ -67,8 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true);
         setUserRole("partner");
         setPartnerId(partner.id.toString());
-        // Redirecionar para a página de propostas após login bem-sucedido
-        window.location.href = '/propostas';
+        // Login bem-sucedido, não redirecionamos aqui para evitar redirect duplo
         return true;
       }
     } catch (error) {
