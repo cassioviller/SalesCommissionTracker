@@ -18,7 +18,7 @@ export default function Comissoes() {
   const tableRef = useRef<any>(null);
   
   // Fetch proposals from API
-  const { data: proposals, isLoading } = useQuery<SalesProposal[]>({
+  const { data: proposals = [], isLoading } = useQuery<SalesProposal[]>({
     queryKey: ['/api/proposals'],
   });
   

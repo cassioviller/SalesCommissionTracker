@@ -66,6 +66,17 @@ export default function NavigationHeader() {
           </Button>
           
           <Button 
+            variant={location === "/propostas-cards" ? "default" : "outline"} 
+            size="sm" 
+            asChild
+          >
+            <a href="/propostas-cards">
+              <FileText className="h-4 w-4 mr-1" />
+              Cards
+            </a>
+          </Button>
+          
+          <Button 
             variant={location === "/kpis" ? "default" : "outline"} 
             size="sm" 
             asChild

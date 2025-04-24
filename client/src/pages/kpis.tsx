@@ -16,12 +16,8 @@ export default function KPIs() {
   const [activeTab, setActiveTab] = useState("geral");
   
   // Buscar dados das propostas
-  const { data: proposals, isLoading } = useQuery<ProposalWithCalculations[]>({
+  const { data: proposals = [], isLoading } = useQuery<ProposalWithCalculations[]>({
     queryKey: ['/api/proposals'],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/proposals");
-      return res.json();
-    },
   });
   
   // KPIs Gerais
