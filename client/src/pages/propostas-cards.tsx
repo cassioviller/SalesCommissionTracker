@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Plus, Filter, ChevronDown, Edit, History, Eye } from "lucide-react";
+import { Search, Plus, Filter, ChevronDown, Edit, History, Eye, List } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { formatCurrency, formatIntegerPercentage, formatDate } from "@/lib/utils/format";
 import type { ProposalWithCalculations } from "@shared/schema";
 import { useAuth } from "@/context/AuthContext";
+import { Link } from "wouter";
 
 export default function PropostasCards() {
   const { userRole } = useAuth();
@@ -98,13 +99,21 @@ export default function PropostasCards() {
             <h1 className="text-2xl font-semibold text-neutral-800">Propostas em Cards</h1>
             <p className="text-neutral-500 text-sm">Visualização de propostas em formato de cartões</p>
           </div>
-          <Button 
-            onClick={() => setIsAddModalOpen(true)}
-            className="mt-3 sm:mt-0 bg-primary hover:bg-primary/90"
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            Adicionar Nova Proposta
-          </Button>
+          <div className="flex gap-3 mt-3 sm:mt-0">
+            <Link href="/propostas">
+              <Button variant="outline" size="sm">
+                <List className="h-4 w-4 mr-1" />
+                Ver em Tabela
+              </Button>
+            </Link>
+            <Button 
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Adicionar Nova Proposta
+            </Button>
+          </div>
         </header>
         
         {/* Barra de pesquisa e filtros */}

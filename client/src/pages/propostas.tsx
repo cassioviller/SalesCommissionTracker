@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Plus } from "lucide-react";
+import { Plus, Grid3X3 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import ProposalTable from "@/components/proposal/proposal-table";
 import type { ProposalWithCalculations } from "@shared/schema";
+import { Link } from "wouter";
 
 export default function Propostas() {
   const { toast } = useToast();
@@ -57,13 +58,21 @@ export default function Propostas() {
             <h1 className="text-2xl font-semibold text-neutral-800">Propostas</h1>
             <p className="text-neutral-500 text-sm">Gerenciamento de propostas com informações detalhadas</p>
           </div>
-          <Button 
-            onClick={() => setIsModalOpen(true)}
-            className="mt-3 sm:mt-0 bg-primary hover:bg-primary/90"
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            Adicionar Nova Proposta
-          </Button>
+          <div className="flex gap-3 mt-3 sm:mt-0">
+            <Link href="/propostas-cards">
+              <Button variant="outline" size="sm">
+                <Grid3X3 className="h-4 w-4 mr-1" />
+                Ver em Cards
+              </Button>
+            </Link>
+            <Button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Adicionar Nova Proposta
+            </Button>
+          </div>
         </header>
         
         {/* Content area - Full width with padding */}

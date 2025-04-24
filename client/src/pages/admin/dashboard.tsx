@@ -13,6 +13,9 @@ import { SearchFilter } from "@/components/ui/search-filter";
 export default function AdminDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProposalId, setSelectedProposalId] = useState<number | null>(null);
+  const [selectedProposalName, setSelectedProposalName] = useState("");
+  const [isPaymentHistoryOpen, setIsPaymentHistoryOpen] = useState(false);
   const auth = useAuth();
   
   // Fetch proposals from API
@@ -51,6 +54,12 @@ export default function AdminDashboard() {
   const handleLogout = () => {
     auth.logout();
     window.location.href = "/";
+  };
+  
+  const handleShowPaymentHistory = (proposalId: number, proposalName: string) => {
+    setSelectedProposalId(proposalId);
+    setSelectedProposalName(proposalName);
+    setIsPaymentHistoryOpen(true);
   };
   
   return (
