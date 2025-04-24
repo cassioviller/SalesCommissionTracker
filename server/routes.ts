@@ -24,35 +24,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const proposals = await storage.getAllProposals();
       
-      // Calcular campos adicionais para cada proposta
-      const proposalsWithCalculations = proposals.map(proposal => {
+      // Calcular campos adicionais para cada proposta com pagamentos
+      const proposalsWithCalculations = await Promise.all(proposals.map(async (proposal) => {
+        // Obter histórico de pagamentos para cada proposta
+        const pagamentosProposta = await storage.getPagamentosPropostaByPropostaId(proposal.id);
+        const pagamentosComissao = await storage.getPagamentosComissaoByPropostaId(proposal.id);
+        
+        // Calcular valor pago a partir do histórico de pagamentos
+        const valorPagoCalculado = pagamentosProposta.reduce(
+          (total, pagamento) => total + Number(pagamento.valor), 
+          0
+        );
+        
+        // Calcular valor de comissão paga a partir do histórico
+        const valorComissaoPagaCalculado = pagamentosComissao.reduce(
+          (total, pagamento) => total + Number(pagamento.valor), 
+          0
+        );
+        
         const valorTotal = Number(proposal.valorTotal);
-        const valorPago = Number(proposal.valorPago);
         const percentComissao = Number(proposal.percentComissao);
-        const valorComissaoPaga = Number(proposal.valorComissaoPaga);
         
         // Calcular saldo em aberto
-        const saldoAberto = valorTotal - valorPago;
+        const saldoAberto = valorTotal - valorPagoCalculado;
         
         // Calcular valor total da comissão
         const valorComissaoTotal = valorTotal * (percentComissao / 100);
         
         // Calcular comissão em aberto
-        const valorComissaoEmAberto = valorComissaoTotal - valorComissaoPaga;
+        const valorComissaoEmAberto = valorComissaoTotal - valorComissaoPagaCalculado;
         
         // Calcular percentual de comissão paga
         const percentComissaoPaga = valorComissaoTotal > 0 
-          ? (valorComissaoPaga / valorComissaoTotal) * 100 
+          ? (valorComissaoPagaCalculado / valorComissaoTotal) * 100 
           : 0;
           
         return {
           ...proposal,
+          valorPago: valorPagoCalculado.toString(),
+          valorComissaoPaga: valorComissaoPagaCalculado.toString(),
           saldoAberto,
           valorComissaoTotal,
           valorComissaoEmAberto,
           percentComissaoPaga
         };
-      });
+      }));
       
       res.json(proposalsWithCalculations);
     } catch (error) {
@@ -74,34 +90,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Proposal not found" });
       }
 
-      // Calcular campos adicionais
-      const valorTotal = Number(proposal.valorTotal);
-      const valorPago = Number(proposal.valorPago);
-      const percentComissao = Number(proposal.percentComissao);
-      const valorComissaoPaga = Number(proposal.valorComissaoPaga);
-      
-      // Calcular saldo em aberto
-      const saldoAberto = valorTotal - valorPago;
-      
-      // Calcular valor total da comissão
-      const valorComissaoTotal = valorTotal * (percentComissao / 100);
-      
-      // Calcular comissão em aberto
-      const valorComissaoEmAberto = valorComissaoTotal - valorComissaoPaga;
-      
-      // Calcular percentual de comissão paga
-      const percentComissaoPaga = valorComissaoTotal > 0 
-        ? (valorComissaoPaga / valorComissaoTotal) * 100 
-        : 0;
-
       // Obter histórico de pagamentos (parcelas)
       const pagamentosProposta = await storage.getPagamentosPropostaByPropostaId(id);
       
       // Obter histórico de pagamentos de comissões
       const pagamentosComissao = await storage.getPagamentosComissaoByPropostaId(id);
       
+      // Calcular valor pago a partir do histórico de pagamentos
+      const valorPagoCalculado = pagamentosProposta.reduce(
+        (total, pagamento) => total + Number(pagamento.valor), 
+        0
+      );
+      
+      // Calcular valor de comissão paga a partir do histórico
+      const valorComissaoPagaCalculado = pagamentosComissao.reduce(
+        (total, pagamento) => total + Number(pagamento.valor), 
+        0
+      );
+      
+      // Calcular campos adicionais
+      const valorTotal = Number(proposal.valorTotal);
+      const percentComissao = Number(proposal.percentComissao);
+      
+      // Calcular saldo em aberto
+      const saldoAberto = valorTotal - valorPagoCalculado;
+      
+      // Calcular valor total da comissão
+      const valorComissaoTotal = valorTotal * (percentComissao / 100);
+      
+      // Calcular comissão em aberto
+      const valorComissaoEmAberto = valorComissaoTotal - valorComissaoPagaCalculado;
+      
+      // Calcular percentual de comissão paga
+      const percentComissaoPaga = valorComissaoTotal > 0 
+        ? (valorComissaoPagaCalculado / valorComissaoTotal) * 100 
+        : 0;
+      
       const proposalWithDetails = {
         ...proposal,
+        valorPago: valorPagoCalculado.toString(), // Substituir pelos valores calculados
+        valorComissaoPaga: valorComissaoPagaCalculado.toString(),
         saldoAberto,
         valorComissaoTotal,
         valorComissaoEmAberto,
