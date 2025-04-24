@@ -212,6 +212,7 @@ export default function AdminDashboard() {
       <AddProposalModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
+        onShowPaymentHistory={handleShowPaymentHistory}
       />
     </div>
   );
