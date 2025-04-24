@@ -7,6 +7,7 @@ import NavigationHeader from "@/components/navigation-header";
 import { BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Bar, PieChart, Pie, Cell, Legend, LineChart, Line } from "recharts";
 import { Loader2 } from "lucide-react";
 import type { ProposalWithCalculations } from "@shared/schema";
+import { formatCurrency } from "@/lib/utils/format";
 
 // Cores para gráficos
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -169,7 +170,7 @@ export default function KPIs() {
                       <CardTitle className="text-base font-medium">Ticket Médio</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-2xl font-bold">R$ {kpisGerais.ticketMedio.toFixed(2)}</p>
+                      <p className="text-2xl font-bold">{formatCurrency(kpisGerais.ticketMedio)}</p>
                       <p className="text-xs text-gray-500">Média do valor das propostas</p>
                     </CardContent>
                   </Card>
@@ -209,7 +210,7 @@ export default function KPIs() {
                       <CardTitle className="text-base font-medium">Total Faturado</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-2xl font-bold">R$ {kpisGerais.valorTotalPropostas.toFixed(2)}</p>
+                      <p className="text-2xl font-bold">{formatCurrency(kpisGerais.valorTotalPropostas)}</p>
                       <p className="text-xs text-gray-500">Soma do valor de todas as propostas</p>
                     </CardContent>
                   </Card>
@@ -219,7 +220,7 @@ export default function KPIs() {
                       <CardTitle className="text-base font-medium">Total Pago</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-2xl font-bold">R$ {kpisGerais.totalPago.toFixed(2)}</p>
+                      <p className="text-2xl font-bold">{formatCurrency(kpisGerais.totalPago)}</p>
                       <p className="text-xs text-gray-500">Valor já recebido dos clientes</p>
                     </CardContent>
                   </Card>
@@ -229,7 +230,7 @@ export default function KPIs() {
                       <CardTitle className="text-base font-medium">Total em Aberto</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-2xl font-bold">R$ {kpisGerais.totalEmAberto.toFixed(2)}</p>
+                      <p className="text-2xl font-bold">{formatCurrency(kpisGerais.totalEmAberto)}</p>
                       <p className="text-xs text-gray-500">Valor a receber</p>
                     </CardContent>
                   </Card>
@@ -360,7 +361,7 @@ export default function KPIs() {
                                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                               </Pie>
-                              <Tooltip formatter={(value) => `R$ ${Number(value).toFixed(2)}`} />
+                              <Tooltip formatter={(value) => formatCurrency(Number(value))} />
                               <Legend />
                             </PieChart>
                           </ResponsiveContainer>
@@ -394,7 +395,7 @@ export default function KPIs() {
                         >
                           <XAxis dataKey="tipo" />
                           <YAxis />
-                          <Tooltip formatter={(value) => `R$ ${Number(value).toFixed(2)}`} />
+                          <Tooltip formatter={(value) => formatCurrency(Number(value))} />
                           <Legend />
                           <Bar dataKey="valor" name="Valor Total" fill="#8884d8" />
                         </BarChart>
@@ -410,7 +411,7 @@ export default function KPIs() {
                           </div>
                           <div className="text-right">
                             <p className="font-medium">{item.percentual.toFixed(1)}%</p>
-                            <p className="text-xs text-gray-500">R$ {item.valor.toFixed(2)}</p>
+                            <p className="text-xs text-gray-500">{formatCurrency(item.valor)}</p>
                           </div>
                         </div>
                       ))}
