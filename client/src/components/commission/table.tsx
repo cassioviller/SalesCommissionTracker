@@ -20,9 +20,10 @@ import { formatCurrency, formatIntegerPercentage, parseCurrencyToNumber } from "
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, PlusCircle, History } from "lucide-react";
+import { Loader2, MoreHorizontal, History, Edit, Trash, Eye } from "lucide-react";
 import type { SalesProposal, ProposalWithCalculations } from "@shared/schema";
 import PaymentHistoryModal from "./payment-history-modal";
+import { useAuth } from "@/context/AuthContext";
 
 // Interface para as propriedades da tabela
 interface CommissionTableProps {
@@ -36,6 +37,8 @@ interface TableRefHandle {
 }
 
 const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ proposals, isLoading }, ref) => {
+  // Obter o papel do usuário para mostrar controles diferentes baseado no papel
+  const { userRole } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [localProposals, setLocalProposals] = useState<ProposalWithCalculations[]>([]);
@@ -396,27 +399,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem 
-                          className="text-neutral-700 cursor-pointer"
-                          onClick={() => handleEdit(proposal)}
-                        >
-                          <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            width="16" 
-                            height="16" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round"
-                            className="mr-2 text-blue-500"
-                          >
-                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                            <path d="m15 5 4 4" />
-                          </svg>
-                          <span>Editar</span>
-                        </DropdownMenuItem>
+                        {/* Item comum a todos os usuários */}
                         <DropdownMenuItem 
                           className="text-neutral-700 cursor-pointer"
                           onClick={() => handleOpenPaymentHistory(proposal)}
@@ -424,30 +407,57 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
                           <History className="mr-2 text-green-500 h-4 w-4" />
                           <span>Histórico de Pagamentos</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="text-neutral-700 cursor-pointer"
-                          onClick={() => handleDelete(proposal.id)}
-                        >
-                          <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            width="16" 
-                            height="16" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round"
-                            className="mr-2 text-red-500"
-                          >
-                            <path d="M3 6h18" />
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                            <line x1="10" y1="11" x2="10" y2="17" />
-                            <line x1="14" y1="11" x2="14" y2="17" />
-                          </svg>
-                          <span>Excluir</span>
-                        </DropdownMenuItem>
+                        
+                        {/* Items apenas para administradores */}
+                        {(userRole === 'admin' || !userRole) && (
+                          <>
+                            <DropdownMenuItem 
+                              className="text-neutral-700 cursor-pointer"
+                              onClick={() => handleEdit(proposal)}
+                            >
+                              <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                width="16" 
+                                height="16" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="2" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round"
+                                className="mr-2 text-blue-500"
+                              >
+                                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                                <path d="m15 5 4 4" />
+                              </svg>
+                              <span>Editar</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="text-neutral-700 cursor-pointer"
+                              onClick={() => handleDelete(proposal.id)}
+                            >
+                              <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                width="16" 
+                                height="16" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="2" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round"
+                                className="mr-2 text-red-500"
+                              >
+                                <path d="M3 6h18" />
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                <line x1="10" y1="11" x2="10" y2="17" />
+                                <line x1="14" y1="11" x2="14" y2="17" />
+                              </svg>
+                              <span>Excluir</span>
+                            </DropdownMenuItem>
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>
