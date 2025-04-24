@@ -11,18 +11,17 @@ import { apiRequest } from "@/lib/queryClient";
 interface AddProposalModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onShowPaymentHistory: (proposalId: number, proposalName: string) => void;
 }
 
-export default function AddProposalModal({ isOpen, onClose }: AddProposalModalProps) {
+export default function AddProposalModal({ isOpen, onClose, onShowPaymentHistory }: AddProposalModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const [formData, setFormData] = useState<InsertProposal>({
+  const [formData, setFormData] = useState({
     proposta: "",
     valorTotal: "",
-    valorPago: "",
-    percentComissao: "",
-    valorComissaoPaga: ""
+    percentComissao: ""
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +37,7 @@ export default function AddProposalModal({ isOpen, onClose }: AddProposalModalPr
       const response = await apiRequest("POST", "/api/proposals", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Proposta adicionada",
         description: "A proposta foi adicionada com sucesso.",
@@ -47,6 +46,11 @@ export default function AddProposalModal({ isOpen, onClose }: AddProposalModalPr
       queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
       resetForm();
       onClose();
+      
+      // Redirecionar para o histórico de pagamentos após criar a proposta
+      if (data && data.id) {
+        onShowPaymentHistory(data.id, data.proposta);
+      }
     },
     onError: (error: any) => {
       console.error("Erro ao adicionar proposta:", error);
@@ -62,15 +66,23 @@ export default function AddProposalModal({ isOpen, onClose }: AddProposalModalPr
     setFormData({
       proposta: "",
       valorTotal: "",
-      valorPago: "",
-      percentComissao: "",
-      valorComissaoPaga: ""
+      percentComissao: ""
     });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    addProposalMutation.mutate(formData);
+    
+    // Preparando os dados para envio - valor pago e comissão paga iniciam com zero
+    const proposalData: InsertProposal = {
+      proposta: formData.proposta,
+      valorTotal: formData.valorTotal,
+      valorPago: "0", // Valor pago inicia zerado
+      percentComissao: formData.percentComissao,
+      valorComissaoPaga: "0" // Valor comissão paga inicia zerado
+    };
+    
+    addProposalMutation.mutate(proposalData);
   };
 
   return (
@@ -82,7 +94,7 @@ export default function AddProposalModal({ isOpen, onClose }: AddProposalModalPr
         
         <form onSubmit={handleSubmit}>
           <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="proposta">Proposta</Label>
                 <Input
@@ -96,7 +108,7 @@ export default function AddProposalModal({ isOpen, onClose }: AddProposalModalPr
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="valorTotal">Valor Total (R$)</Label>
+                <Label htmlFor="valorTotal">Valor Total do Contrato (R$)</Label>
                 <Input
                   id="valorTotal"
                   name="valorTotal"
@@ -111,22 +123,7 @@ export default function AddProposalModal({ isOpen, onClose }: AddProposalModalPr
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="valorPago">Valor Pago (R$)</Label>
-                <Input
-                  id="valorPago"
-                  name="valorPago"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0,00"
-                  value={formData.valorPago}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="percentComissao">% Comissão</Label>
+                <Label htmlFor="percentComissao">Percentual de Comissão (%)</Label>
                 <Input
                   id="percentComissao"
                   name="percentComissao"
@@ -142,18 +139,17 @@ export default function AddProposalModal({ isOpen, onClose }: AddProposalModalPr
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="valorComissaoPaga">Valor Comissão Paga (R$)</Label>
-                <Input
-                  id="valorComissaoPaga"
-                  name="valorComissaoPaga"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0,00"
-                  value={formData.valorComissaoPaga}
-                  onChange={handleChange}
-                  required
-                />
+                <div className="flex justify-between items-center">
+                  <Label>Valor da Comissão</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {formData.valorTotal && formData.percentComissao ? 
+                      `R$ ${(parseFloat(formData.valorTotal) * (parseFloat(formData.percentComissao) / 100)).toFixed(2)}` : 
+                      "R$ 0,00"}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Após criar a proposta, você poderá registrar os pagamentos no histórico.
+                </p>
               </div>
             </div>
           </div>

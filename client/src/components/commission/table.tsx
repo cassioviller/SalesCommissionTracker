@@ -38,12 +38,8 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
   const [formData, setFormData] = useState({
     proposta: "",
     valorTotal: "0",
-    valorPago: "0",
-    percentComissao: "0",
-    valorComissaoPaga: "0",
-    dataPagamento: ""
+    percentComissao: "0"
   });
-  const [comissaoAPagar, setComissaoAPagar] = useState("0");
   const [isPaymentHistoryModalOpen, setIsPaymentHistoryModalOpen] = useState(false);
   const [selectedProposalId, setSelectedProposalId] = useState<number | null>(null);
   const [selectedProposalName, setSelectedProposalName] = useState("");
@@ -76,12 +72,8 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
     setFormData({
       proposta: proposal.proposta,
       valorTotal: proposal.valorTotal.toString(),
-      valorPago: proposal.valorPago.toString(),
-      percentComissao: proposal.percentComissao.toString(),
-      valorComissaoPaga: proposal.valorComissaoPaga.toString(),
-      dataPagamento: new Date().toISOString().split('T')[0]  // Data atual como padrão
+      percentComissao: proposal.percentComissao.toString()
     });
-    setComissaoAPagar("0"); // Inicializa com zero
     setIsEditDialogOpen(true);
   };
   
@@ -185,48 +177,16 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
   
-  // Handle adding a new commission payment
-  const handleAddPayment = () => {
-    if (!currentProposal) return;
-    
-    const pagamento = parseFloat(comissaoAPagar);
-    if (isNaN(pagamento) || pagamento <= 0) {
-      toast({
-        title: "Valor inválido",
-        description: "Informe um valor válido para o pagamento",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    const novoValorComissaoPaga = parseFloat(formData.valorComissaoPaga) + pagamento;
-    setFormData((prev) => ({
-      ...prev,
-      valorComissaoPaga: novoValorComissaoPaga.toString()
-    }));
-    setComissaoAPagar("0"); // Reset
-    
-    toast({
-      title: "Pagamento adicionado",
-      description: `Pagamento de ${formatCurrency(pagamento)} adicionado.`,
-      variant: "default",
-    });
-  };
-  
   // Handle saving the edited proposal
   const handleSaveProposal = () => {
     if (!currentProposal) return;
     
     // Validar dados do formulário
     const valorTotal = parseFloat(formData.valorTotal);
-    const valorPago = parseFloat(formData.valorPago);
     const percentComissao = parseFloat(formData.percentComissao);
-    const valorComissaoPaga = parseFloat(formData.valorComissaoPaga);
     
     if (isNaN(valorTotal) || valorTotal < 0 ||
-        isNaN(valorPago) || valorPago < 0 ||
-        isNaN(percentComissao) || percentComissao < 0 || percentComissao > 100 ||
-        isNaN(valorComissaoPaga) || valorComissaoPaga < 0) {
+        isNaN(percentComissao) || percentComissao < 0 || percentComissao > 100) {
       toast({
         title: "Dados inválidos",
         description: "Verifique os valores informados",
@@ -239,9 +199,7 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
     const updateData = {
       proposta: formData.proposta,
       valorTotal,
-      valorPago,
       percentComissao,
-      valorComissaoPaga,
     };
     
     apiRequest("PATCH", `/api/proposals/${currentProposal.id}`, updateData)
@@ -329,87 +287,27 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="valorTotal">Valor Total (R$)</Label>
-                <Input 
-                  id="valorTotal" 
-                  name="valorTotal" 
-                  type="number" 
-                  min="0" 
-                  step="0.01" 
-                  value={formData.valorTotal} 
-                  onChange={handleInputChange} 
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="valorPago">Valor Pago (R$)</Label>
-                <Input 
-                  id="valorPago" 
-                  name="valorPago" 
-                  type="number" 
-                  min="0" 
-                  step="0.01" 
-                  value={formData.valorPago} 
-                  onChange={handleInputChange} 
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="valorTotal">Valor Total do Contrato (R$)</Label>
+              <Input 
+                id="valorTotal" 
+                name="valorTotal" 
+                type="number" 
+                min="0" 
+                step="0.01" 
+                value={formData.valorTotal} 
+                onChange={handleInputChange} 
+              />
             </div>
             
-            <div className="border-t pt-4 mt-2">
-              <h3 className="text-lg font-medium mb-4">Pagamentos de Comissão</h3>
-              
-              <div className="grid grid-cols-3 gap-4 mb-4">
-                <div className="space-y-2 col-span-2">
-                  <Label htmlFor="valorComissaoPaga">Valor Total de Comissão Paga (R$)</Label>
-                  <Input 
-                    id="valorComissaoPaga" 
-                    name="valorComissaoPaga" 
-                    type="number" 
-                    min="0" 
-                    step="0.01" 
-                    value={formData.valorComissaoPaga} 
-                    onChange={handleInputChange} 
-                    className="font-semibold"
-                    readOnly 
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="dataPagamento">Data de Pagamento</Label>
-                  <Input 
-                    id="dataPagamento" 
-                    name="dataPagamento" 
-                    type="date" 
-                    value={formData.dataPagamento} 
-                    onChange={handleInputChange} 
-                  />
-                </div>
-              </div>
-              
-              <div className="flex items-end gap-2">
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor="comissaoAPagar">Adicionar Pagamento (R$)</Label>
-                  <Input 
-                    id="comissaoAPagar" 
-                    type="number" 
-                    min="0" 
-                    step="0.01" 
-                    value={comissaoAPagar} 
-                    onChange={(e) => setComissaoAPagar(e.target.value)} 
-                    className="w-full"
-                  />
-                </div>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={handleAddPayment}
-                  className="mb-0.5"
-                  disabled={!comissaoAPagar || parseFloat(comissaoAPagar) <= 0}
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Adicionar
-                </Button>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="percentComissao">Percentual de Comissão (%)</Label>
+                <span className="text-xs text-muted-foreground">
+                  Comissão Total: {formData.valorTotal && formData.percentComissao ? 
+                    formatCurrency(Number(formData.valorTotal) * (Number(formData.percentComissao) / 100)) : 
+                    formatCurrency(0)}
+                </span>
               </div>
             </div>
             
