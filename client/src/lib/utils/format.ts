@@ -10,6 +10,19 @@ export function formatCurrency(value: number): string {
 }
 
 /**
+ * Converte uma string de moeda (ex: R$ 1.234,56) para número (1234.56)
+ */
+export function parseCurrencyToNumber(value: string): number {
+  // Remove símbolos, pontos de milhar e substitui vírgula por ponto
+  const numericValue = value
+    .replace(/[^\d,.-]/g, '')  // Remove tudo exceto dígitos, vírgula, ponto e sinal
+    .replace('.', '')          // Remove pontos (separadores de milhar)
+    .replace(',', '.');        // Substitui vírgula por ponto (para decimal)
+    
+  return parseFloat(numericValue);
+}
+
+/**
  * Formata uma data para o formato brasileiro (DD/MM/YYYY)
  */
 export function formatDate(date: Date | string): string {
@@ -20,10 +33,24 @@ export function formatDate(date: Date | string): string {
 }
 
 /**
- * Formata um número para porcentagem
+ * Formata um número para porcentagem com uma casa decimal
  */
 export function formatPercent(value: number): string {
   return `${value.toFixed(1)}%`;
+}
+
+/**
+ * Alias para formatPercent (compatibilidade com código existente)
+ */
+export function formatPercentage(value: number): string {
+  return formatPercent(value);
+}
+
+/**
+ * Formata um número para porcentagem sem casas decimais
+ */
+export function formatIntegerPercentage(value: number): string {
+  return `${Math.round(value)}%`;
 }
 
 /**

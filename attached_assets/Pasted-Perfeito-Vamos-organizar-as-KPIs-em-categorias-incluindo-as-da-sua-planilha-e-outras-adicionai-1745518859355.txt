@@ -1,0 +1,89 @@
+Perfeito. Vamos organizar as KPIs em **categorias**, incluindo as da sua planilha e outras adicionais estratégicas baseadas no que você já tem no sistema e no modelo de negócio.
+
+---
+
+## ✅ **KPIs Comerciais e de Desempenho Geral**
+
+| KPI                                         | Cálculo / Origem                                                     |
+|--------------------------------------------|----------------------------------------------------------------------|
+| Ticket médio                                | Média do valor total das propostas fechadas                         |
+| Peso médio por mês                          | Soma do peso das propostas dividido pelo número de meses ativos     |
+| Clientes atendidos                          | Contagem de clientes únicos com propostas fechadas                  |
+| Propostas emitidas                          | Valor manual informado por mês                                      |
+| Propostas para fechar uma venda             | Propostas emitidas ÷ propostas fechadas (campo manual dividido)     |
+| Propostas fechadas                          | Total de cards (propostas) inseridos no sistema                     |
+| Total faturado                              | Soma do valor total de todas as propostas fechadas                  |
+| Total pago pelos clientes                   | Soma do campo “valor pago” das propostas                            |
+| Total em aberto (recebível)                 | Soma do campo “saldo aberto” das propostas                          |
+
+---
+
+## ✅ **KPIs de Canal de Venda (Tipo de Cliente)**
+
+| KPI                                         | Cálculo                                                              |
+|--------------------------------------------|----------------------------------------------------------------------|
+| Vendas por arquitetos                      | % de propostas com “Tipo de Cliente” = Arquiteto                    |
+| Vendas por construtor                      | % de propostas com “Tipo de Cliente” = Construtor                   |
+| Vendas por cliente final                   | % de propostas com “Tipo de Cliente” = Cliente Final                |
+| Vendas por BNI                              | % de propostas com origem pelo networking (campo adicional se usar) |
+| Vendas por fornecedores                    | % de propostas com origem por fornecedor (campo adicional se usar) |
+
+---
+
+## ✅ **KPIs por Projeto**
+
+| KPI                                         | Cálculo                                                              |
+|--------------------------------------------|----------------------------------------------------------------------|
+| % com projeto executivo (PE)               | % de propostas com “Projeto” = PE                                    |
+| % com projeto executivo + complementar     | % de propostas com “Projeto” = PE + PC                               |
+| % sem projeto                              | % de propostas com “Projeto” vazio ou “Nenhum”                       |
+
+---
+
+## ✅ **KPIs de Recompra e Relacionamento**
+
+| KPI                                         | Cálculo                                                              |
+|--------------------------------------------|----------------------------------------------------------------------|
+| % de clientes com recompra                 | % de propostas com “Cliente de Recompra” = Sim                      |
+| Número de clientes com recompra            | Contagem única de clientes com mais de uma proposta                 |
+
+---
+
+## ✅ **KPIs de Comissão**
+
+| KPI                                         | Cálculo                                                              |
+|--------------------------------------------|----------------------------------------------------------------------|
+| Total de comissão gerada                   | Soma de “Valor Total da Comissão”                                   |
+| Total de comissão paga                     | Soma de “Valor de Comissão Paga”                                    |
+| Total de comissão em aberto                | Soma de “Valor de Comissão em Aberto”                               |
+| Percentual médio de comissão paga          | Média de “Percentual de Comissão Paga”                              |
+| % de propostas com comissão 100% paga      | (Nº de propostas com 100% ÷ total de propostas) * 100               |
+| % de propostas com comissão em aberto      | (Nº de propostas com valor > 0 em aberto ÷ total) * 100             |
+
+---
+
+## ✅ **KPIs de Performance e Impacto**
+
+| KPI                                         | Cálculo                                                              |
+|--------------------------------------------|----------------------------------------------------------------------|
+| Tempo médio de negociação                  | Média do campo “Tempo Médio de Negociação (dias)”                   |
+| Top 10 vendas representam (%)              | Soma das 10 maiores propostas ÷ total faturado * 100                |
+| % da receita gerada por arquitetos         | Soma de valores das propostas de arquitetos ÷ total faturado * 100 |
+| % da receita gerada por cliente final      | Idem acima                                                          |
+| % da receita gerada por construtores       | Idem acima                                                          |
+
+---
+
+## ✅ **KPIs Visuais (para exibir em gráfico)**
+
+- **Gráfico de barras:** Top 10 propostas por valor
+- **Pizza:** Distribuição por Tipo de Cliente
+- **Pizza:** Distribuição por Tipo de Projeto
+- **Linha:** Faturamento por mês
+- **Linha:** Comissão paga por mês
+- **Donut:** Comissão Paga vs Total
+- **Donut:** Valor Pago vs Valor Total
+
+---
+
+Se quiser agora posso montar um **modelo de layout com cards para cada KPI**, ou **criar um esquema de banco/API para suportar isso dinamicamente**. Qual próximo passo deseja?
