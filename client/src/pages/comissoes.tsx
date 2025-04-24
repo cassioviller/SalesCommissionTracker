@@ -41,9 +41,13 @@ export default function Comissoes() {
   
   // Manipulador para mostrar o histórico de pagamentos
   const handleShowPaymentHistory = (proposalId: number, proposalName: string) => {
-    // Chama a função handleOpenPaymentHistory do componente CommissionTable através da referência
+    console.log("Função chamada com:", proposalId, proposalName);
+    // Chama a função handleOpenPaymentHistoryById do componente CommissionTable através da referência
     if (tableRef.current && tableRef.current.handleOpenPaymentHistoryById) {
+      console.log("Ref encontrada, abrindo histórico");
       tableRef.current.handleOpenPaymentHistoryById(proposalId, proposalName);
+    } else {
+      console.error("Referência da tabela não encontrada ou função não disponível");
     }
   };
   

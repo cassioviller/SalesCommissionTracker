@@ -44,14 +44,25 @@ export default function AddProposalModal({ isOpen, onClose, onShowPaymentHistory
         variant: "default",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
+      
+      // Salvar os dados para usar após fechar
+      const newProposalId = data?.id;
+      const newProposalName = data?.proposta;
+      
+      // Resetar e fechar o formulário
       resetForm();
       onClose();
       
-      // Redirecionar para o histórico de pagamentos após criar a proposta
-      if (data && data.id) {
+      // Abrimos o histórico de pagamentos após criar a proposta
+      if (newProposalId && newProposalName && typeof onShowPaymentHistory === 'function') {
+        console.log("Abrindo histórico para:", newProposalId, newProposalName);
+        // Usamos um timeout para garantir que o modal foi fechado
         setTimeout(() => {
-          onShowPaymentHistory(data.id, data.proposta);
-        }, 300); // Pequeno atraso para garantir que o modal seja fechado primeiro
+          onShowPaymentHistory(newProposalId, newProposalName);
+        }, 500);
+      } else {
+        console.error("Não foi possível abrir o histórico: ", 
+          typeof onShowPaymentHistory !== 'function' ? "onShowPaymentHistory não é uma função" : "Dados inválidos");
       }
     },
     onError: (error: any) => {
