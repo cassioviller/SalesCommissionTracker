@@ -6,6 +6,7 @@ import CommissionTable from "@/components/commission/table";
 import ChartPanel from "@/components/commission/chart-panel";
 import AddProposalModal from "@/components/commission/add-proposal-modal";
 import type { SalesProposal, ProposalWithCalculations } from "@shared/schema";
+import NavigationHeader from "@/components/navigation-header";
 
 export default function Comissoes() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,8 +54,9 @@ export default function Comissoes() {
   
   return (
     <div className="h-screen overflow-hidden bg-neutral-100">
+      <NavigationHeader />
       {/* Main content */}
-      <main className="h-full overflow-auto bg-neutral-100">
+      <main className="h-[calc(100vh-64px)] overflow-auto bg-neutral-100">
         {/* Page header */}
         <header className="bg-white shadow-sm py-4 px-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
           <div>
