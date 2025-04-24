@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -24,12 +24,18 @@ import { Loader2, PlusCircle, History } from "lucide-react";
 import type { SalesProposal, ProposalWithCalculations } from "@shared/schema";
 import PaymentHistoryModal from "./payment-history-modal";
 
+// Interface para as propriedades da tabela
 interface CommissionTableProps {
   proposals: ProposalWithCalculations[];
   isLoading: boolean;
 }
 
-export default function CommissionTable({ proposals, isLoading }: CommissionTableProps) {
+// Interface para as funções expostas para o componente pai
+interface TableRefHandle {
+  handleOpenPaymentHistoryById: (proposalId: number, proposalName: string) => void;
+}
+
+const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ proposals, isLoading }, ref) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [localProposals, setLocalProposals] = useState<ProposalWithCalculations[]>([]);
@@ -59,12 +65,24 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
     setLocalProposals(proposals);
   }, [proposals]);
   
-  // Função para abrir o modal de histórico de pagamentos
+  // Funções para abrir o modal de histórico de pagamentos
   const handleOpenPaymentHistory = (proposal: ProposalWithCalculations) => {
     setSelectedProposalId(proposal.id);
     setSelectedProposalName(proposal.proposta);
     setIsPaymentHistoryModalOpen(true);
   };
+  
+  // Função para abrir o histórico de pagamentos pelo ID (usada pelo componente pai)
+  const handleOpenPaymentHistoryById = (proposalId: number, proposalName: string) => {
+    setSelectedProposalId(proposalId);
+    setSelectedProposalName(proposalName);
+    setIsPaymentHistoryModalOpen(true);
+  };
+  
+  // Expondo funções para o componente pai
+  useImperativeHandle(ref, () => ({
+    handleOpenPaymentHistoryById
+  }));
   
   // Função para abrir o diálogo de edição
   const handleEdit = (proposal: ProposalWithCalculations) => {
@@ -455,4 +473,6 @@ export default function CommissionTable({ proposals, isLoading }: CommissionTabl
       </div>
     </div>
   );
-}
+});
+
+export default CommissionTable;

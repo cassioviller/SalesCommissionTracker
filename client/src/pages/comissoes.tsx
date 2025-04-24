@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -9,6 +9,12 @@ import type { SalesProposal, ProposalWithCalculations } from "@shared/schema";
 
 export default function Comissoes() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPaymentHistoryModalOpen, setIsPaymentHistoryModalOpen] = useState(false);
+  const [selectedProposalId, setSelectedProposalId] = useState<number | null>(null);
+  const [selectedProposalName, setSelectedProposalName] = useState("");
+  
+  // Ref para o componente da tabela
+  const tableRef = useRef<any>(null);
   
   // Fetch proposals from API
   const { data: proposals, isLoading } = useQuery<SalesProposal[]>({
@@ -32,6 +38,14 @@ export default function Comissoes() {
       percentComissaoPaga
     };
   });
+  
+  // Manipulador para mostrar o histórico de pagamentos
+  const handleShowPaymentHistory = (proposalId: number, proposalName: string) => {
+    // Chama a função handleOpenPaymentHistory do componente CommissionTable através da referência
+    if (tableRef.current && tableRef.current.handleOpenPaymentHistoryById) {
+      tableRef.current.handleOpenPaymentHistoryById(proposalId, proposalName);
+    }
+  };
   
   return (
     <div className="h-screen overflow-hidden bg-neutral-100">
@@ -63,6 +77,7 @@ export default function Comissoes() {
             {/* Commission Table - takes up 2/3 of the space on large screens */}
             <div className="xl:col-span-2">
               <CommissionTable 
+                ref={tableRef}
                 proposals={proposalsWithCalculations} 
                 isLoading={isLoading} 
               />
@@ -79,7 +94,8 @@ export default function Comissoes() {
       {/* Add Proposal Modal */}
       <AddProposalModal 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        onClose={() => setIsModalOpen(false)}
+        onShowPaymentHistory={handleShowPaymentHistory}
       />
     </div>
   );
