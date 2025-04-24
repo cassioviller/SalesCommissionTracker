@@ -17,6 +17,7 @@ const GerenciarParceiros = lazy(() => import('./pages/admin/gerenciar-parceiros'
 const PartnerDashboard = lazy(() => import('./pages/partner-dashboard'));
 const Comissoes = lazy(() => import('./pages/comissoes'));
 const Propostas = lazy(() => import('./pages/propostas'));
+const PropostasCards = lazy(() => import('./pages/propostas-cards'));
 
 // Componente fallback para carregamento
 const LoadingFallback = () => (
@@ -59,9 +60,11 @@ function AppRouter() {
         <ProtectedRoute path="/admin" component={AdminDashboard} requiredRole="admin" />
         <ProtectedRoute path="/admin/criar-parceiro" component={CriarParceiro} requiredRole="admin" />
         <ProtectedRoute path="/admin/gerenciar-parceiros" component={GerenciarParceiros} requiredRole="admin" />
+        <ProtectedRoute path="/admin/propostas" component={Propostas} requiredRole="admin" />
         <ProtectedRoute path="/partner" component={PartnerDashboard} requiredRole="partner" />
         <ProtectedRoute path="/comissoes" component={Comissoes} />
         <ProtectedRoute path="/propostas" component={Propostas} />
+        <ProtectedRoute path="/propostas-cards" component={PropostasCards} />
         <Route component={NotFound} />
       </Switch>
     </div>
