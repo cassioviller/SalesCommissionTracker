@@ -72,6 +72,7 @@ export default function ProposalTable({ proposals, isLoading }: ProposalTablePro
     pesoEstrutura: "",
     valorPorQuilo: "",
     valorTotal: "",
+    valorTotalMaterial: "",
     valorPago: "",
     percentComissao: "",
     recomendacaoDireta: "nao",
@@ -133,22 +134,22 @@ export default function ProposalTable({ proposals, isLoading }: ProposalTablePro
     setLocalProposals(filtered);
   }, [proposals, searchQuery, filters]);
   
-  // Função para determinar a classe de cor da linha com base na porcentagem de comissão paga
+  // Função para determinar a classe de cor da linha com base na porcentagem de comissão paga (15% mais vibrante)
   const getRowColorClass = (percentComissaoPaga: number): string => {
-    if (percentComissaoPaga <= 0) return 'bg-red-50'; // Vermelho só quando 0%
-    if (percentComissaoPaga >= 100) return 'bg-green-50'; // Verde só quando 100%
-    return 'bg-yellow-50'; // Amarelo para todos os valores entre 1% e 99%
+    if (percentComissaoPaga <= 0) return 'bg-red-100'; // Vermelho mais vibrante quando 0%
+    if (percentComissaoPaga >= 100) return 'bg-green-100'; // Verde mais vibrante quando 100%
+    return 'bg-yellow-100'; // Amarelo mais vibrante para valores entre 1% e 99%
   };
 
-  // Função para determinar a classe de cor do texto da porcentagem
+  // Função para determinar a classe de cor do texto da porcentagem (15% mais vibrante)
   const getPercentageColorClass = (percentComissaoPaga: number): string => {
-    if (percentComissaoPaga <= 0) return 'text-red-600 font-medium';
-    if (percentComissaoPaga >= 100) return 'text-green-600 font-medium';
-    // Tons sutis de amarelo para valores parciais
-    if (percentComissaoPaga > 75) return 'text-amber-600 font-medium';
-    if (percentComissaoPaga > 50) return 'text-amber-500 font-medium';
-    if (percentComissaoPaga > 25) return 'text-yellow-600 font-medium';
-    return 'text-yellow-700 font-medium';
+    if (percentComissaoPaga <= 0) return 'text-red-700 font-medium';
+    if (percentComissaoPaga >= 100) return 'text-green-700 font-medium';
+    // Tons mais vibrantes de amarelo para valores parciais
+    if (percentComissaoPaga > 75) return 'text-amber-700 font-medium';
+    if (percentComissaoPaga > 50) return 'text-amber-600 font-medium';
+    if (percentComissaoPaga > 25) return 'text-yellow-700 font-medium';
+    return 'text-yellow-800 font-medium';
   };
 
   // Função para abrir o modal de edição
@@ -180,6 +181,7 @@ export default function ProposalTable({ proposals, isLoading }: ProposalTablePro
       pesoEstrutura: proposal.pesoEstrutura?.toString() || "",
       valorPorQuilo: proposal.valorPorQuilo?.toString() || "",
       valorTotal: proposal.valorTotal.toString(),
+      valorTotalMaterial: proposal.valorTotalMaterial?.toString() || "",
       valorPago: proposal.valorPago.toString(),
       percentComissao: proposal.percentComissao.toString(),
       recomendacaoDireta: proposal.recomendacaoDireta || "nao",
@@ -257,6 +259,7 @@ export default function ProposalTable({ proposals, isLoading }: ProposalTablePro
       tipoContrato: formData.tipoContrato,
       pesoEstrutura: formData.pesoEstrutura ? parseFloat(formData.pesoEstrutura) : undefined,
       valorPorQuilo: formData.valorPorQuilo ? parseFloat(formData.valorPorQuilo) : undefined,
+      valorTotalMaterial: formData.valorTotalMaterial ? parseFloat(formData.valorTotalMaterial) : undefined,
       recomendacaoDireta: formData.recomendacaoDireta,
       faturamentoDireto: formData.faturamentoDireto,
       tempoNegociacao: formData.tempoNegociacao ? parseInt(formData.tempoNegociacao) : undefined,
@@ -897,7 +900,7 @@ export default function ProposalTable({ proposals, isLoading }: ProposalTablePro
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="valorTotal">Valor Total (R$)</Label>
                 <Input 
@@ -907,6 +910,19 @@ export default function ProposalTable({ proposals, isLoading }: ProposalTablePro
                   min="0"
                   step="0.01"
                   value={formData.valorTotal} 
+                  onChange={handleInputChange} 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="valorTotalMaterial">Valor Total Material (R$)</Label>
+                <Input 
+                  id="valorTotalMaterial" 
+                  name="valorTotalMaterial" 
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.valorTotalMaterial} 
                   onChange={handleInputChange} 
                 />
               </div>

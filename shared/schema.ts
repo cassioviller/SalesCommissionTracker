@@ -57,6 +57,7 @@ export const salesProposals = pgTable("sales_proposals", {
   tipoContrato: text("tipo_contrato"), // "MP", "MO", "MP + MO"
   pesoEstrutura: numeric("peso_estrutura", { precision: 10, scale: 2 }),
   valorPorQuilo: numeric("valor_por_quilo", { precision: 10, scale: 2 }),
+  valorTotalMaterial: numeric("valor_total_material", { precision: 10, scale: 2 }),
   recomendacaoDireta: text("recomendacao_direta").default("nao"), // sim/nao
   faturamentoDireto: text("faturamento_direto").default("nao"), // sim/nao
   tempoNegociacao: integer("tempo_negociacao"), // em dias
@@ -88,6 +89,7 @@ export const insertProposalSchema = z.object({
   tipoContrato: z.enum(TIPOS_CONTRATO).optional(),
   pesoEstrutura: z.string().optional(), // número em formato string
   valorPorQuilo: z.string().optional(), // número em formato string
+  valorTotalMaterial: z.string().optional(), // número em formato string
   recomendacaoDireta: z.enum(["sim", "nao"]).optional(),
   faturamentoDireto: z.enum(["sim", "nao"]).optional(),
   tempoNegociacao: z.string().optional(), // número em formato string
@@ -101,6 +103,7 @@ export const updateProposalSchema = z.object({
   valorPago: z.number().nonnegative().optional(),
   percentComissao: z.number().min(0).max(100).optional(),
   valorComissaoPaga: z.number().nonnegative().optional(),
+  valorTotalMaterial: z.number().nonnegative().optional(),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
