@@ -12,6 +12,7 @@ import { formatCurrency, formatIntegerPercentage, formatDate } from "@/lib/utils
 import type { ProposalWithCalculations } from "@shared/schema";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "wouter";
+import NavigationHeader from "@/components/navigation-header";
 
 export default function PropostasCards() {
   const { userRole } = useAuth();
@@ -82,17 +83,21 @@ export default function PropostasCards() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-center">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-        <p className="mt-2 text-neutral-600">Carregando dados...</p>
+      <div className="h-screen overflow-hidden bg-neutral-100">
+        <NavigationHeader />
+        <div className="h-[calc(100vh-64px)] flex items-center justify-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+          <p className="ml-2 text-neutral-600">Carregando dados...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="h-screen overflow-hidden bg-neutral-100">
+      <NavigationHeader />
       {/* Main content */}
-      <main className="h-full overflow-auto bg-neutral-100">
+      <main className="h-[calc(100vh-64px)] overflow-auto bg-neutral-100">
         {/* Page header */}
         <header className="bg-white shadow-sm py-4 px-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
           <div>

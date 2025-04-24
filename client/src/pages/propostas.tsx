@@ -73,9 +73,12 @@ export default function Propostas() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-center">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-        <p className="mt-2 text-neutral-600">Carregando dados...</p>
+      <div className="h-screen overflow-hidden bg-neutral-100">
+        <NavigationHeader />
+        <div className="h-[calc(100vh-64px)] flex items-center justify-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+          <p className="ml-2 text-neutral-600">Carregando dados...</p>
+        </div>
       </div>
     );
   }

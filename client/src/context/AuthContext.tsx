@@ -41,6 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAuthenticated(true);
       setUserRole("admin");
       setPartnerId(undefined);
+      // Redirecionar para a página de propostas após login bem-sucedido
+      window.location.href = '/propostas';
       return true;
     } 
     
@@ -65,6 +67,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true);
         setUserRole("partner");
         setPartnerId(partner.id.toString());
+        // Redirecionar para a página de propostas após login bem-sucedido
+        window.location.href = '/propostas';
         return true;
       }
     } catch (error) {
