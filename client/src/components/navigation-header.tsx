@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "wouter";
-import { BarChart2, FileText, FileTextIcon, Home, LogOut, Users } from "lucide-react";
+import { BarChart2, FileText, FileTextIcon, Home, LogOut, Users, Grid } from "lucide-react";
 
 export default function NavigationHeader() {
   const { userRole, logout } = useAuth();
@@ -85,6 +85,17 @@ export default function NavigationHeader() {
             <a href="/kpis">
               <BarChart2 className="h-4 w-4 mr-1" />
               KPIs
+            </a>
+          </Button>
+          
+          <Button 
+            variant={location === "/propostas-cards" ? "default" : "outline"} 
+            size="sm" 
+            asChild
+          >
+            <a href="/propostas-cards">
+              <Grid className="h-4 w-4 mr-1" />
+              Cards
             </a>
           </Button>
           
