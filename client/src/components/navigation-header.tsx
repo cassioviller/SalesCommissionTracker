@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "wouter";
-import { BarChart2, FileText, LogOut, Users } from "lucide-react";
+import { BarChart2, FileText, FileTextIcon, LogOut, Users, Home } from "lucide-react";
 
 export default function NavigationHeader() {
   const { userRole, logout } = useAuth();
@@ -16,15 +16,15 @@ export default function NavigationHeader() {
         </div>
         
         <div className="flex flex-wrap gap-2">
-          {userRole === "admin" && (
+          {userRole === "partner" && (
             <Button 
-              variant={location.includes("/admin/gerenciar-parceiros") ? "default" : "outline"} 
+              variant={location === "/partner-dashboard" ? "default" : "outline"} 
               size="sm" 
               asChild
             >
-              <a href="/admin/gerenciar-parceiros">
-                <Users className="h-4 w-4 mr-1" />
-                Parceiros
+              <a href="/partner-dashboard">
+                <Home className="h-4 w-4 mr-1" />
+                Dashboard
               </a>
             </Button>
           )}
@@ -38,6 +38,17 @@ export default function NavigationHeader() {
             <a href="/propostas">
               <FileText className="h-4 w-4 mr-1" />
               Propostas
+            </a>
+          </Button>
+          
+          <Button 
+            variant={location === "/comissoes" ? "default" : "outline"} 
+            size="sm" 
+            asChild
+          >
+            <a href="/comissoes">
+              <FileTextIcon className="h-4 w-4 mr-1" />
+              Comissões
             </a>
           </Button>
           
