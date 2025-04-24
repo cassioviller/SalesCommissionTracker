@@ -6,6 +6,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { formatCurrency, formatPercentage } from "@/lib/utils/format";
 import type { ProposalWithCalculations } from "@shared/schema";
 import { useAuth } from "../context/AuthContext";
+import NavigationHeader from "@/components/navigation-header";
 
 export default function PartnerDashboard() {
   const auth = useAuth();
@@ -86,22 +87,7 @@ export default function PartnerDashboard() {
   
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <div className="bg-primary rounded-md text-white h-8 w-8 flex items-center justify-center mr-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 6.37v11.26a.9.9 0 0 1-1.33.83l-1.47-.87a1.17 1.17 0 0 0-1.21.04l-3.11 2.14a1.17 1.17 0 0 1-1.21.04L7.6 17.9a1.17 1.17 0 0 0-1.21.04l-2.72 1.87A.9.9 0 0 1 2 19V5.5a.9.9 0 0 1 .33-.7l2.72-1.87a1.17 1.17 0 0 1 1.21-.04l3.07 1.91a1.17 1.17 0 0 0 1.21-.04l3.11-2.14a1.17 1.17 0 0 1 1.21-.04l1.47.87a.9.9 0 0 1 .67.92z" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">Portal de Comissões</h1>
-              <p className="text-xs text-gray-500">Dashboard do Parceiro</p>
-            </div>
-          </div>
-          <Button variant="ghost" onClick={handleLogout}>Sair</Button>
-        </div>
-      </header>
+      <NavigationHeader />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
