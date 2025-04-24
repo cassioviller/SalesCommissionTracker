@@ -39,6 +39,24 @@ interface TableRefHandle {
 const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ proposals, isLoading }, ref) => {
   // Obter o papel do usuário para mostrar controles diferentes baseado no papel
   const { userRole } = useAuth();
+  
+  // Função para determinar a classe de cor da linha com base na porcentagem de comissão paga
+  const getRowColorClass = (percentComissaoPaga: number): string => {
+    if (percentComissaoPaga <= 0) return 'bg-opacity-5 bg-red-100';
+    if (percentComissaoPaga >= 100) return 'bg-opacity-5 bg-green-100';
+    if (percentComissaoPaga > 70) return 'bg-opacity-5 bg-green-50';
+    if (percentComissaoPaga > 30) return 'bg-opacity-5 bg-yellow-50';
+    return 'bg-opacity-5 bg-orange-50';
+  };
+  
+  // Função para determinar a classe de cor do texto da porcentagem
+  const getPercentageColorClass = (percentComissaoPaga: number): string => {
+    if (percentComissaoPaga <= 0) return 'text-red-600 font-medium';
+    if (percentComissaoPaga >= 100) return 'text-green-600 font-medium';
+    if (percentComissaoPaga > 70) return 'text-green-500 font-medium';
+    if (percentComissaoPaga > 30) return 'text-yellow-600 font-medium';
+    return 'text-orange-500 font-medium';
+  };
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [localProposals, setLocalProposals] = useState<ProposalWithCalculations[]>([]);
@@ -366,7 +384,10 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
               </tr>
             ) : (
               localProposals.map((proposal) => (
-                <tr key={proposal.id} className="border-b hover:bg-gray-50">
+                <tr 
+                  key={proposal.id} 
+                  className={`border-b hover:bg-gray-50 ${getRowColorClass(Number(proposal.percentComissaoPaga))}`}
+                >
                   <td className="py-3 px-4 font-medium text-sm">{proposal.proposta}</td>
                   <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.valorTotal))}</td>
                   <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.valorPago))}</td>
@@ -375,7 +396,11 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
                   <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.valorComissaoTotal))}</td>
                   <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.valorComissaoPaga))}</td>
                   <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.valorComissaoEmAberto))}</td>
-                  <td className="py-3 px-3 text-center text-sm">{formatIntegerPercentage(Number(proposal.percentComissaoPaga))}</td>
+                  <td className="py-3 px-3 text-center text-sm">
+                    <span className={getPercentageColorClass(Number(proposal.percentComissaoPaga))}>
+                      {formatIntegerPercentage(Number(proposal.percentComissaoPaga))}
+                    </span>
+                  </td>
                   <td className="py-3 px-2 text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -475,7 +500,11 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
               <td className="py-3 px-4 text-sm">{formatCurrency(totalComissao)}</td>
               <td className="py-3 px-4 text-sm">{formatCurrency(totalComissaoPaga)}</td>
               <td className="py-3 px-4 text-sm">{formatCurrency(totalComissaoEmAberto)}</td>
-              <td className="py-3 px-3 text-sm text-center">{formatIntegerPercentage(percentComissaoPaga)}</td>
+              <td className="py-3 px-3 text-sm text-center">
+                <span className={getPercentageColorClass(percentComissaoPaga)}>
+                  {formatIntegerPercentage(percentComissaoPaga)}
+                </span>
+              </td>
               <td className="py-3 px-2 text-sm text-center">-</td>
             </tr>
           </tfoot>
