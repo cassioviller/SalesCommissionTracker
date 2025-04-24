@@ -28,13 +28,15 @@ export default function Propostas() {
     },
   });
   
-  // Tratar erros na busca dos dados
-  if (error) {
-    toast({
-      title: "Erro ao carregar propostas",
-      description: `${error}`,
-      variant: "destructive",
-    });
+  // Função para tratar erros ao buscar dados
+  const handleError = () => {
+    if (error) {
+      toast({
+        title: "Erro ao carregar propostas",
+        description: `${error}`,
+        variant: "destructive",
+      });
+    }
   }
   
   // Processar dados para calcular campos adicionais
