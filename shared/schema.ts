@@ -103,7 +103,21 @@ export const updateProposalSchema = z.object({
   valorPago: z.number().nonnegative().optional(),
   percentComissao: z.number().min(0).max(100).optional(),
   valorComissaoPaga: z.number().nonnegative().optional(),
+  
+  // Campos opcionais para proposta detalhada
+  nomeCliente: z.string().optional(),
+  tipoCliente: z.enum(TIPOS_CLIENTE).optional(),
+  tiposServico: z.array(z.enum(TIPOS_SERVICO)).optional(),
+  dataProposta: z.string().optional(), // data em formato string
+  tipoProjeto: z.enum(TIPOS_PROJETO).optional(),
+  tipoContrato: z.enum(TIPOS_CONTRATO).optional(),
+  pesoEstrutura: z.number().nonnegative().optional(),
+  valorPorQuilo: z.number().nonnegative().optional(),
   valorTotalMaterial: z.number().nonnegative().optional(),
+  recomendacaoDireta: z.enum(["sim", "nao"]).optional(),
+  faturamentoDireto: z.enum(["sim", "nao"]).optional(),
+  tempoNegociacao: z.number().nonnegative().optional(),
+  clienteRecompra: z.enum(["sim", "nao"]).optional(),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

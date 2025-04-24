@@ -1,0 +1,77 @@
+Perfeito. Abaixo está a explicação clara e direta de como será estruturada a **nova Página de Propostas**, seguindo exatamente o que você pediu:
+
+---
+
+## ✅ Página de Propostas
+
+### 🔹 O que aparece visualmente:
+
+- A página **NÃO terá uma tabela**.
+- Ela mostrará **apenas uma lista de cards**, um para cada proposta fechada.
+- Cada card exibirá um **resumo mínimo** da proposta, como por exemplo:
+  - Número da Proposta
+  - Nome do Cliente
+  - Valor Total da Proposta
+  - Status da Comissão (com cor ou porcentagem)
+
+### 🔹 Cada card terá:
+- Um botão ou ícone **"Editar"** que leva para a **página de edição completa da proposta**.
+
+---
+
+## ✅ Página de Adicionar Proposta
+
+### Funciona assim:
+- Quando clicar em **"Adicionar Nova Proposta"**, abrirá uma tela com **todos os campos listados abaixo**.
+- **Nenhum campo será obrigatório**.
+- O sistema permite salvar a proposta mesmo se ela estiver **incompleta**.
+
+| Campo                              | Tipo de dado           |
+|-----------------------------------|------------------------|
+| Número da Proposta                | Número                 |
+| Nome do Cliente                   | Texto                  |
+| Tipo de Cliente                   | Seleção única          |
+| Tipos de Serviço                  | Seleção múltipla       |
+| Data da Proposta                  | Data                   |
+| Tipo de Projeto                   | Seleção única          |
+| Tipo de Contrato                  | Seleção única          |
+| Peso da Estrutura                 | Número (kg)            |
+| Valor por Quilo                   | Número (R$)            |
+| Valor Total da Proposta           | Número (R$)            |
+| Valor Pago pelo Cliente           | Número (R$)            |
+| Saldo Aberto                      | Número (R$)            |
+| Percentual de Comissão            | Número (%)             |
+| Valor Total da Comissão           | Número (R$)            |
+| Valor de Comissão Paga            | Número (R$)            |
+| Valor de Comissão em Aberto       | Número (R$)            |
+| Percentual de Comissão Paga       | Número (%)             |
+| Recomendação Direta               | Seleção única          |
+| Faturamento Direto                | Seleção única          |
+| Tempo Médio de Negociação (dias)  | Número (dias)          |
+| Cliente de Recompra               | Seleção única          |
+
+---
+
+## ✅ Edição de Propostas
+
+- Cada proposta pode ser **editada a qualquer momento**.
+- Ao clicar em "Editar" no card, você verá todos os campos listados acima para **preencher ou alterar dados** da proposta.
+
+---
+
+## ✅ Cabeçalho em todas as páginas
+
+- Toda página do sistema (dashboard, propostas, parceiros, relatórios, etc.) terá no topo um **menu fixo com links para todas as outras páginas** do sistema.
+- Exemplo:
+  - [Dashboard] [Propostas] [Parceiros] [Relatórios] [Comissões] [Sair]
+
+---
+
+## ✅ Comissões de Vendas
+
+- **Nada será alterado** na parte de criação e controle de comissões.
+- A forma como você já cadastra, paga e gerencia comissões continuará **exatamente igual**.
+
+---
+
+Se quiser, posso agora gerar o layout dos cards ou o formulário JSX com todos os campos. Deseja seguir com isso?

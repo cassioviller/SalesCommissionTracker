@@ -1,16 +1,22 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Grid3X3 } from "lucide-react";
+import { Search, Plus, Filter, ChevronDown, Edit, Eye } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import ProposalTable from "@/components/proposal/proposal-table";
+import { formatCurrency } from "@/lib/utils/format";
 import type { ProposalWithCalculations } from "@shared/schema";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 export default function Propostas() {
   const { toast } = useToast();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [, navigate] = useLocation();
   
   // Buscar dados das propostas
   const { data: proposals, isLoading, error } = useQuery<ProposalWithCalculations[]>({
@@ -47,6 +53,31 @@ export default function Propostas() {
       percentComissaoPaga
     };
   }) || [];
+  
+  // Filtrar propostas pela busca
+  const filteredProposals = proposalsWithCalculations.filter(proposal => {
+    if (!searchQuery) return true;
+    
+    const query = searchQuery.toLowerCase();
+    return (
+      proposal.proposta.toLowerCase().includes(query) ||
+      (proposal.nomeCliente && proposal.nomeCliente.toLowerCase().includes(query))
+    );
+  });
+  
+  // Função para editar proposta
+  const handleEditProposal = (proposal: ProposalWithCalculations) => {
+    navigate(`/edit-proposal/${proposal.id}`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="p-8 text-center">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+        <p className="mt-2 text-neutral-600">Carregando dados...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen overflow-hidden bg-neutral-100">
@@ -56,44 +87,90 @@ export default function Propostas() {
         <header className="bg-white shadow-sm py-4 px-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
           <div>
             <h1 className="text-2xl font-semibold text-neutral-800">Propostas</h1>
-            <p className="text-neutral-500 text-sm">Gerenciamento de propostas com informações detalhadas</p>
+            <p className="text-neutral-500 text-sm">Gerenciamento de propostas fechadas</p>
           </div>
           <div className="flex gap-3 mt-3 sm:mt-0">
-            <Link href="/propostas-cards">
-              <Button variant="outline" size="sm">
-                <Grid3X3 className="h-4 w-4 mr-1" />
-                Ver em Cards
+            <Link href="/add-proposal">
+              <Button className="bg-primary hover:bg-primary/90">
+                <Plus className="h-4 w-4 mr-1" />
+                Adicionar Nova Proposta
               </Button>
             </Link>
-            <Button 
-              onClick={() => setIsModalOpen(true)}
-              className="bg-primary hover:bg-primary/90"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Adicionar Nova Proposta
-            </Button>
           </div>
         </header>
         
-        {/* Content area - Full width with padding */}
+        {/* Barra de pesquisa e filtros */}
+        <div className="p-4 sticky top-0 z-10 bg-neutral-100 border-b">
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input 
+                placeholder="Buscar proposta..." 
+                className="pl-10" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4" />
+              Filtros
+              <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Grid de cards */}
         <div className="p-6">
-          <div className="w-full">
-            {/* Main table component */}
-            <ProposalTable 
-              proposals={proposalsWithCalculations} 
-              isLoading={isLoading} 
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProposals.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-neutral-500">Nenhuma proposta encontrada</p>
+              </div>
+            ) : (
+              filteredProposals.map((proposal) => (
+                <Card key={proposal.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg font-medium">{proposal.proposta}</CardTitle>
+                    </div>
+                    <CardDescription>
+                      {proposal.nomeCliente || "Sem cliente"}
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent className="pb-2">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-neutral-500">Valor Total:</span>
+                        <span className="font-medium">{formatCurrency(Number(proposal.valorTotal))}</span>
+                      </div>
+                      
+                      <Separator />
+                    </div>
+                  </CardContent>
+                  
+                  <CardFooter className="pt-2 flex gap-2 justify-between">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleEditProposal(proposal)}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Editar
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </main>
-      
-      {/* Add Proposal Modal - To be implemented */}
-      {/* 
-      <AddProposalModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
-      />
-      */}
     </div>
   );
 }
