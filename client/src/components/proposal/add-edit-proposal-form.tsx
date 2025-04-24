@@ -28,7 +28,7 @@ import {
   TIPOS_SERVICO,
   insertProposalSchema
 } from "@shared/schema";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 
 // Estendendo o schema para validação de formulário
 const formSchema = insertProposalSchema.extend({
@@ -47,12 +47,12 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     proposal?.dataProposta ? new Date(proposal.dataProposta) : undefined
   );
-  const [selectedServices, setSelectedServices] = useState<string[]>(
-    proposal?.tiposServico as string[] || []
+  const [selectedServices, setSelectedServices] = useState<(typeof TIPOS_SERVICO)[number][]>(
+    (proposal?.tiposServico as (typeof TIPOS_SERVICO)[number][]) || []
   );
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [_, navigate] = useNavigate();
+  const [_, navigate] = useLocation();
 
   // Form setup
   const form = useForm<z.infer<typeof formSchema>>({
@@ -143,7 +143,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   });
 
   // Lidar com mudanças nos serviços selecionados
-  const handleServicesChange = (service: string, checked: boolean) => {
+  const handleServicesChange = (service: (typeof TIPOS_SERVICO)[number], checked: boolean) => {
     if (checked) {
       setSelectedServices(prev => [...prev, service]);
     } else {

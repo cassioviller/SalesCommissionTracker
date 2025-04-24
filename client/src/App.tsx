@@ -18,6 +18,8 @@ const PartnerDashboard = lazy(() => import('./pages/partner-dashboard'));
 const Comissoes = lazy(() => import('./pages/comissoes'));
 const Propostas = lazy(() => import('./pages/propostas'));
 const PropostasCards = lazy(() => import('./pages/propostas-cards'));
+const AddProposal = lazy(() => import('./pages/add-proposal'));
+const EditProposal = lazy(() => import('./pages/edit-proposal'));
 
 // Componente fallback para carregamento
 const LoadingFallback = () => (
@@ -65,6 +67,8 @@ function AppRouter() {
         <ProtectedRoute path="/comissoes" component={Comissoes} />
         <ProtectedRoute path="/propostas" component={Propostas} />
         <ProtectedRoute path="/propostas-cards" component={PropostasCards} />
+        <ProtectedRoute path="/add-proposal" component={AddProposal} />
+        <ProtectedRoute path="/edit-proposal/:id" component={EditProposal} />
         <Route component={NotFound} />
       </Switch>
     </div>
