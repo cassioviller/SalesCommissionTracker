@@ -256,8 +256,10 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
     const formattedData: any = {
       ...dataToSend,
       tiposServico: selectedServices,
+      comissaoHabilitada: comissaoHabilitada ? "true" : "false" // Adicionar valor correto do switch
     };
     
+    console.log("Enviando dados para API:", formattedData);
     mutation.mutate(formattedData);
   };
 

@@ -16,12 +16,16 @@ export default function Comissoes() {
   
   // Calculate derived fields for each proposal and filter out proposals without commission or with disabled commission
   const proposalsWithCalculations: ProposalWithCalculations[] = (proposals || [])
-    .filter(proposal => 
+    .filter(proposal => {
+      // Para debug
+      console.log("Proposta:", proposal.proposta, "comissaoHabilitada:", proposal.comissaoHabilitada, typeof proposal.comissaoHabilitada);
+      
       // Filtro duplo: verifica se tem percentual de comissão E se comissão está habilitada 
-      proposal.percentComissao && 
-      Number(proposal.percentComissao) > 0 && 
-      proposal.comissaoHabilitada === "true"
-    )
+      // Aceita tanto boolean (true) quanto string ("true")
+      return proposal.percentComissao && 
+        Number(proposal.percentComissao) > 0 && 
+        (proposal.comissaoHabilitada === true || proposal.comissaoHabilitada === "true");
+    })
     .map(proposal => {
       const saldoAberto = Number(proposal.valorTotal) - Number(proposal.valorPago);
       const valorComissaoTotal = Number(proposal.valorTotal) * (Number(proposal.percentComissao) / 100);
