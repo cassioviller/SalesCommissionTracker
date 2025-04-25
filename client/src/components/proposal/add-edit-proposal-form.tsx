@@ -18,7 +18,17 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon, ArrowLeft } from "lucide-react";
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog";
+import { CalendarIcon, ArrowLeft, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   InsertProposal,
@@ -48,6 +58,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [_, navigate] = useLocation();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   // Estado para controlar se os campos de comissão estão habilitados
   const [comissaoHabilitada, setComissaoHabilitada] = useState<boolean>(
@@ -195,6 +206,36 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       });
     },
   });
+  
+  // Mutation para excluir proposta
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      if (!proposal?.id) {
+        throw new Error("ID da proposta não encontrado");
+      }
+      
+      await apiRequest("DELETE", `/api/proposals/${proposal.id}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Proposta excluída",
+        description: "A proposta foi excluída com sucesso",
+      });
+      
+      // Invalidar cache para atualizar lista
+      queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
+      
+      // Navegar de volta para a lista de propostas
+      navigate("/propostas");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: `Não foi possível excluir a proposta: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
 
   // Lidar com mudanças nos serviços selecionados
   const handleServicesChange = (service: (typeof TIPOS_SERVICO)[number], checked: boolean) => {
@@ -266,21 +307,36 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   return (
     <Card className="max-w-4xl mx-auto">
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              if (onCancel) {
-                onCancel();
-              } else {
-                navigate("/propostas");
-              }
-            }}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <CardTitle>{editMode ? "Editar Proposta" : "Nova Proposta"}</CardTitle>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                if (onCancel) {
+                  onCancel();
+                } else {
+                  navigate("/propostas");
+                }
+              }}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <CardTitle>{editMode ? "Editar Proposta" : "Nova Proposta"}</CardTitle>
+          </div>
+          
+          {/* Botão de exclusão (apenas no modo de edição) */}
+          {editMode && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Excluir Proposta
+            </Button>
+          )}
         </div>
       </CardHeader>
       
@@ -676,6 +732,29 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
           </Button>
         </CardFooter>
       </form>
+      
+      {/* Diálogo de confirmação para excluir proposta */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a proposta {proposal?.proposta}? 
+              Esta ação não pode ser desfeita e todos os registros de pagamentos 
+              associados a esta proposta serão excluídos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => deleteMutation.mutate()}
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
