@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 type SidebarItemProps = {
   href: string;
@@ -30,6 +31,7 @@ const SidebarItem = ({ href, icon, label, active }: SidebarItemProps) => {
 
 export default function Sidebar() {
   const [location] = useLocation();
+  const { userRole } = useAuth();
   
   return (
     <aside className="w-48 bg-white shadow-md h-screen hidden lg:block">
@@ -112,16 +114,18 @@ export default function Sidebar() {
             label="Payments" 
             active={location === "/payments"}
           />
-          <SidebarItem 
-            href="/comissoes" 
-            icon={
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
-            } 
-            label="Comissões de Vendas" 
-            active={location === "/comissoes"}
-          />
+          {userRole !== "partner" && (
+            <SidebarItem 
+              href="/comissoes" 
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              } 
+              label="Comissões de Vendas" 
+              active={location === "/comissoes"}
+            />
+          )}
           <SidebarItem 
             href="/payments-mode" 
             icon={

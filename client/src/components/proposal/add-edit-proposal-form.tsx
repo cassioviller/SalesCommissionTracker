@@ -48,6 +48,11 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   const queryClient = useQueryClient();
   const [_, navigate] = useLocation();
   
+  // Estado para controlar se os campos de comissão estão habilitados
+  const [comissaoHabilitada, setComissaoHabilitada] = useState<boolean>(
+    editMode ? (proposal?.percentComissao ? Number(proposal.percentComissao) > 0 : false) : false
+  );
+  
   // Form setup
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
