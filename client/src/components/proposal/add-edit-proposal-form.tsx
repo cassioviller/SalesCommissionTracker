@@ -16,6 +16,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { CalendarIcon, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -466,7 +467,25 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
 
           {/* Valores e Comissões */}
           <div className="space-y-4">
-            <h2 className="text-lg font-medium">Valores e Comissões</h2>
+            <div className="flex flex-row items-center justify-between">
+              <h2 className="text-lg font-medium">Valores e Comissões</h2>
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="comissaoSwitch" className="text-sm font-medium">
+                  {comissaoHabilitada ? "Comissão habilitada" : "Comissão desabilitada"}
+                </Label>
+                <Switch
+                  id="comissaoSwitch"
+                  checked={comissaoHabilitada}
+                  onCheckedChange={(checked) => {
+                    setComissaoHabilitada(checked);
+                    if (!checked) {
+                      form.setValue("percentComissao", "0");
+                      form.setValue("valorComissaoPaga", "0");
+                    }
+                  }}
+                />
+              </div>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -508,6 +527,8 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
                   max="100"
                   step="0.1"
                   placeholder="0.00"
+                  disabled={!comissaoHabilitada}
+                  className={!comissaoHabilitada ? "bg-gray-50" : ""}
                   {...form.register("percentComissao")}
                 />
               </div>

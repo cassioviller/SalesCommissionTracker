@@ -6,7 +6,26 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Plus, Filter, ChevronDown, Edit, History, Eye, List } from "lucide-react";
+import { Search, Plus, Filter, ChevronDown, Edit, History, Eye, List, MoreVertical, Trash2 } from "lucide-react";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { apiRequest } from "@/lib/queryClient";
 import { formatCurrency, formatIntegerPercentage, formatDate } from "@/lib/utils/format";
 import type { ProposalWithCalculations } from "@shared/schema";
@@ -20,6 +39,8 @@ export default function PropostasCards() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [proposalToDelete, setProposalToDelete] = useState<ProposalWithCalculations | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   // Buscar dados das propostas
   const { data: proposals, isLoading, error } = useQuery<ProposalWithCalculations[]>({
