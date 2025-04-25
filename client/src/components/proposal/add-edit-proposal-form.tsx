@@ -165,9 +165,24 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
 
   // Submit form
   const onSubmit = (data: z.infer<typeof formSchema>) => {
+    // Processar os dados para garantir que campos numéricos vazios sejam enviados como "0"
+    const processedData = Object.entries(data).reduce((acc: any, [key, value]) => {
+      // Se for um campo numérico e estiver vazio, substitua por "0"
+      if (
+        ['valorTotal', 'valorPago', 'percentComissao', 'valorComissaoPaga', 
+         'pesoEstrutura', 'valorPorQuilo', 'valorTotalMaterial', 'tempoNegociacao'].includes(key) && 
+        (value === "" || value === undefined || value === null)
+      ) {
+        acc[key] = "0";
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+
     // Converter para o formato esperado pela API
     const formattedData: InsertProposal = {
-      ...data,
+      ...processedData,
       tiposServico: selectedServices,
     };
     
