@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, Check } from "lucide-react";
+import { Loader2, Plus, Check, ChevronsUpDown } from "lucide-react";
 import { Link } from "wouter";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
@@ -425,7 +425,53 @@ export default function GerenciarParceiros() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
-              <Input id="password" name="password" type="password" value={formData.password} onChange={handleInputChange} />
+              <Input id="password" name="password" type="text" value={formData.password} onChange={handleInputChange} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="propostas">Propostas Associadas</Label>
+              <Popover open={proposalPopoverOpen} onOpenChange={setProposalPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={proposalPopoverOpen}
+                    className="w-full justify-between"
+                    disabled={isLoadingProposals}
+                  >
+                    {formData.selectedProposalIds.length > 0
+                      ? `${formData.selectedProposalIds.length} proposta(s) selecionada(s)`
+                      : "Selecione propostas"}
+                    {isLoadingProposals ? (
+                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0 max-h-[300px] overflow-auto">
+                  <Command>
+                    <CommandInput placeholder="Buscar proposta..." />
+                    <CommandEmpty>Nenhuma proposta encontrada.</CommandEmpty>
+                    <CommandGroup className="max-h-60 overflow-y-auto">
+                      {proposals.map((proposal) => (
+                        <CommandItem
+                          key={proposal.id}
+                          value={proposal.id.toString()}
+                          onSelect={() => toggleProposal(proposal.id)}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              formData.selectedProposalIds.includes(proposal.id) ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {proposal.proposta}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
           
@@ -471,7 +517,53 @@ export default function GerenciarParceiros() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-password">Nova Senha (deixe em branco para manter)</Label>
-              <Input id="edit-password" name="password" type="password" value={formData.password} onChange={handleInputChange} />
+              <Input id="edit-password" name="password" type="text" value={formData.password} onChange={handleInputChange} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-propostas">Propostas Associadas</Label>
+              <Popover open={proposalPopoverOpen} onOpenChange={setProposalPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={proposalPopoverOpen}
+                    className="w-full justify-between"
+                    disabled={isLoadingProposals}
+                  >
+                    {formData.selectedProposalIds.length > 0
+                      ? `${formData.selectedProposalIds.length} proposta(s) selecionada(s)`
+                      : "Selecione propostas"}
+                    {isLoadingProposals ? (
+                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0 max-h-[300px] overflow-auto">
+                  <Command>
+                    <CommandInput placeholder="Buscar proposta..." />
+                    <CommandEmpty>Nenhuma proposta encontrada.</CommandEmpty>
+                    <CommandGroup className="max-h-60 overflow-y-auto">
+                      {proposals.map((proposal) => (
+                        <CommandItem
+                          key={proposal.id}
+                          value={proposal.id.toString()}
+                          onSelect={() => toggleProposal(proposal.id)}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              formData.selectedProposalIds.includes(proposal.id) ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {proposal.proposta}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
           
