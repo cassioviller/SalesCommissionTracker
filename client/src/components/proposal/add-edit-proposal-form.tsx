@@ -275,27 +275,41 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       return acc;
     }, {});
 
-    // Converter string para números para todos os modos (criação e edição)
+    // Precisamos manter os dados no formato correto para cada modo
     const dataToSend = { ...processedData };
     
-    // Converter campos numéricos de string para número
+    // Lista de campos numéricos
     const numericFields = [
       'valorTotal', 'valorPago', 'percentComissao', 'valorComissaoPaga', 
       'pesoEstrutura', 'valorPorQuilo', 'valorTotalMaterial', 'tempoNegociacao'
     ];
     
-    // Convertemos todos os campos numéricos para number
-    numericFields.forEach(field => {
-      if (field in dataToSend) {
-        dataToSend[field] = Number(dataToSend[field]);
-      }
-    });
+    // Se estiver no modo de edição, converte para numbers
+    // Se estiver criando, garante que sejam strings
+    if (editMode) {
+      // Para edição, convertemos todos os campos numéricos para number
+      numericFields.forEach(field => {
+        if (field in dataToSend) {
+          dataToSend[field] = Number(dataToSend[field]);
+        }
+      });
+    } else {
+      // Para criação, garantimos que todos os campos numéricos sejam strings
+      numericFields.forEach(field => {
+        if (field in dataToSend) {
+          // Se já for string, mantém. Se for number, converte para string
+          if (typeof dataToSend[field] === 'number') {
+            dataToSend[field] = String(dataToSend[field]);
+          }
+        }
+      });
+    }
     
     // Converter para o formato esperado pela API
     const formattedData: any = {
       ...dataToSend,
       tiposServico: selectedServices,
-      comissaoHabilitada: comissaoHabilitada // Enviar como boolean
+      comissaoHabilitada: comissaoHabilitada ? "true" : "false" // Enviar como string conforme esperado pelo schema
     };
     
     console.log("Enviando dados para API:", formattedData);
