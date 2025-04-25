@@ -147,25 +147,34 @@ export class DatabaseStorage implements IStorage {
     // Convert numeric values to strings for database compatibility
     const dbUpdateData: Record<string, any> = {};
     
-    if (updateData.proposta !== undefined) {
-      dbUpdateData.proposta = updateData.proposta;
+    // Campos de texto básicos
+    const textFields = ['proposta', 'nomeCliente', 'tipoCliente', 'dataProposta', 
+                        'tipoProjeto', 'tipoContrato', 'recomendacaoDireta', 
+                        'faturamentoDireto', 'clienteRecompra'];
+                        
+    textFields.forEach(field => {
+      if (field in updateData) {
+        dbUpdateData[field] = updateData[field];
+      }
+    });
+    
+    // Campos numéricos que precisam ser convertidos para string
+    const numericFields = ['valorTotal', 'valorPago', 'percentComissao', 'valorComissaoPaga',
+                          'pesoEstrutura', 'valorPorQuilo', 'valorTotalMaterial', 
+                          'tempoNegociacao'];
+                          
+    numericFields.forEach(field => {
+      if (field in updateData && updateData[field] !== undefined) {
+        dbUpdateData[field] = updateData[field].toString();
+      }
+    });
+    
+    // Array de tipos de serviço
+    if ('tiposServico' in updateData) {
+      dbUpdateData.tiposServico = updateData.tiposServico;
     }
     
-    if (updateData.valorTotal !== undefined) {
-      dbUpdateData.valorTotal = updateData.valorTotal.toString();
-    }
-    
-    if (updateData.valorPago !== undefined) {
-      dbUpdateData.valorPago = updateData.valorPago.toString();
-    }
-    
-    if (updateData.percentComissao !== undefined) {
-      dbUpdateData.percentComissao = updateData.percentComissao.toString();
-    }
-    
-    if (updateData.valorComissaoPaga !== undefined) {
-      dbUpdateData.valorComissaoPaga = updateData.valorComissaoPaga.toString();
-    }
+    // console.log('Atualizando proposta:', id, 'com dados:', dbUpdateData);
     
     const [updatedProposal] = await db
       .update(salesProposals)

@@ -64,7 +64,7 @@ function AppRouter() {
         {/* Rota pública de login */}
         <Route path="/">
           {isAuthenticated ? (
-            <Redirect to={userRole === "admin" ? "/admin" : "/propostas"} />
+            <Redirect to={userRole === "admin" ? "/admin" : "/partner"} />
           ) : (
             <Login />
           )}
@@ -75,16 +75,18 @@ function AppRouter() {
         <ProtectedRoute path="/admin/criar-parceiro" component={CriarParceiro} requiredRole="admin" />
         <ProtectedRoute path="/admin/gerenciar-parceiros" component={GerenciarParceiros} requiredRole="admin" />
         
-        {/* Rota de dashboard do parceiro */}
-        <ProtectedRoute path="/partner" component={PartnerDashboard} requiredRole="partner" />
+        {/* Rotas exclusivas para admin */}
+        <ProtectedRoute path="/propostas" component={Propostas} requiredRole="admin" />
+        <ProtectedRoute path="/propostas-cards" component={PropostasCards} requiredRole="admin" />
+        <ProtectedRoute path="/add-proposal" component={AddProposal} requiredRole="admin" />
+        <ProtectedRoute path="/edit-proposal/:id" component={EditProposal} requiredRole="admin" />
+        <ProtectedRoute path="/kpis" component={KPIs} requiredRole="admin" />
         
-        {/* Rotas comuns - acessíveis tanto para admin quanto parceiro */}
-        <ProtectedRoute path="/propostas" component={Propostas} />
-        <ProtectedRoute path="/propostas-cards" component={PropostasCards} />
-        <ProtectedRoute path="/add-proposal" component={AddProposal} />
-        <ProtectedRoute path="/edit-proposal/:id" component={EditProposal} />
+        {/* Rota de comissões - acessível tanto para admin quanto parceiro */}
         <ProtectedRoute path="/comissoes" component={Comissoes} />
-        <ProtectedRoute path="/kpis" component={KPIs} />
+        
+        {/* Rota de dashboard do parceiro - redireciona para comissões */}
+        <ProtectedRoute path="/partner" component={PartnerDashboard} requiredRole="partner" />
         
         {/* Rota de fallback para não encontrado */}
         <Route component={NotFound} />
