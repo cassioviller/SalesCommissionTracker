@@ -19,7 +19,11 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/utils/format";
-import type { ProposalWithCalculations } from "@shared/schema";
+import type { 
+  ProposalWithCalculations, 
+  PagamentoProposta, 
+  PagamentoComissao 
+} from "@shared/schema";
 
 export default function PagamentosProposta() {
   const { id } = useParams();
@@ -46,7 +50,7 @@ export default function PagamentosProposta() {
   });
 
   // Buscar pagamentos da proposta
-  const { data: pagamentosProposta = [] } = useQuery({
+  const { data: pagamentosProposta = [] } = useQuery<PagamentoProposta[]>({
     queryKey: ['/api/propostas', propostaId, 'pagamentos'],
     queryFn: async () => {
       if (!propostaId) throw new Error("ID da proposta não informado");
@@ -57,7 +61,7 @@ export default function PagamentosProposta() {
   });
 
   // Buscar pagamentos de comissão da proposta
-  const { data: pagamentosComissao = [] } = useQuery({
+  const { data: pagamentosComissao = [] } = useQuery<PagamentoComissao[]>({
     queryKey: ['/api/propostas', propostaId, 'comissoes'],
     queryFn: async () => {
       if (!propostaId) throw new Error("ID da proposta não informado");
@@ -69,7 +73,7 @@ export default function PagamentosProposta() {
 
   // Mutation para adicionar pagamento
   const addPagamentoMutation = useMutation({
-    mutationFn: async (data: { valor: string; dataPagamento: string; observacao?: string }) => {
+    mutationFn: async (data: { valor: number; dataPagamento: string; observacao?: string }) => {
       if (!propostaId) throw new Error("ID da proposta não informado");
       const res = await apiRequest("POST", `/api/propostas/${propostaId}/pagamentos`, data);
       return res.json();
@@ -101,7 +105,7 @@ export default function PagamentosProposta() {
 
   // Mutation para adicionar pagamento de comissão
   const addPagamentoComissaoMutation = useMutation({
-    mutationFn: async (data: { valor: string; dataPagamento: string; observacao?: string }) => {
+    mutationFn: async (data: { valor: number; dataPagamento: string; observacao?: string }) => {
       if (!propostaId) throw new Error("ID da proposta não informado");
       const res = await apiRequest("POST", `/api/propostas/${propostaId}/comissoes`, data);
       return res.json();
@@ -195,8 +199,20 @@ export default function PagamentosProposta() {
       return;
     }
     
+    // Converte o valor para número e formata a data
+    const valorNumerico = Number(novoValor.replace(',', '.'));
+    
+    if (isNaN(valorNumerico)) {
+      toast({
+        title: "Valor inválido",
+        description: "Por favor, insira um valor numérico válido",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     const data = {
-      valor: novoValor,
+      valor: valorNumerico,
       dataPagamento: format(novaData, 'yyyy-MM-dd'),
       observacao: novaObservacao || undefined,
     };
@@ -257,7 +273,7 @@ export default function PagamentosProposta() {
               </div>
             ) : (
               <div className="space-y-3 max-h-[200px] overflow-auto">
-                {pagamentosProposta.map((pagamento) => (
+                {pagamentosProposta.map((pagamento: PagamentoProposta) => (
                   <div key={pagamento.id} className="grid grid-cols-3 items-center border-b border-gray-100 pb-3">
                     <div className="text-sm">
                       {format(new Date(pagamento.dataPagamento), "dd/MM/yyyy")}
@@ -365,7 +381,7 @@ export default function PagamentosProposta() {
               </div>
             ) : (
               <div className="space-y-3 max-h-[200px] overflow-auto">
-                {pagamentosComissao.map((pagamento) => (
+                {pagamentosComissao.map((pagamento: PagamentoComissao) => (
                   <div key={pagamento.id} className="grid grid-cols-3 items-center border-b border-gray-100 pb-3">
                     <div className="text-sm">
                       {format(new Date(pagamento.dataPagamento), "dd/MM/yyyy")}
