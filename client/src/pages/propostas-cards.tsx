@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Plus, Filter, ChevronDown, Edit, Eye, List, Trash2 } from "lucide-react";
+import { Search, Plus, Filter, ChevronDown, Edit, Eye, List, Trash2, Banknote } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -227,8 +227,16 @@ export default function PropostasCards() {
                       Editar
                     </Button>
                     
-                    {/* Botão de pagamentos com modal integrado */}
-                    <PaymentButtonModal proposal={proposal} />
+                    {/* Botão de pagamentos direcionando para página dedicada */}
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="text-green-600"
+                      onClick={() => window.location.href = `/pagamentos-proposta/${proposal.id}`}
+                    >
+                      <Banknote className="h-4 w-4 mr-1" />
+                      Pagamentos
+                    </Button>
                     
                     {/* Botão de excluir */}
                     <Button 

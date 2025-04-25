@@ -20,6 +20,7 @@ const Propostas = lazy(() => import('./pages/propostas'));
 const PropostasCards = lazy(() => import('./pages/propostas-cards'));
 const AddProposal = lazy(() => import('./pages/add-proposal'));
 const EditProposal = lazy(() => import('./pages/edit-proposal'));
+const PagamentosProposta = lazy(() => import('./pages/pagamentos-proposta'));
 const KPIs = lazy(() => import('./pages/kpis'));
 
 // Componente fallback para carregamento
@@ -80,6 +81,7 @@ function AppRouter() {
         <ProtectedRoute path="/propostas-cards" component={PropostasCards} requiredRole="admin" />
         <ProtectedRoute path="/add-proposal" component={AddProposal} requiredRole="admin" />
         <ProtectedRoute path="/edit-proposal/:id" component={EditProposal} requiredRole="admin" />
+        <ProtectedRoute path="/pagamentos-proposta/:id" component={PagamentosProposta} requiredRole="admin" />
         <ProtectedRoute path="/kpis" component={KPIs} requiredRole="admin" />
         
         {/* Rota de comissões - acessível apenas para admin */}
