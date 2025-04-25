@@ -12,7 +12,7 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import NavigationHeader from "@/components/navigation-header";
-import { BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Bar, PieChart, Pie, Cell, Legend, LineChart, Line } from "recharts";
+import { BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Bar, PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid } from "recharts";
 import { Loader2 } from "lucide-react";
 import type { ProposalWithCalculations } from "@shared/schema";
 import { formatCurrency } from "@/lib/utils/format";
@@ -575,7 +575,6 @@ export default function KPIs() {
                               layout="vertical"
                               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                             >
-                              <CartesianGrid strokeDasharray="3 3" />
                               <XAxis type="number" />
                               <YAxis dataKey="tipo" type="category" width={100} />
                               <Tooltip formatter={(value) => formatCurrency(Number(value))} />

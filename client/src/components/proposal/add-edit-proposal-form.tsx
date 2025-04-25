@@ -44,16 +44,10 @@ type Props = {
 };
 
 export default function AddEditProposalForm({ editMode = false, proposal, onSuccess, onCancel }: Props) {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    proposal?.dataProposta ? new Date(proposal.dataProposta) : undefined
-  );
-  const [selectedServices, setSelectedServices] = useState<(typeof TIPOS_SERVICO)[number][]>(
-    (proposal?.tiposServico as (typeof TIPOS_SERVICO)[number][]) || []
-  );
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [_, navigate] = useLocation();
-
+  
   // Form setup
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -88,6 +82,47 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       clienteRecompra: "nao",
     },
   });
+  
+  // Estado para data e serviços selecionados  
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    proposal?.dataProposta ? new Date(proposal.dataProposta) : undefined
+  );
+  const [selectedServices, setSelectedServices] = useState<(typeof TIPOS_SERVICO)[number][]>(
+    (proposal?.tiposServico as (typeof TIPOS_SERVICO)[number][]) || []
+  );
+  
+  // Atualizar o formulário quando a proposta mudar (importante para edições)
+  useEffect(() => {
+    if (editMode && proposal) {
+      console.log("Atualizando formulário com proposta:", proposal);
+      
+      // Reset do formulário com os dados novos
+      form.reset({
+        proposta: proposal.proposta || "",
+        valorTotal: String(proposal.valorTotal || ""),
+        valorPago: String(proposal.valorPago || ""),
+        percentComissao: String(proposal.percentComissao || ""),
+        valorComissaoPaga: String(proposal.valorComissaoPaga || ""),
+        nomeCliente: proposal.nomeCliente || "",
+        tipoCliente: proposal.tipoCliente as any || undefined,
+        tiposServico: proposal.tiposServico as any || [],
+        dataProposta: proposal.dataProposta ? proposal.dataProposta.toString() : undefined,
+        tipoProjeto: proposal.tipoProjeto as any || undefined,
+        tipoContrato: proposal.tipoContrato as any || undefined,
+        pesoEstrutura: proposal.pesoEstrutura ? String(proposal.pesoEstrutura) : "",
+        valorPorQuilo: proposal.valorPorQuilo ? String(proposal.valorPorQuilo) : "",
+        valorTotalMaterial: proposal.valorTotalMaterial ? String(proposal.valorTotalMaterial) : "",
+        recomendacaoDireta: proposal.recomendacaoDireta as "sim" | "nao" || "nao",
+        faturamentoDireto: proposal.faturamentoDireto as "sim" | "nao" || "nao",
+        tempoNegociacao: proposal.tempoNegociacao ? String(proposal.tempoNegociacao) : "",
+        clienteRecompra: proposal.clienteRecompra as "sim" | "nao" || "nao",
+      });
+      
+      // Atualizar estados derivados
+      setSelectedDate(proposal.dataProposta ? new Date(proposal.dataProposta) : undefined);
+      setSelectedServices((proposal.tiposServico as (typeof TIPOS_SERVICO)[number][]) || []);
+    }
+  }, [proposal, editMode, form]);
 
   const { watch } = form;
   
