@@ -395,6 +395,18 @@ export default function PropostasCards() {
       </AlertDialog>
       
       {/* Modal para adicionar proposta será implementado posteriormente */}
+      
+      {/* Modal de histórico de pagamentos */}
+      {selectedProposalId && (
+        <PaymentHistoryModal
+          isOpen={isPaymentHistoryModalOpen}
+          onClose={() => setIsPaymentHistoryModalOpen(false)}
+          propostaId={selectedProposalId}
+          propostaNome={selectedProposalName}
+          pagamentosProposta={selectedProposalDetails?.pagamentosProposta || []}
+          pagamentosComissao={selectedProposalDetails?.pagamentosComissao || []}
+        />
+      )}
     </div>
   );
 }
