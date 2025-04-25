@@ -313,39 +313,43 @@ export default function PropostasCards() {
                   <CardFooter className="pt-2 flex flex-wrap justify-between gap-2">
                     {/* Primeira linha de botões */}
                     <div className="flex w-full gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => window.location.href = `/edit-proposal/${proposal.id}`}
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Editar
-                      </Button>
-                      
-                      <div className="flex gap-2 flex-1">
+                      {userRole === 'admin' && (
                         <Button 
                           variant="outline" 
                           size="sm"
                           className="flex-1"
-                          onClick={() => handleViewPayments(proposal)}
+                          onClick={() => window.location.href = `/edit-proposal/${proposal.id}`}
                         >
-                          <History className="h-4 w-4 mr-1" />
-                          Pagamentos
+                          <Edit className="h-4 w-4 mr-1" />
+                          Editar
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => {
-                            setProposalToDelete(proposal);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Excluir
-                        </Button>
-                      </div>
+                      )}
+                      
+                      {userRole === 'admin' && (
+                        <div className="flex gap-2 flex-1">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => handleViewPayments(proposal)}
+                          >
+                            <History className="h-4 w-4 mr-1" />
+                            Pagamentos
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => {
+                              setProposalToDelete(proposal);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Excluir
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     
                     {/* Segunda linha apenas com botão de visualizar */}
