@@ -47,16 +47,18 @@ export default function NavigationHeader() {
             </Button>
           )}
           
-          <Button 
-            variant={location === "/propostas" || location.includes("/edit-proposal") || location === "/add-proposal" ? "default" : "outline"} 
-            size="sm" 
-            asChild
-          >
-            <Link href="/propostas">
-              <FileText className="h-4 w-4 mr-1" />
-              Propostas
-            </Link>
-          </Button>
+          {userRole === "admin" && (
+            <Button 
+              variant={location === "/propostas" || location.includes("/edit-proposal") || location === "/add-proposal" ? "default" : "outline"} 
+              size="sm" 
+              asChild
+            >
+              <Link href="/propostas">
+                <FileText className="h-4 w-4 mr-1" />
+                Propostas
+              </Link>
+            </Button>
+          )}
           
           <Button 
             variant={location === "/comissoes" ? "default" : "outline"} 
@@ -69,16 +71,18 @@ export default function NavigationHeader() {
             </Link>
           </Button>
           
-          <Button 
-            variant={location === "/kpis" ? "default" : "outline"} 
-            size="sm" 
-            asChild
-          >
-            <Link href="/kpis">
-              <BarChart2 className="h-4 w-4 mr-1" />
-              KPIs
-            </Link>
-          </Button>
+          {userRole === "admin" && (
+            <Button 
+              variant={location === "/kpis" ? "default" : "outline"} 
+              size="sm" 
+              asChild
+            >
+              <Link href="/kpis">
+                <BarChart2 className="h-4 w-4 mr-1" />
+                KPIs
+              </Link>
+            </Button>
+          )}
           
           <Button 
             variant="outline" 

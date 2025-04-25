@@ -64,7 +64,7 @@ function AppRouter() {
         {/* Rota pública de login */}
         <Route path="/">
           {isAuthenticated ? (
-            <Redirect to={userRole === "admin" ? "/admin" : "/partner"} />
+            <Redirect to={userRole === "admin" ? "/admin" : "/comissoes"} />
           ) : (
             <Login />
           )}
