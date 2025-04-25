@@ -476,18 +476,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
                     R$ {Number(proposal.valorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </td>
                   <td className="px-2 py-3 text-right">
-                    {userRole === 'admin' ? (
-                      <Input
-                        value={proposal.valorPago.toString()}
-                        onChange={(e) => handleFieldChange(proposal.id, 'valorPago', e.target.value)}
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        className="h-8 w-28 text-right"
-                      />
-                    ) : (
-                      <span>R$ {Number(proposal.valorPago).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                    )}
+                    <span>R$ {Number(proposal.valorPago).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </td>
                   <td className="px-2 py-3 text-right">
                     R$ {Number(proposal.saldoAberto).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -499,18 +488,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
                     R$ {Number(proposal.valorComissaoTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </td>
                   <td className="px-2 py-3 text-right">
-                    {userRole === 'admin' ? (
-                      <Input
-                        value={proposal.valorComissaoPaga.toString()}
-                        onChange={(e) => handleFieldChange(proposal.id, 'valorComissaoPaga', e.target.value)}
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        className="h-8 w-28 text-right"
-                      />
-                    ) : (
-                      <span>R$ {Number(proposal.valorComissaoPaga).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                    )}
+                    <span>R$ {Number(proposal.valorComissaoPaga).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </td>
                   <td className="px-2 py-3 text-right">
                     R$ {Number(proposal.valorComissaoEmAberto).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}

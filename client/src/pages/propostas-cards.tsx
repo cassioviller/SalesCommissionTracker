@@ -32,6 +32,7 @@ import type { ProposalWithCalculations } from "@shared/schema";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "wouter";
 import NavigationHeader from "@/components/navigation-header";
+import PaymentHistoryModal from "@/components/commission/payment-history-modal";
 
 export default function PropostasCards() {
   const { userRole } = useAuth();
@@ -41,6 +42,9 @@ export default function PropostasCards() {
   const [showFilters, setShowFilters] = useState(false);
   const [proposalToDelete, setProposalToDelete] = useState<ProposalWithCalculations | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPaymentHistoryModalOpen, setIsPaymentHistoryModalOpen] = useState(false);
+  const [selectedProposalId, setSelectedProposalId] = useState<number | null>(null);
+  const [selectedProposalName, setSelectedProposalName] = useState("");
   
   // Buscar dados das propostas
   const queryClient = useQueryClient();
@@ -50,6 +54,17 @@ export default function PropostasCards() {
       const res = await apiRequest("GET", "/api/proposals");
       return res.json();
     },
+  });
+  
+  // Estado para armazenar os dados da proposta selecionada com os pagamentos
+  const { data: selectedProposalDetails } = useQuery({
+    queryKey: ['/api/proposals', selectedProposalId],
+    queryFn: async () => {
+      if (!selectedProposalId) return null;
+      const res = await apiRequest('GET', `/api/proposals/${selectedProposalId}`);
+      return res.json();
+    },
+    enabled: !!selectedProposalId && isPaymentHistoryModalOpen,
   });
   
   // Mutation para excluir proposta
@@ -120,11 +135,9 @@ export default function PropostasCards() {
   };
   
   const handleViewPayments = (proposal: ProposalWithCalculations) => {
-    toast({
-      title: "Histórico de Pagamentos",
-      description: `Visualizando pagamentos da proposta ${proposal.proposta}`,
-      variant: "default",
-    });
+    setSelectedProposalId(proposal.id);
+    setSelectedProposalName(proposal.proposta);
+    setIsPaymentHistoryModalOpen(true);
   };
 
   if (isLoading) {
