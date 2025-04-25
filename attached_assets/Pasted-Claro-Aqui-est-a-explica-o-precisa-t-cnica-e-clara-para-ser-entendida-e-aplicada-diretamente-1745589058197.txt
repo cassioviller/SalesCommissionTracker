@@ -1,0 +1,74 @@
+Claro! Aqui está a explicação **precisa, técnica e clara** para ser entendida e aplicada diretamente por uma **IA de desenvolvimento no Replit** ou um programador frontend/back-end que esteja dando manutenção no projeto.
+
+---
+
+## ✅ ALTERAÇÕES E CORREÇÕES NO PROJETO (FORMATO TÉCNICO PARA IMPLEMENTAÇÃO)
+
+---
+
+### 🔐 **Página: Adicionar / Editar Parceiro**
+
+**Alterar o formulário para conter apenas os seguintes campos:**
+
+- `nome` (tipo: texto)
+- `usuario` (tipo: texto)
+- `email` (tipo: email)
+- `senha` (tipo: texto — visível, não oculto)
+- `propostasAssociadas` (tipo: seleção múltipla por dropdown com os números/títulos das propostas já existentes)
+
+**Ações esperadas:**
+- A senha deve ser **armazenada em texto visível**, apenas para controle interno (sem criptografia obrigatória).
+- Dropdown de propostas deve **permitir múltiplas seleções** e buscar dinamicamente as propostas do banco.
+- Ao editar um parceiro, todas as propostas associadas devem aparecer previamente selecionadas.
+
+---
+
+### 📊 **Página: Comissões**
+
+**Ajustes de layout:**
+
+- O gráfico **Donut (Comissão Paga vs Total)** que está posicionado ao lado da tabela deve ser movido para cima da tabela.
+- A **tabela de propostas comissões** deve ocupar toda a largura disponível da página.
+- A **rolagem lateral da tabela deve ser removida** — ajustar `overflow`, `min-width`, `colunas` e `padding` se necessário.
+
+---
+
+### 🧾 **Página: Propostas**
+
+**Erro ao atualizar proposta:**
+- Verificar o fluxo de atualização da proposta.
+- Confirmar que o **formulário de edição está preenchendo corretamente os campos** antes de enviar o `PUT` ou `PATCH`.
+- Certificar que o `ID` da proposta está sendo passado corretamente na atualização.
+
+---
+
+### 📈 **Página: KPIs**
+
+#### 🟠 Correção no KPI: "Clientes Atendidos"
+- Substituir por: **"Propostas Emitidas"**
+- Esse campo deve ser **manual e editável pelo usuário (admin)**.
+- Criar campo de entrada do tipo `number` para que o admin defina quantas propostas foram emitidas por período (ou no total).
+- Valor manual será usado para calcular KPIs como **Taxa de Conversão** e **Propostas para Fechamento**.
+
+#### 🟣 Correção no Gráfico de Tipo de Projeto
+- Remover o gráfico de **barra lateral** que mostra a distribuição por tipo de projeto.
+- Manter **apenas o gráfico de pizza (Donut ou Pie)** com a divisão:
+  - Projeto Executivo (PE)
+  - Projeto Executivo + Complementar (PE + PC)
+  - Sem Projeto
+
+---
+
+## 📋 RESUMO DAS AÇÕES
+
+| Página          | Ação                                                                                     |
+|-----------------|-------------------------------------------------------------------------------------------|
+| Parceiros       | Formulário simplificado com dropdown de propostas e senha visível                        |
+| Comissões       | Gráfico Donut acima da tabela, tabela ocupando largura total, remover scroll horizontal  |
+| Propostas       | Corrigir erro na atualização (verificar ID, PATCH/PUT, dados ausentes)                   |
+| KPIs (Geral)    | Substituir “Clientes Atendidos” por “Propostas Emitidas” com campo numérico editável     |
+| KPIs (Projetos) | Remover gráfico de barras laterais, manter apenas pizza com PE / PE+PC / Sem Projeto     |
+
+---
+
+Se quiser, posso gerar agora o `schema JSON`, o código React de cada componente corrigido ou o layout visual com todas essas instruções aplicadas. Deseja seguir com qual parte?

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Check } from "lucide-react";
 import { Link } from "wouter";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 // Interface para parceiros
 interface Partner {
@@ -17,6 +20,12 @@ interface Partner {
   email: string;
   password?: string;
   proposalIds: number[];
+}
+
+// Interface para propostas
+interface SalesProposal {
+  id: number;
+  proposta: string;
 }
 
 export default function GerenciarParceiros() {
@@ -34,7 +43,23 @@ export default function GerenciarParceiros() {
     name: "",
     username: "",
     email: "",
-    password: ""
+    password: "",
+    selectedProposalIds: [] as number[]
+  });
+  
+  // Estado para controlar o popover de seleção de propostas
+  const [proposalPopoverOpen, setProposalPopoverOpen] = useState(false);
+  
+  // Buscar propostas para associar ao parceiro
+  const { data: proposals = [], isLoading: isLoadingProposals } = useQuery({
+    queryKey: ['/api/proposals'],
+    queryFn: async () => {
+      const response = await fetch('/api/proposals');
+      if (!response.ok) {
+        throw new Error('Erro ao buscar propostas');
+      }
+      return response.json();
+    }
   });
   
   // Fetch da lista de parceiros
@@ -152,7 +177,13 @@ export default function GerenciarParceiros() {
   });
   
   const handleStartAdd = () => {
-    setFormData({ name: "", username: "", email: "", password: "" });
+    setFormData({ 
+      name: "", 
+      username: "", 
+      email: "", 
+      password: "",
+      selectedProposalIds: []
+    });
     setIsAddDialogOpen(true);
   };
   
@@ -162,9 +193,27 @@ export default function GerenciarParceiros() {
       name: partner.name,
       username: partner.username,
       email: partner.email,
-      password: "" // Não queremos preencher a senha para editar
+      password: "", // Não queremos preencher a senha para editar
+      selectedProposalIds: partner.proposalIds || []
     });
     setIsEditDialogOpen(true);
+  };
+  
+  // Função para alternar uma proposta na seleção
+  const toggleProposal = (proposalId: number) => {
+    setFormData(prev => {
+      if (prev.selectedProposalIds.includes(proposalId)) {
+        return {
+          ...prev,
+          selectedProposalIds: prev.selectedProposalIds.filter(id => id !== proposalId)
+        };
+      } else {
+        return {
+          ...prev,
+          selectedProposalIds: [...prev.selectedProposalIds, proposalId]
+        };
+      }
+    });
   };
   
   const handleStartDelete = (partner: Partner) => {
@@ -189,7 +238,7 @@ export default function GerenciarParceiros() {
       username: formData.username,
       email: formData.email,
       password: formData.password,
-      proposalIds: []
+      proposalIds: formData.selectedProposalIds
     };
     
     addPartnerMutation.mutate(newPartner);
@@ -213,6 +262,7 @@ export default function GerenciarParceiros() {
       name: formData.name,
       username: formData.username,
       email: formData.email,
+      proposalIds: formData.selectedProposalIds
     };
     
     // Apenas incluir a senha se houver alguma coisa no campo
