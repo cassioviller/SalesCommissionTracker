@@ -14,9 +14,14 @@ export default function Comissoes() {
     queryKey: ['/api/proposals'],
   });
   
-  // Calculate derived fields for each proposal and filter out proposals without commission
+  // Calculate derived fields for each proposal and filter out proposals without commission or with disabled commission
   const proposalsWithCalculations: ProposalWithCalculations[] = (proposals || [])
-    .filter(proposal => proposal.percentComissao && Number(proposal.percentComissao) > 0) // Remove propostas sem percentual de comissão
+    .filter(proposal => 
+      // Filtro duplo: verifica se tem percentual de comissão E se comissão está habilitada 
+      proposal.percentComissao && 
+      Number(proposal.percentComissao) > 0 && 
+      proposal.comissaoHabilitada === "true"
+    )
     .map(proposal => {
       const saldoAberto = Number(proposal.valorTotal) - Number(proposal.valorPago);
       const valorComissaoTotal = Number(proposal.valorTotal) * (Number(proposal.percentComissao) / 100);

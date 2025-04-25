@@ -105,7 +105,7 @@ export const updateProposalSchema = z.object({
   valorPago: z.number().nonnegative().optional(),
   percentComissao: z.number().min(0).max(100).optional(),
   valorComissaoPaga: z.number().nonnegative().optional(),
-  comissaoHabilitada: z.boolean().optional(),
+  comissaoHabilitada: z.enum(["true", "false"]).optional(),
   
   // Campos opcionais para proposta detalhada
   nomeCliente: z.string().optional(),

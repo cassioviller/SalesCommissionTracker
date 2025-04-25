@@ -64,7 +64,7 @@ function AppRouter() {
         {/* Rota pública de login */}
         <Route path="/">
           {isAuthenticated ? (
-            <Redirect to={userRole === "admin" ? "/admin" : "/comissoes"} />
+            <Redirect to={userRole === "admin" ? "/admin" : "/partner"} />
           ) : (
             <Login />
           )}
@@ -82,10 +82,10 @@ function AppRouter() {
         <ProtectedRoute path="/edit-proposal/:id" component={EditProposal} requiredRole="admin" />
         <ProtectedRoute path="/kpis" component={KPIs} requiredRole="admin" />
         
-        {/* Rota de comissões - acessível tanto para admin quanto parceiro */}
-        <ProtectedRoute path="/comissoes" component={Comissoes} />
+        {/* Rota de comissões - acessível apenas para admin */}
+        <ProtectedRoute path="/comissoes" component={Comissoes} requiredRole="admin" />
         
-        {/* Rota de dashboard do parceiro - redireciona para comissões */}
+        {/* Rota de dashboard do parceiro - visualização exclusiva */}
         <ProtectedRoute path="/partner" component={PartnerDashboard} requiredRole="partner" />
         
         {/* Rota de fallback para não encontrado */}
