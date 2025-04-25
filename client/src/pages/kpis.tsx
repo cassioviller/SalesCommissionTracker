@@ -78,12 +78,30 @@ export default function KPIs() {
     // Contagem de clientes únicos
     const clientesUnicos = new Set(proposals.map(p => p.nomeCliente).filter(Boolean)).size;
     
-    // Calculando propostas por mês (simplificado)
-    const hoje = new Date();
-    // Como não temos acesso ao createdAt, usamos 6 meses como padrão
-    const mesesAtivos = 6;
+    // Filtrar propostas com data válida para calcular intervalo de tempo
+    const propostasComData = proposals.filter(p => p.dataProposta);
     
-    // Peso médio por mês
+    // Calculando intervalo de tempo entre a proposta mais antiga e a mais recente
+    let mesesAtivos = 6; // Valor padrão como fallback
+    
+    if (propostasComData.length > 0) {
+      // Converter strings de data para objetos Date
+      const datas = propostasComData.map(p => new Date(p.dataProposta as string));
+      
+      // Encontrar a data mais antiga e a mais recente
+      const dataInicial = new Date(Math.min(...datas.map(d => d.getTime())));
+      const dataFinal = new Date(Math.max(...datas.map(d => d.getTime())));
+      
+      // Calcular a diferença em meses
+      const mesesDiferenca = 
+        (dataFinal.getFullYear() - dataInicial.getFullYear()) * 12 + 
+        (dataFinal.getMonth() - dataInicial.getMonth()) + 1; // +1 para incluir o mês atual
+      
+      // Usar pelo menos 1 mês para evitar divisão por zero
+      mesesAtivos = Math.max(1, mesesDiferenca);
+    }
+    
+    // Peso médio por mês com base no intervalo real
     const pesoTotal = proposals.reduce((sum, p) => sum + (Number(p.pesoEstrutura) || 0), 0);
     const pesoMedioPorMes = pesoTotal / mesesAtivos;
     

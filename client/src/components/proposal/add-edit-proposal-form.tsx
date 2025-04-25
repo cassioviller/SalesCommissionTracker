@@ -96,6 +96,8 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   const watchPercentComissao = watch("percentComissao");
   const watchValorPago = watch("valorPago");
   const watchValorComissaoPaga = watch("valorComissaoPaga");
+  const watchPesoEstrutura = watch("pesoEstrutura");
+  const watchValorPorQuilo = watch("valorPorQuilo");
 
   // Cálculos em tempo real
   const valorTotalNum = Number(watchValorTotal) || 0;
@@ -106,6 +108,17 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   const percentComissaoPaga = valorComissaoTotal > 0 
     ? (Number(watchValorComissaoPaga || 0) / valorComissaoTotal) * 100
     : 0;
+    
+  // Calcular valor total do material quando peso e valor por quilo são preenchidos
+  useEffect(() => {
+    const pesoEstrutura = Number(watchPesoEstrutura) || 0;
+    const valorPorQuilo = Number(watchValorPorQuilo) || 0;
+    
+    if (pesoEstrutura > 0 && valorPorQuilo > 0) {
+      const valorTotalMaterial = pesoEstrutura * valorPorQuilo;
+      form.setValue("valorTotalMaterial", valorTotalMaterial.toString());
+    }
+  }, [watchPesoEstrutura, watchValorPorQuilo, form]);
 
   // Mutation para criar/editar proposta
   const mutation = useMutation({
@@ -180,9 +193,27 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       return acc;
     }, {});
 
+    // Converter string para números para edição de proposta (PUT/PATCH)
+    const dataToSend = { ...processedData };
+    
+    // Converter campos numéricos de string para número quando estiver editando
+    if (editMode) {
+      const numericFields = [
+        'valorTotal', 'valorPago', 'percentComissao', 'valorComissaoPaga', 
+        'pesoEstrutura', 'valorPorQuilo', 'valorTotalMaterial', 'tempoNegociacao'
+      ];
+      
+      // Para edição, convertemos todos os campos numéricos para number
+      numericFields.forEach(field => {
+        if (field in dataToSend) {
+          dataToSend[field] = Number(dataToSend[field]);
+        }
+      });
+    }
+    
     // Converter para o formato esperado pela API
-    const formattedData: InsertProposal = {
-      ...processedData,
+    const formattedData: any = {
+      ...dataToSend,
       tiposServico: selectedServices,
     };
     
