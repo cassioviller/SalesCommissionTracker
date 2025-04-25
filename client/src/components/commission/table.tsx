@@ -541,20 +541,20 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
         </DialogContent>
       </Dialog>
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+      <div className="w-full">
+        <table className="w-full border-collapse table-fixed">
           <thead className="bg-white">
             <tr className="border-b">
-              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Proposta</th>
-              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Valor Total</th>
-              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Valor Pago</th>
-              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Saldo Aberto</th>
-              <th className="py-3 px-3 text-center text-sm uppercase font-medium text-gray-600">% Comissão</th>
-              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Valor Comissão Total</th>
-              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Valor Comissão Paga</th>
-              <th className="py-3 px-4 text-left text-sm uppercase font-medium text-gray-600">Comissão em Aberto</th>
-              <th className="py-3 px-3 text-center text-sm uppercase font-medium text-gray-600">% Paga</th>
-              <th className="py-3 px-2 text-center text-sm uppercase font-medium text-gray-600">Ações</th>
+              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[13%]">Proposta</th>
+              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[10%]">Valor Total</th>
+              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[10%]">Valor Pago</th>
+              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[10%]">Saldo Aberto</th>
+              <th className="py-3 px-2 text-center text-xs uppercase font-medium text-gray-600 w-[7%]">% Com</th>
+              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[10%]">Com Total</th>
+              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[10%]">Com Paga</th>
+              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[10%]">Com Aberto</th>
+              <th className="py-3 px-2 text-center text-xs uppercase font-medium text-gray-600 w-[7%]">% Paga</th>
+              <th className="py-3 px-2 text-center text-xs uppercase font-medium text-gray-600 w-[13%]">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -570,15 +570,15 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
                   key={proposal.id} 
                   className={`border-b hover:bg-gray-50 ${getRowColorClass(Number(proposal.percentComissaoPaga))}`}
                 >
-                  <td className="py-3 px-4 font-medium text-sm">{proposal.proposta}</td>
-                  <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.valorTotal))}</td>
-                  <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.valorPago))}</td>
-                  <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.saldoAberto))}</td>
-                  <td className="py-3 px-3 text-center text-sm">{formatIntegerPercentage(Number(proposal.percentComissao))}</td>
-                  <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.valorComissaoTotal))}</td>
-                  <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.valorComissaoPaga))}</td>
-                  <td className="py-3 px-4 text-sm">{formatCurrency(Number(proposal.valorComissaoEmAberto))}</td>
-                  <td className="py-3 px-3 text-center text-sm">
+                  <td className="py-3 px-2 font-medium text-sm truncate">{proposal.proposta}</td>
+                  <td className="py-3 px-2 text-sm">{formatCurrency(Number(proposal.valorTotal))}</td>
+                  <td className="py-3 px-2 text-sm">{formatCurrency(Number(proposal.valorPago))}</td>
+                  <td className="py-3 px-2 text-sm">{formatCurrency(Number(proposal.saldoAberto))}</td>
+                  <td className="py-3 px-2 text-center text-sm">{formatIntegerPercentage(Number(proposal.percentComissao))}</td>
+                  <td className="py-3 px-2 text-sm">{formatCurrency(Number(proposal.valorComissaoTotal))}</td>
+                  <td className="py-3 px-2 text-sm">{formatCurrency(Number(proposal.valorComissaoPaga))}</td>
+                  <td className="py-3 px-2 text-sm">{formatCurrency(Number(proposal.valorComissaoEmAberto))}</td>
+                  <td className="py-3 px-2 text-center text-sm">
                     <span className={getPercentageColorClass(Number(proposal.percentComissaoPaga))}>
                       {formatIntegerPercentage(Number(proposal.percentComissaoPaga))}
                     </span>
@@ -674,15 +674,15 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
           </tbody>
           <tfoot className="bg-gray-50 font-semibold">
             <tr className="border-t">
-              <td className="py-3 px-4 text-sm">Total</td>
-              <td className="py-3 px-4 text-sm">{formatCurrency(totalValor)}</td>
-              <td className="py-3 px-4 text-sm">{formatCurrency(totalPago)}</td>
-              <td className="py-3 px-4 text-sm">{formatCurrency(totalAberto)}</td>
-              <td className="py-3 px-3 text-sm text-center">-</td>
-              <td className="py-3 px-4 text-sm">{formatCurrency(totalComissao)}</td>
-              <td className="py-3 px-4 text-sm">{formatCurrency(totalComissaoPaga)}</td>
-              <td className="py-3 px-4 text-sm">{formatCurrency(totalComissaoEmAberto)}</td>
-              <td className="py-3 px-3 text-sm text-center">
+              <td className="py-3 px-2 text-sm">Total</td>
+              <td className="py-3 px-2 text-sm">{formatCurrency(totalValor)}</td>
+              <td className="py-3 px-2 text-sm">{formatCurrency(totalPago)}</td>
+              <td className="py-3 px-2 text-sm">{formatCurrency(totalAberto)}</td>
+              <td className="py-3 px-2 text-sm text-center">-</td>
+              <td className="py-3 px-2 text-sm">{formatCurrency(totalComissao)}</td>
+              <td className="py-3 px-2 text-sm">{formatCurrency(totalComissaoPaga)}</td>
+              <td className="py-3 px-2 text-sm">{formatCurrency(totalComissaoEmAberto)}</td>
+              <td className="py-3 px-2 text-sm text-center">
                 <span className={getPercentageColorClass(percentComissaoPaga)}>
                   {formatIntegerPercentage(percentComissaoPaga)}
                 </span>
