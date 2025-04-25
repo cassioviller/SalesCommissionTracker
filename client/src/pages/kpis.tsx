@@ -18,8 +18,12 @@ import type { ProposalWithCalculations } from "@shared/schema";
 import { formatCurrency } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
 
-// Cores para gráficos
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+// Cores para os gráficos
+const COLORS = [
+  "#8884d8", "#83a6ed", "#8dd1e1", "#82ca9d", "#a4de6c", 
+  "#d0ed57", "#ffc658", "#ff8042", "#ff5151", "#7c1fff",
+  "#50C878", "#9370DB", "#5F9EA0", "#FF7F50", "#6495ED"
+];
 
 export default function KPIs() {
   const [activeTab, setActiveTab] = useState("geral");
@@ -30,8 +34,20 @@ export default function KPIs() {
   // Handler para mudança no número de propostas emitidas
   const handlePropostasEmitidasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
-    setPropostasEmitidas(isNaN(value) ? 0 : value);
+    const newValue = isNaN(value) ? 0 : value;
+    setPropostasEmitidas(newValue);
+    
+    // Salvar no localStorage para persistir entre navegações
+    localStorage.setItem('propostasEmitidas', newValue.toString());
   };
+  
+  // Carregar valor salvo do localStorage ao montar o componente
+  useEffect(() => {
+    const savedValue = localStorage.getItem('propostasEmitidas');
+    if (savedValue) {
+      setPropostasEmitidas(parseInt(savedValue));
+    }
+  }, []);
 
   // Limpar filtros de data
   const limparFiltros = () => {
@@ -735,15 +751,21 @@ export default function KPIs() {
                             tick={{ fontSize: 12 }}
                             height={60}
                           />
-                          <YAxis />
+                          <YAxis 
+                            tickCount={Math.max(...kpisPorServico.servicosData.map(s => s.quantidade)) + 1}
+                            allowDecimals={false}
+                          />
                           <Tooltip />
                           <Legend />
                           <Bar 
                             dataKey="quantidade" 
-                            name="Quantidade" 
-                            fill="#8884d8" 
+                            name="Quantidade"
                             barSize={40}
-                          />
+                          >
+                            {kpisPorServico.servicosData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Bar>
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
