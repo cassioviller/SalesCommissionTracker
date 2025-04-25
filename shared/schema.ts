@@ -47,6 +47,7 @@ export const salesProposals = pgTable("sales_proposals", {
   valorPago: numeric("valor_pago", { precision: 10, scale: 2 }).notNull(),
   percentComissao: numeric("percent_comissao", { precision: 5, scale: 2 }).notNull(),
   valorComissaoPaga: numeric("valor_comissao_paga", { precision: 10, scale: 2 }).notNull(),
+  comissaoHabilitada: text("comissao_habilitada").default("true").notNull(),
   
   // Novos campos para proposta detalhada
   nomeCliente: text("nome_cliente"),
@@ -79,6 +80,7 @@ export const insertProposalSchema = z.object({
   valorPago: z.string(),
   percentComissao: z.string(),
   valorComissaoPaga: z.string(),
+  comissaoHabilitada: z.enum(["true", "false"]).default("true"),
   
   // Campos opcionais para proposta detalhada
   nomeCliente: z.string().optional(),
@@ -103,6 +105,7 @@ export const updateProposalSchema = z.object({
   valorPago: z.number().nonnegative().optional(),
   percentComissao: z.number().min(0).max(100).optional(),
   valorComissaoPaga: z.number().nonnegative().optional(),
+  comissaoHabilitada: z.boolean().optional(),
   
   // Campos opcionais para proposta detalhada
   nomeCliente: z.string().optional(),
