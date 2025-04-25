@@ -541,8 +541,9 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ prop
         </DialogContent>
       </Dialog>
 
-      <div className="w-full">
-        <table className="w-full border-collapse table-fixed">
+      <div className="w-full overflow-auto">
+        <div className="min-w-[1000px]">
+          <table className="w-full border-collapse">
           <thead className="bg-white">
             <tr className="border-b">
               <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[13%]">Proposta</th>
