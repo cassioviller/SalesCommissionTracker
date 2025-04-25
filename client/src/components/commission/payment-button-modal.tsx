@@ -175,7 +175,7 @@ export default function PaymentButtonModal({ proposal }: { proposal: ProposalWit
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {pagamentosProposta.map((pagamento) => (
+                      {pagamentosProposta.map((pagamento: PagamentoProposta) => (
                         <TableRow key={pagamento.id}>
                           <TableCell>
                             {format(new Date(pagamento.dataPagamento), "dd/MM/yyyy")}
@@ -289,7 +289,7 @@ export default function PaymentButtonModal({ proposal }: { proposal: ProposalWit
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {pagamentosComissao.map((pagamento) => (
+                      {pagamentosComissao.map((pagamento: PagamentoComissao) => (
                         <TableRow key={pagamento.id}>
                           <TableCell>
                             {format(new Date(pagamento.dataPagamento), "dd/MM/yyyy")}
