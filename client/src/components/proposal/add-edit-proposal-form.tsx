@@ -111,7 +111,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   const mutation = useMutation({
     mutationFn: async (data: InsertProposal) => {
       const url = editMode ? `/api/proposals/${proposal?.id}` : "/api/proposals";
-      const method = editMode ? "PUT" : "POST";
+      const method = editMode ? "PATCH" : "POST";
       const res = await apiRequest(method, url, data);
       return res.json();
     },

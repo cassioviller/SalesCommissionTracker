@@ -3,12 +3,20 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import NavigationHeader from "@/components/navigation-header";
 import { BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Bar, PieChart, Pie, Cell, Legend, LineChart, Line } from "recharts";
 import { Loader2 } from "lucide-react";
 import type { ProposalWithCalculations } from "@shared/schema";
 import { formatCurrency } from "@/lib/utils/format";
+import { cn } from "@/lib/utils";
 
 // Cores para gráficos
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -16,17 +24,46 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'
 export default function KPIs() {
   const [activeTab, setActiveTab] = useState("geral");
   const [propostasEmitidas, setPropostasEmitidas] = useState<number>(0);
+  const [dataInicio, setDataInicio] = useState<Date | undefined>(undefined);
+  const [dataFim, setDataFim] = useState<Date | undefined>(undefined);
   
   // Handler para mudança no número de propostas emitidas
   const handlePropostasEmitidasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     setPropostasEmitidas(isNaN(value) ? 0 : value);
   };
+
+  // Limpar filtros de data
+  const limparFiltros = () => {
+    setDataInicio(undefined);
+    setDataFim(undefined);
+  };
   
   // Buscar dados das propostas
-  const { data: proposals = [], isLoading } = useQuery<ProposalWithCalculations[]>({
+  const { data: allProposals = [], isLoading } = useQuery<ProposalWithCalculations[]>({
     queryKey: ['/api/proposals'],
   });
+
+  // Filtrar propostas por período se as datas estiverem definidas
+  const proposals = useMemo(() => {
+    if (!allProposals.length) return [];
+    
+    // Se nenhuma data for selecionada, retorna todas as propostas
+    if (!dataInicio && !dataFim) return allProposals;
+    
+    return allProposals.filter(proposta => {
+      // Se a proposta não tem data, não podemos filtrar
+      if (!proposta.dataProposta) return false;
+      
+      const dataPropostaObj = new Date(proposta.dataProposta);
+      
+      // Verificar se a data da proposta está dentro do intervalo selecionado
+      const passaDataInicio = !dataInicio || dataPropostaObj >= dataInicio;
+      const passaDataFim = !dataFim || dataPropostaObj <= dataFim;
+      
+      return passaDataInicio && passaDataFim;
+    });
+  }, [allProposals, dataInicio, dataFim]);
   
   // KPIs Gerais
   const kpisGerais = useMemo(() => {
@@ -194,6 +231,99 @@ export default function KPIs() {
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-800">KPIs - Indicadores de Desempenho</h1>
           <p className="text-gray-500">Análise detalhada das métricas de negócio</p>
+        </div>
+        
+        {/* Filtro de período */}
+        <div className="mb-6 p-4 bg-white rounded-lg shadow-sm">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+            <div className="flex-1">
+              <h3 className="text-sm font-medium mb-2">Filtrar por período</h3>
+              <div className="flex flex-wrap gap-2">
+                <div className="flex-1">
+                  <Label htmlFor="dataInicio" className="text-xs mb-1 block">Data Início</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        id="dataInicio"
+                        variant={"outline"}
+                        className="w-full justify-start text-left font-normal h-9"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dataInicio ? (
+                          format(dataInicio, "dd/MM/yyyy")
+                        ) : (
+                          <span className="text-muted-foreground">Selecionar</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dataInicio}
+                        onSelect={setDataInicio}
+                        initialFocus
+                        locale={ptBR}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                <div className="flex-1">
+                  <Label htmlFor="dataFim" className="text-xs mb-1 block">Data Fim</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        id="dataFim"
+                        variant={"outline"}
+                        className="w-full justify-start text-left font-normal h-9"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dataFim ? (
+                          format(dataFim, "dd/MM/yyyy")
+                        ) : (
+                          <span className="text-muted-foreground">Selecionar</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dataFim}
+                        onSelect={setDataFim}
+                        initialFocus
+                        locale={ptBR}
+                        disabled={(date) => dataInicio ? date < dataInicio : false}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                <div className="flex items-end">
+                  <Button variant="outline" size="sm" onClick={limparFiltros} className="h-9">
+                    Limpar filtros
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex-none text-sm">
+              {dataInicio || dataFim ? (
+                <div className="p-2 bg-blue-50 rounded border border-blue-100">
+                  <p className="font-medium">Mostrando {proposals.length} propostas</p>
+                  <p className="text-xs text-gray-500">
+                    Período: {dataInicio ? format(dataInicio, "dd/MM/yyyy") : "Início"} 
+                    {' - '} 
+                    {dataFim ? format(dataFim, "dd/MM/yyyy") : "Hoje"}
+                  </p>
+                </div>
+              ) : (
+                <div className="p-2 bg-gray-50 rounded border border-gray-100">
+                  <p className="font-medium">Mostrando todas as propostas</p>
+                  <p className="text-xs text-gray-500">Total: {proposals.length} propostas</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         
         <Tabs defaultValue="geral" onValueChange={setActiveTab} className="w-full">
