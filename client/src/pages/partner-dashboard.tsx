@@ -157,107 +157,101 @@ export default function PartnerDashboard() {
           </Card>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Detalhes das Propostas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-2 font-medium">Proposta</th>
-                        <th className="text-right py-3 px-2 font-medium">Valor Total</th>
-                        <th className="text-right py-3 px-2 font-medium">% Comissão</th>
-                        <th className="text-right py-3 px-2 font-medium">Comissão Total</th>
-                        <th className="text-right py-3 px-2 font-medium">Comissão Paga</th>
-                        <th className="text-right py-3 px-2 font-medium">Comissão em Aberto</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {proposals.map((proposal) => (
-                        <tr key={proposal.id} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-2">{proposal.proposta}</td>
-                          <td className="py-3 px-2 text-right">{formatCurrency(Number(proposal.valorTotal))}</td>
-                          <td className="py-3 px-2 text-right">{formatPercentage(Number(proposal.percentComissao))}</td>
-                          <td className="py-3 px-2 text-right">{formatCurrency(Number(proposal.valorComissaoTotal))}</td>
-                          <td className="py-3 px-2 text-right">{formatCurrency(Number(proposal.valorComissaoPaga))}</td>
-                          <td className="py-3 px-2 text-right font-medium text-primary">
-                            {formatCurrency(Number(proposal.valorComissaoEmAberto))}
-                          </td>
-                        </tr>
-                      ))}
-                      
-                      {proposals.length === 0 && (
-                        <tr>
-                          <td colSpan={6} className="py-4 text-center text-gray-500">
-                            Nenhuma proposta encontrada.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+        <div className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Status do Pagamento</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center">
+              <div className="relative w-48 h-48 mb-6">
+                <svg viewBox="0 0 100 100" className="w-full h-full">
+                  {/* Círculo de fundo */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke="#e5e7eb"
+                    strokeWidth="8"
+                  />
+                  {/* Círculo de progresso */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={`${percentComissaoPaga * 2.51} 251.2`}
+                    strokeDashoffset="0"
+                    className="text-primary"
+                    transform="rotate(-90 50 50)"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-3xl font-bold">{Math.round(percentComissaoPaga)}%</span>
+                  <span className="text-sm text-gray-500">Recebido</span>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-sm text-gray-500 mb-2">
+                  {percentComissaoPaga < 100 
+                    ? `Falta receber ${formatCurrency(totalComissaoEmAberto)} de comissão`
+                    : "Comissão totalmente recebida!"}
+                </p>
+                <div className="text-xs text-gray-400">
+                  {percentComissaoPaga < 100 
+                    ? "Os pagamentos são realizados conforme cronograma financeiro"
+                    : "Todos os pagamentos foram concluídos"}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Informações sobre propostas e comissões */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-700">Resumo das Propostas</h3>
           
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>Status do Pagamento</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center">
-                <div className="relative w-48 h-48 mb-6">
-                  <svg viewBox="0 0 100 100" className="w-full h-full">
-                    {/* Círculo de fundo */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="40"
-                      fill="none"
-                      stroke="#e5e7eb"
-                      strokeWidth="8"
-                    />
-                    {/* Círculo de progresso */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="40"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                      strokeDasharray={`${percentComissaoPaga * 2.51} 251.2`}
-                      strokeDashoffset="0"
-                      className="text-primary"
-                      transform="rotate(-90 50 50)"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-bold">{Math.round(percentComissaoPaga)}%</span>
-                    <span className="text-sm text-gray-500">Recebido</span>
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="space-y-4">
+              {proposals.length > 0 ? (
+                proposals.map((proposal) => (
+                  <div key={proposal.id} className="border-b pb-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-medium">{proposal.proposta}</h4>
+                      <span className="text-sm bg-blue-100 text-blue-800 py-1 px-2 rounded-full">
+                        {formatPercentage(Number(proposal.percentComissao))}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500">Valor da Proposta</p>
+                        <p className="font-medium">{formatCurrency(Number(proposal.valorTotal))}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Comissão Total</p>
+                        <p className="font-medium">{formatCurrency(Number(proposal.valorComissaoTotal))}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Comissão Paga</p>
+                        <p className="font-medium">{formatCurrency(Number(proposal.valorComissaoPaga))}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Comissão em Aberto</p>
+                        <p className="font-medium text-primary">{formatCurrency(Number(proposal.valorComissaoEmAberto))}</p>
+                      </div>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center py-6 text-gray-500">
+                  Nenhuma proposta encontrada.
                 </div>
-                
-                <div className="text-center">
-                  <p className="text-sm text-gray-500 mb-2">
-                    {percentComissaoPaga < 100 
-                      ? `Falta receber ${formatCurrency(totalComissaoEmAberto)} de comissão`
-                      : "Comissão totalmente recebida!"}
-                  </p>
-                  <div className="text-xs text-gray-400">
-                    {percentComissaoPaga < 100 
-                      ? "Os pagamentos são realizados conforme cronograma financeiro"
-                      : "Todos os pagamentos foram concluídos"}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-
+              )}
+            </div>
           </div>
         </div>
       </main>

@@ -11,17 +11,26 @@ export default function EditProposalPage() {
   const proposalId = params?.id;
   const [proposal, setProposal] = useState<SalesProposal | null>(null);
   
-  const { data, isLoading, error } = useQuery<SalesProposal>({
+  const { data, isLoading, error, refetch } = useQuery<SalesProposal>({
     queryKey: [`/api/proposals/${proposalId}`],
     queryFn: async () => {
       const res = await apiRequest("GET", `/api/proposals/${proposalId}`);
       return res.json();
     },
     enabled: !!proposalId,
+    staleTime: 0, // Não usar cache para garantir que sempre busca dados frescos
   });
+  
+  // Força atualização dos dados ao montar o componente
+  useEffect(() => {
+    if (proposalId) {
+      refetch();
+    }
+  }, [proposalId, refetch]);
   
   useEffect(() => {
     if (data) {
+      console.log("Proposal data loaded:", data);
       setProposal(data);
     }
   }, [data]);

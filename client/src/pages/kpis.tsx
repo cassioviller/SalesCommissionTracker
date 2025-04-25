@@ -461,9 +461,8 @@ export default function KPIs() {
                   </Card>
                 </div>
                 
-                {/* KPIs de Recompra */}
+                {/* KPIs de Recompra e Performance - sem subtítulos */}
                 <div className="mt-8">
-                  <h2 className="text-xl font-semibold mb-4">KPIs de Recompra</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Card>
                       <CardHeader>
@@ -530,9 +529,8 @@ export default function KPIs() {
                   </div>
                 </div>
                 
-                {/* KPIs de Performance */}
+                {/* KPIs de Performance - sem subtítulo */}
                 <div className="mt-8">
-                  <h2 className="text-xl font-semibold mb-4">KPIs de Performance e Impacto</h2>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <Card>
                       <CardHeader>
@@ -555,30 +553,35 @@ export default function KPIs() {
                     
                     <Card className="col-span-1 lg:col-span-1 h-full">
                       <CardHeader>
-                        <CardTitle className="text-base">Receita por Tipo de Cliente</CardTitle>
+                        <CardTitle className="text-base">Top 10 Vendas por Tipo de Cliente</CardTitle>
                       </CardHeader>
                       <CardContent>
+                        <p className="mb-4 text-sm">
+                          {kpisGerais.percentPorTipoCliente.length > 0 && (
+                            <>
+                              Top 10 vendas vieram{' '}
+                              {kpisGerais.percentPorTipoCliente
+                                .filter(item => item.tipo === 'Arquiteto' || item.tipo === 'Cliente Final')
+                                .map(item => `${item.percentual.toFixed(1)}% de ${item.tipo.toLowerCase()}`)
+                                .join(' e ')}
+                            </>
+                          )}
+                        </p>
+                        
                         <div className="h-64">
                           <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                              <Pie
-                                data={kpisGerais.percentPorTipoCliente}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                outerRadius={80}
-                                fill="#8884d8"
-                                dataKey="valor"
-                                nameKey="tipo"
-                                label={({ tipo, percentual }) => `${tipo}: ${percentual.toFixed(1)}%`}
-                              >
-                                {kpisGerais.percentPorTipoCliente.map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                              </Pie>
+                            <BarChart 
+                              data={kpisGerais.percentPorTipoCliente} 
+                              layout="vertical"
+                              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis type="number" />
+                              <YAxis dataKey="tipo" type="category" width={100} />
                               <Tooltip formatter={(value) => formatCurrency(Number(value))} />
                               <Legend />
-                            </PieChart>
+                              <Bar dataKey="valor" fill="#8884d8" />
+                            </BarChart>
                           </ResponsiveContainer>
                         </div>
                       </CardContent>
@@ -597,6 +600,39 @@ export default function KPIs() {
           <TabsContent value="canal">
             {kpisGerais ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Gráfico de pizza Receita por Tipo de Cliente */}
+                <Card className="col-span-1 lg:col-span-2">
+                  <CardHeader>
+                    <CardTitle>Receita por Tipo de Cliente</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-80">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={kpisGerais.percentPorTipoCliente}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            outerRadius={100}
+                            fill="#8884d8"
+                            dataKey="valor"
+                            nameKey="tipo"
+                            label={({ tipo, percentual }) => `${tipo}: ${percentual.toFixed(1)}%`}
+                          >
+                            {kpisGerais.percentPorTipoCliente.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Gráfico de barras Distribuição da Receita por Canal */}
                 <Card className="col-span-1 lg:col-span-2">
                   <CardHeader>
                     <CardTitle>Distribuição da Receita por Canal</CardTitle>
