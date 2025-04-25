@@ -126,18 +126,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProposal(insertProposal: InsertProposal): Promise<SalesProposal> {
-    // Convert from string to numeric for database storage
-    const dbProposal = {
-      proposta: insertProposal.proposta,
-      valorTotal: insertProposal.valorTotal,
-      valorPago: insertProposal.valorPago,
-      percentComissao: insertProposal.percentComissao,
-      valorComissaoPaga: insertProposal.valorComissaoPaga
-    };
-
+    // Usar todos os campos disponíveis no insertProposal
     const [proposal] = await db
       .insert(salesProposals)
-      .values(dbProposal)
+      .values(insertProposal)
       .returning();
     
     return proposal;
