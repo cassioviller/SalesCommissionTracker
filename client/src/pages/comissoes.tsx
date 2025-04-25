@@ -79,19 +79,19 @@ export default function Comissoes() {
         
         {/* Content area */}
         <div className="p-6">
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Commission Table - takes up 2/3 of the space on large screens */}
-            <div className="xl:col-span-2">
+          <div className="flex flex-col gap-6">
+            {/* Chart Panel - agora posicionado acima da tabela */}
+            <div className="w-full max-w-md mx-auto">
+              <ChartPanel proposals={proposalsWithCalculations} />
+            </div>
+            
+            {/* Commission Table - ocupa toda a largura da tela */}
+            <div className="w-full">
               <CommissionTable 
                 ref={tableRef}
                 proposals={proposalsWithCalculations} 
                 isLoading={isLoading} 
               />
-            </div>
-            
-            {/* Chart Panel - takes up 1/3 of the space on large screens */}
-            <div>
-              <ChartPanel proposals={proposalsWithCalculations} />
             </div>
           </div>
         </div>
