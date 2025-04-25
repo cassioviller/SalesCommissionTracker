@@ -1,11 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { BarChart2, FileText, FileTextIcon, LogOut, Users, Home } from "lucide-react";
 
 export default function NavigationHeader() {
   const { userRole, logout } = useAuth();
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
+  
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
   
   return (
     <header className="bg-white border-b shadow-sm py-3 px-6 sticky top-0 z-10">
@@ -22,36 +27,35 @@ export default function NavigationHeader() {
               size="sm" 
               asChild
             >
-              <a href="/admin/gerenciar-parceiros">
+              <Link href="/admin/gerenciar-parceiros">
                 <Users className="h-4 w-4 mr-1" />
                 Parceiros
-              </a>
+              </Link>
             </Button>
           )}
           
           {userRole === "partner" && (
             <Button 
-              variant={location === "/partner-dashboard" ? "default" : "outline"} 
+              variant={location === "/partner" ? "default" : "outline"} 
               size="sm" 
               asChild
             >
-              <a href="/partner-dashboard">
+              <Link href="/partner">
                 <Home className="h-4 w-4 mr-1" />
                 Dashboard
-              </a>
+              </Link>
             </Button>
           )}
           
           <Button 
-            variant={location === "/propostas" || location === "/propostas-cards" || 
-                    location.includes("/edit-proposal") || location === "/add-proposal" ? "default" : "outline"} 
+            variant={location === "/propostas" || location.includes("/edit-proposal") || location === "/add-proposal" ? "default" : "outline"} 
             size="sm" 
             asChild
           >
-            <a href="/propostas">
+            <Link href="/propostas">
               <FileText className="h-4 w-4 mr-1" />
               Propostas
-            </a>
+            </Link>
           </Button>
           
           <Button 
@@ -59,29 +63,27 @@ export default function NavigationHeader() {
             size="sm" 
             asChild
           >
-            <a href="/comissoes">
+            <Link href="/comissoes">
               <FileTextIcon className="h-4 w-4 mr-1" />
               Comissões
-            </a>
+            </Link>
           </Button>
-          
-
           
           <Button 
             variant={location === "/kpis" ? "default" : "outline"} 
             size="sm" 
             asChild
           >
-            <a href="/kpis">
+            <Link href="/kpis">
               <BarChart2 className="h-4 w-4 mr-1" />
               KPIs
-            </a>
+            </Link>
           </Button>
           
           <Button 
             variant="outline" 
             size="sm"
-            onClick={logout}
+            onClick={handleLogout}
           >
             <LogOut className="h-4 w-4 mr-1" />
             Sair

@@ -13,7 +13,7 @@ type UserRole = "admin" | "partner" | null;
 // Carregar os componentes administrativos e de parceiro de forma dinâmica
 const AdminDashboard = lazy(() => import('./pages/admin/dashboard'));
 const CriarParceiro = lazy(() => import('./pages/admin/criar-parceiro'));
-const GerenciarParceiros = lazy(() => import('./pages/admin/gerenciar-parceiros')); // Versão unificada com API
+const GerenciarParceiros = lazy(() => import('./pages/admin/gerenciar-parceiros'));
 const PartnerDashboard = lazy(() => import('./pages/partner-dashboard'));
 const Comissoes = lazy(() => import('./pages/comissoes'));
 const Propostas = lazy(() => import('./pages/propostas'));
@@ -56,21 +56,37 @@ function ProtectedRoute({
 
 // Router principal
 function AppRouter() {
+  const { isAuthenticated, userRole } = useAuth();
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <Switch>
-        <Route path="/" component={Login} />
+        {/* Rota pública de login */}
+        <Route path="/">
+          {isAuthenticated ? (
+            <Redirect to={userRole === "admin" ? "/admin" : "/propostas"} />
+          ) : (
+            <Login />
+          )}
+        </Route>
+        
+        {/* Rotas de administrador */}
         <ProtectedRoute path="/admin" component={AdminDashboard} requiredRole="admin" />
         <ProtectedRoute path="/admin/criar-parceiro" component={CriarParceiro} requiredRole="admin" />
         <ProtectedRoute path="/admin/gerenciar-parceiros" component={GerenciarParceiros} requiredRole="admin" />
-        <ProtectedRoute path="/admin/propostas" component={Propostas} requiredRole="admin" />
+        
+        {/* Rota de dashboard do parceiro */}
         <ProtectedRoute path="/partner" component={PartnerDashboard} requiredRole="partner" />
-        <ProtectedRoute path="/comissoes" component={Comissoes} />
+        
+        {/* Rotas comuns - acessíveis tanto para admin quanto parceiro */}
         <ProtectedRoute path="/propostas" component={Propostas} />
         <ProtectedRoute path="/propostas-cards" component={PropostasCards} />
         <ProtectedRoute path="/add-proposal" component={AddProposal} />
         <ProtectedRoute path="/edit-proposal/:id" component={EditProposal} />
+        <ProtectedRoute path="/comissoes" component={Comissoes} />
         <ProtectedRoute path="/kpis" component={KPIs} />
+        
+        {/* Rota de fallback para não encontrado */}
         <Route component={NotFound} />
       </Switch>
     </div>

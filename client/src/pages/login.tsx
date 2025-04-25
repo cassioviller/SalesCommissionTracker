@@ -17,12 +17,7 @@ export default function Login() {
   const { toast } = useToast();
   const auth = useAuth();
   
-  // Se já estiver autenticado, redirecionar para a página de propostas
-  useEffect(() => {
-    if (auth.isAuthenticated) {
-      navigate("/propostas");
-    }
-  }, [auth.isAuthenticated, navigate]);
+  // Não precisamos de redirecionamento aqui, pois o App.tsx já cuida disso
   
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +38,6 @@ export default function Login() {
         title: "Login bem-sucedido",
         description: "Bem-vindo ao painel de administração.",
       });
-      navigate("/propostas");
     } else {
       toast({
         title: "Erro de Login",
@@ -72,7 +66,6 @@ export default function Login() {
         title: "Login bem-sucedido",
         description: "Bem-vindo ao portal de parceiros.",
       });
-      navigate("/propostas");
     } else {
       toast({
         title: "Erro de Login",
