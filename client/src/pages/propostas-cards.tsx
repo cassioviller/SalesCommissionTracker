@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -43,11 +43,36 @@ export default function PropostasCards() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   // Buscar dados das propostas
+  const queryClient = useQueryClient();
   const { data: proposals, isLoading, error } = useQuery<ProposalWithCalculations[]>({
     queryKey: ['/api/proposals'],
     queryFn: async () => {
       const res = await apiRequest("GET", "/api/proposals");
       return res.json();
+    },
+  });
+  
+  // Mutation para excluir proposta
+  const deleteMutation = useMutation({
+    mutationFn: async (proposalId: number) => {
+      const res = await apiRequest("DELETE", `/api/proposals/${proposalId}`);
+      return res.status === 204 ? null : res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
+      toast({
+        title: "Proposta excluída",
+        description: "A proposta foi excluída com sucesso",
+      });
+      setProposalToDelete(null);
+      setIsDeleteDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao excluir proposta",
+        description: `Erro: ${error.message}`,
+        variant: "destructive",
+      });
     },
   });
   
@@ -180,17 +205,56 @@ export default function PropostasCards() {
                 <Card key={proposal.id} className="overflow-hidden hover:shadow-md transition-shadow">
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg font-medium">{proposal.proposta}</CardTitle>
-                      <Badge 
-                        variant="outline" 
-                        className={getStatusColor(Number(proposal.percentComissaoPaga))}
-                      >
-                        {formatIntegerPercentage(Number(proposal.percentComissaoPaga))}
-                      </Badge>
+                      <div className="flex-1">
+                        <CardTitle className="text-lg font-medium">{proposal.proposta}</CardTitle>
+                        <CardDescription>
+                          {proposal.nomeCliente || "Sem cliente"}
+                        </CardDescription>
+                      </div>
+                      
+                      <div className="flex items-start space-x-2">
+                        <Badge 
+                          variant="outline" 
+                          className={getStatusColor(Number(proposal.percentComissaoPaga))}
+                        >
+                          {formatIntegerPercentage(Number(proposal.percentComissaoPaga))}
+                        </Badge>
+                        
+                        {userRole === 'admin' && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                              <DropdownMenuItem 
+                                onClick={() => window.location.href = `/edit-proposal/${proposal.id}`}
+                              >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleViewPayments(proposal)}>
+                                <History className="h-4 w-4 mr-2" />
+                                Histórico de Pagamentos
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                className="text-red-600 focus:text-red-600"
+                                onClick={() => {
+                                  setProposalToDelete(proposal);
+                                  setIsDeleteDialogOpen(true);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Excluir
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </div>
                     </div>
-                    <CardDescription>
-                      {proposal.nomeCliente || "Sem cliente"}
-                    </CardDescription>
                   </CardHeader>
                   
                   <CardContent className="pb-2">
@@ -269,6 +333,32 @@ export default function PropostasCards() {
           </div>
         </div>
       </main>
+      
+      {/* Diálogo de confirmação para excluir proposta */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a proposta {proposalToDelete?.proposta}? 
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => {
+                if (proposalToDelete?.id) {
+                  deleteMutation.mutate(proposalToDelete.id);
+                }
+              }}
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       {/* Modal para adicionar proposta será implementado posteriormente */}
     </div>
