@@ -348,6 +348,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         valor: Number(data.valor),
       });
 
+      // Atualizar o valor total pago na proposta
+      const pagamentosProposta = await storage.getPagamentosPropostaByPropostaId(propostaId);
+      const valorPagoTotal = pagamentosProposta.reduce(
+        (total, pagamento) => total + Number(pagamento.valor),
+        0
+      );
+
+      // Buscar proposta atual
+      const proposta = await storage.getProposal(propostaId);
+      if (proposta) {
+        // Atualizar o valor pago na proposta
+        await storage.updateProposal(propostaId, {
+          valorPago: valorPagoTotal
+        });
+      }
+
       res.status(201).json(novoPagamento);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -369,10 +385,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid ID format" });
       }
 
+      // Primeiro buscar o pagamento para obter o ID da proposta
+      const pagamentos = await storage.getPagamentosPropostaByPropostaId(0); // Todos os pagamentos
+      const pagamento = pagamentos.find(p => p.id === id);
+      
+      if (!pagamento) {
+        return res.status(404).json({ message: "Pagamento not found" });
+      }
+      
+      const propostaId = pagamento.propostaId;
+      
+      // Excluir o pagamento
       const success = await storage.deletePagamentoProposta(id);
       if (!success) {
         return res.status(404).json({ message: "Pagamento not found" });
       }
+      
+      // Recalcular valor total pago na proposta
+      const pagamentosProposta = await storage.getPagamentosPropostaByPropostaId(propostaId);
+      const valorPagoTotal = pagamentosProposta.reduce(
+        (total, p) => total + Number(p.valor),
+        0
+      );
+      
+      // Atualizar o valor pago na proposta
+      await storage.updateProposal(propostaId, {
+        valorPago: valorPagoTotal
+      });
 
       res.status(204).end();
     } catch (error) {
@@ -417,6 +456,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         valor: Number(data.valor),
       });
 
+      // Atualizar o valor total de comissão paga na proposta
+      const pagamentosComissao = await storage.getPagamentosComissaoByPropostaId(propostaId);
+      const valorComissaoPagoTotal = pagamentosComissao.reduce(
+        (total, pagamento) => total + Number(pagamento.valor),
+        0
+      );
+
+      // Buscar proposta atual
+      const proposta = await storage.getProposal(propostaId);
+      if (proposta) {
+        // Atualizar o valor de comissão paga na proposta
+        await storage.updateProposal(propostaId, {
+          valorComissaoPaga: valorComissaoPagoTotal
+        });
+      }
+
       res.status(201).json(novoPagamento);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -438,10 +493,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid ID format" });
       }
 
+      // Primeiro buscar o pagamento para obter o ID da proposta
+      const pagamentos = await storage.getPagamentosComissaoByPropostaId(0); // Todos os pagamentos
+      const pagamento = pagamentos.find(p => p.id === id);
+      
+      if (!pagamento) {
+        return res.status(404).json({ message: "Pagamento de comissão not found" });
+      }
+      
+      const propostaId = pagamento.propostaId;
+      
+      // Excluir o pagamento
       const success = await storage.deletePagamentoComissao(id);
       if (!success) {
         return res.status(404).json({ message: "Pagamento de comissão not found" });
       }
+      
+      // Recalcular valor total de comissão paga na proposta
+      const pagamentosComissao = await storage.getPagamentosComissaoByPropostaId(propostaId);
+      const valorComissaoPagoTotal = pagamentosComissao.reduce(
+        (total, p) => total + Number(p.valor),
+        0
+      );
+      
+      // Atualizar o valor de comissão paga na proposta
+      await storage.updateProposal(propostaId, {
+        valorComissaoPaga: valorComissaoPagoTotal
+      });
 
       res.status(204).end();
     } catch (error) {
