@@ -6,15 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Plus, Filter, ChevronDown, Edit, History, Eye, List, MoreVertical, Trash2 } from "lucide-react";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+import { Search, Plus, Filter, ChevronDown, Edit, Eye, List, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,15 +16,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { apiRequest } from "@/lib/queryClient";
-import { formatCurrency, formatIntegerPercentage, formatDate } from "@/lib/utils/format";
+import { formatCurrency, formatIntegerPercentage } from "@/lib/utils/format";
 import type { ProposalWithCalculations } from "@shared/schema";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "wouter";
 import NavigationHeader from "@/components/navigation-header";
-import PaymentHistoryModal from "@/components/commission/payment-history-modal";
+import PaymentButtonModal from "@/components/commission/payment-button-modal";
 
 export default function PropostasCards() {
   const { userRole } = useAuth();
@@ -137,9 +128,27 @@ export default function PropostasCards() {
   };
   
   const handleViewPayments = (proposal: ProposalWithCalculations) => {
+    console.log("Abrindo histórico de pagamentos...");
+    console.log("Proposta selecionada:", proposal);
+    
+    // Atualiza o estado para abrir o modal
     setSelectedProposalId(proposal.id);
     setSelectedProposalName(proposal.proposta);
     setIsPaymentHistoryModalOpen(true);
+    
+    console.log("Modal deve estar aberto:", true);
+    console.log("ID da proposta selecionada:", proposal.id);
+    console.log("Nome da proposta selecionada:", proposal.proposta);
+    
+    // Forçar o modal a aparecer com timeout
+    setTimeout(() => {
+      if (selectedProposalId !== proposal.id) {
+        console.log("Tentando setar ID da proposta novamente...");
+        setSelectedProposalId(proposal.id);
+      }
+      console.log("Tentando abrir modal novamente...");
+      setIsPaymentHistoryModalOpen(true);
+    }, 100);
   };
 
   if (isLoading) {
@@ -219,149 +228,66 @@ export default function PropostasCards() {
               filteredProposals.map((proposal) => (
                 <Card key={proposal.id} className="overflow-hidden hover:shadow-md transition-shadow">
                   <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg font-medium">{proposal.proposta}</CardTitle>
-                        <CardDescription>
-                          {proposal.nomeCliente || "Sem cliente"}
-                        </CardDescription>
-                      </div>
-                      
-                      <div className="flex items-start space-x-2">
-                        <Badge 
-                          variant="outline" 
-                          className={getStatusColor(Number(proposal.percentComissaoPaga))}
-                        >
-                          {formatIntegerPercentage(Number(proposal.percentComissaoPaga))}
-                        </Badge>
-                        
-                        {userRole === 'admin' && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                              <DropdownMenuItem 
-                                onClick={() => window.location.href = `/edit-proposal/${proposal.id}`}
-                              >
-                                <Edit className="h-4 w-4 mr-2" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleViewPayments(proposal)}>
-                                <History className="h-4 w-4 mr-2" />
-                                Histórico de Pagamentos
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                className="text-red-600 focus:text-red-600"
-                                onClick={() => {
-                                  setProposalToDelete(proposal);
-                                  setIsDeleteDialogOpen(true);
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
-                      </div>
-                    </div>
+                    <CardTitle className="text-lg font-medium flex justify-between">
+                      <span>{proposal.proposta}</span>
+                      <Badge 
+                        variant="outline" 
+                        className={getStatusColor(Number(proposal.percentComissaoPaga))}
+                      >
+                        {formatIntegerPercentage(Number(proposal.percentComissaoPaga))}
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription>
+                      {proposal.nomeCliente || "Sem cliente"}
+                    </CardDescription>
                   </CardHeader>
                   
-                  <CardContent className="pb-2">
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">Valor Total:</span>
-                        <span className="font-medium">{formatCurrency(Number(proposal.valorTotal))}</span>
-                      </div>
-                      
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">Valor Material:</span>
-                        <span className="font-medium">
-                          {proposal.valorTotalMaterial ? formatCurrency(Number(proposal.valorTotalMaterial)) : "N/A"}
-                        </span>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">Comissão:</span>
-                        <span className="font-medium">{formatCurrency(Number(proposal.valorComissaoTotal))}</span>
-                      </div>
-                      
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">Comissão Paga:</span>
-                        <span className="font-medium">{formatCurrency(Number(proposal.valorComissaoPaga))}</span>
-                      </div>
-                      
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">Restante:</span>
-                        <span className="font-medium">{formatCurrency(Number(proposal.valorComissaoEmAberto))}</span>
-                      </div>
-                      
-                      {proposal.dataProposta && (
-                        <div className="flex justify-between">
-                          <span className="text-neutral-500">Data:</span>
-                          <span className="font-medium">{formatDate(proposal.dataProposta)}</span>
-                        </div>
-                      )}
+                  <CardContent className="pb-2 text-sm space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-neutral-500">Valor Total:</span>
+                      <span className="font-medium">{formatCurrency(Number(proposal.valorTotal))}</span>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="flex justify-between">
+                      <span className="text-neutral-500">Comissão:</span>
+                      <span className="font-medium">{formatCurrency(Number(proposal.valorComissaoTotal))}</span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-neutral-500">Pago:</span>
+                      <span className="font-medium">{formatCurrency(Number(proposal.valorComissaoPaga))}</span>
                     </div>
                   </CardContent>
                   
-                  <CardFooter className="pt-2 flex flex-wrap justify-between gap-2">
-                    {/* Primeira linha de botões */}
-                    <div className="flex w-full gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => window.location.href = `/edit-proposal/${proposal.id}`}
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Editar
-                      </Button>
-                      
-                      <div className="flex gap-2 flex-1">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => handleViewPayments(proposal)}
-                        >
-                          <History className="h-4 w-4 mr-1" />
-                          Pagamentos
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => {
-                            setProposalToDelete(proposal);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Excluir
-                        </Button>
-                      </div>
-                    </div>
+                  <CardFooter className="flex justify-between">
+                    {/* Botão único de editar */}
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.location.href = `/edit-proposal/${proposal.id}`}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Editar
+                    </Button>
                     
-                    {/* Segunda linha apenas com botão de visualizar */}
-                    <div className="flex w-full gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => handleViewProposal(proposal)}
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Visualizar
-                      </Button>
-                    </div>
+                    {/* Botão de pagamentos com modal integrado */}
+                    <PaymentButtonModal proposal={proposal} />
+                    
+                    {/* Botão de excluir */}
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="text-red-600"
+                      onClick={() => {
+                        setProposalToDelete(proposal);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Excluir
+                    </Button>
                   </CardFooter>
                 </Card>
               ))
@@ -398,17 +324,7 @@ export default function PropostasCards() {
       
       {/* Modal para adicionar proposta será implementado posteriormente */}
       
-      {/* Modal de histórico de pagamentos */}
-      {selectedProposalId && (
-        <PaymentHistoryModal
-          isOpen={isPaymentHistoryModalOpen}
-          onClose={() => setIsPaymentHistoryModalOpen(false)}
-          propostaId={selectedProposalId}
-          propostaNome={selectedProposalName}
-          pagamentosProposta={selectedProposalDetails?.pagamentosProposta || []}
-          pagamentosComissao={selectedProposalDetails?.pagamentosComissao || []}
-        />
-      )}
+      {/* Modal de histórico de pagamentos removido, agora usando PaymentButtonModal */}
     </div>
   );
 }

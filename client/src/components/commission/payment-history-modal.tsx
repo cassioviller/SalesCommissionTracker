@@ -70,6 +70,13 @@ export default function PaymentHistoryModal({
   pagamentosProposta,
   pagamentosComissao
 }: PaymentHistoryModalProps) {
+  // Debug
+  console.log("Renderizando modal de pagamentos");
+  console.log("isOpen:", isOpen);
+  console.log("propostaId:", propostaId);
+  console.log("propostaNome:", propostaNome);
+  console.log("pagamentosProposta:", pagamentosProposta);
+  console.log("pagamentosComissao:", pagamentosComissao);
   const [activeTab, setActiveTab] = useState("pagamentos");
 
   const [novoValor, setNovoValor] = useState("");
