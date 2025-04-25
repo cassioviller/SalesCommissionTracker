@@ -451,7 +451,6 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
               <th className="px-2 py-3 text-right font-medium">Comissão Paga</th>
               <th className="px-2 py-3 text-right font-medium">Comissão em Aberto</th>
               <th className="px-2 py-3 text-right font-medium">% Comissão Paga</th>
-              <th className="px-2 py-3 text-center font-medium">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -519,28 +518,6 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
                   <td className={`px-2 py-3 text-right ${getPercentageColorClass(proposal.percentComissaoPaga)}`}>
                     {Number(proposal.percentComissaoPaga).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}%
                   </td>
-                  <td className="px-2 py-3 text-center">
-                    <div className="flex justify-center gap-1">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleOpenPaymentHistory(proposal)}
-                      >
-                        <History className="h-4 w-4" />
-                      </Button>
-                      {userRole === 'admin' && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleEdit(proposal)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </td>
                 </tr>
               ))
             )}
@@ -570,7 +547,6 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
               <td className={`px-2 py-3 text-right ${getPercentageColorClass(percentComissaoPaga)}`}>
                 {percentComissaoPaga.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}%
               </td>
-              <td className="px-2 py-3"></td>
             </tr>
           </tfoot>
         </table>
