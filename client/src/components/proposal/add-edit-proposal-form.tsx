@@ -275,29 +275,27 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       return acc;
     }, {});
 
-    // Converter string para números para edição de proposta (PUT/PATCH)
+    // Converter string para números para todos os modos (criação e edição)
     const dataToSend = { ...processedData };
     
-    // Converter campos numéricos de string para número quando estiver editando
-    if (editMode) {
-      const numericFields = [
-        'valorTotal', 'valorPago', 'percentComissao', 'valorComissaoPaga', 
-        'pesoEstrutura', 'valorPorQuilo', 'valorTotalMaterial', 'tempoNegociacao'
-      ];
-      
-      // Para edição, convertemos todos os campos numéricos para number
-      numericFields.forEach(field => {
-        if (field in dataToSend) {
-          dataToSend[field] = Number(dataToSend[field]);
-        }
-      });
-    }
+    // Converter campos numéricos de string para número
+    const numericFields = [
+      'valorTotal', 'valorPago', 'percentComissao', 'valorComissaoPaga', 
+      'pesoEstrutura', 'valorPorQuilo', 'valorTotalMaterial', 'tempoNegociacao'
+    ];
+    
+    // Convertemos todos os campos numéricos para number
+    numericFields.forEach(field => {
+      if (field in dataToSend) {
+        dataToSend[field] = Number(dataToSend[field]);
+      }
+    });
     
     // Converter para o formato esperado pela API
     const formattedData: any = {
       ...dataToSend,
       tiposServico: selectedServices,
-      comissaoHabilitada: comissaoHabilitada ? "true" : "false" // Adicionar valor correto do switch
+      comissaoHabilitada: comissaoHabilitada // Enviar como boolean
     };
     
     console.log("Enviando dados para API:", formattedData);
