@@ -39,7 +39,7 @@ interface TableRefHandle {
   handleOpenPaymentHistoryById: (proposalId: number, proposalName: string) => void;
 }
 
-const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(({ proposals, isLoading }, ref) => {
+const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(function CommissionTable({ proposals, isLoading }, ref) {
   // Obter o papel do usuário para mostrar controles diferentes baseado no papel
   const { userRole } = useAuth();
 
