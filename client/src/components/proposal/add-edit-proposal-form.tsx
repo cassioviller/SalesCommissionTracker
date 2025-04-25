@@ -39,7 +39,7 @@ import {
   TIPOS_SERVICO,
   insertProposalSchema
 } from "@shared/schema";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 
 // Estendendo o schema para validação de formulário
 const formSchema = insertProposalSchema.extend({
@@ -337,15 +337,16 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
                 <Trash2 className="h-4 w-4 mr-1" />
                 Excluir Proposta
               </Button>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => window.location.href = `/pagamentos-proposta/${proposal?.id}`}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                <Receipt className="h-4 w-4 mr-1" />
-                Pagamentos
-              </Button>
+              <Link href={`/pagamentos-proposta/${proposal?.id}`}>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 w-full"
+                >
+                  <Receipt className="h-4 w-4 mr-1" />
+                  Pagamentos
+                </Button>
+              </Link>
             </div>
           )}
         </div>
