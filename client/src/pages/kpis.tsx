@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { apiRequest } from "@/lib/queryClient";
 import NavigationHeader from "@/components/navigation-header";
 import { BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Bar, PieChart, Pie, Cell, Legend, LineChart, Line } from "recharts";
@@ -494,9 +495,9 @@ export default function KPIs() {
           
           {/* Tab: Tipo de Projeto */}
           <TabsContent value="projeto">
-            {kpisPorProjeto ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="col-span-1">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {kpisPorProjeto ? (
+                <Card className="col-span-1 lg:col-span-1">
                   <CardHeader>
                     <CardTitle>Distribuição por Tipo de Projeto</CardTitle>
                   </CardHeader>
@@ -526,55 +527,51 @@ export default function KPIs() {
                     </div>
                   </CardContent>
                 </Card>
-                
-                <Card className="col-span-1">
+              ) : (
+                <div className="text-center py-10 col-span-1">
+                  <p className="text-gray-500">Sem dados suficientes para análise de projetos</p>
+                </div>
+              )}
+              
+              {kpisPorServico ? (
+                <Card className="col-span-1 lg:col-span-1">
                   <CardHeader>
-                    <CardTitle>KPIs por Tipo de Projeto</CardTitle>
+                    <CardTitle>Distribuição por Tipo de Serviço</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>% com projeto executivo (PE)</span>
-                        <span className="font-medium">{kpisPorProjeto.pe.toFixed(1)}%</span>
-                      </div>
-                      <div className="relative pt-1">
-                        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
-                          <div style={{ width: `${kpisPorProjeto.pe}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"></div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>% com PE + PC</span>
-                        <span className="font-medium">{kpisPorProjeto.pePc.toFixed(1)}%</span>
-                      </div>
-                      <div className="relative pt-1">
-                        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
-                          <div style={{ width: `${kpisPorProjeto.pePc}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>% sem projeto</span>
-                        <span className="font-medium">{kpisPorProjeto.semProjeto.toFixed(1)}%</span>
-                      </div>
-                      <div className="relative pt-1">
-                        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
-                          <div style={{ width: `${kpisPorProjeto.semProjeto}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-orange-500"></div>
-                        </div>
-                      </div>
+                  <CardContent>
+                    <div className="h-80">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={kpisPorServico.servicosData}
+                          margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                        >
+                          <XAxis 
+                            dataKey="nome" 
+                            angle={-45} 
+                            textAnchor="end" 
+                            tick={{ fontSize: 12 }}
+                            height={60}
+                          />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Bar 
+                            dataKey="quantidade" 
+                            name="Quantidade" 
+                            fill="#8884d8" 
+                            barSize={40}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-            ) : (
-              <div className="text-center py-10">
-                <p className="text-gray-500">Sem dados suficientes para análise de projetos</p>
-              </div>
-            )}
+              ) : (
+                <div className="text-center py-10 col-span-1">
+                  <p className="text-gray-500">Sem dados suficientes para análise de serviços</p>
+                </div>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </main>
