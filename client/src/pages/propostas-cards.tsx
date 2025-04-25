@@ -297,50 +297,54 @@ export default function PropostasCards() {
                     </div>
                   </CardContent>
                   
-                  <CardFooter className="pt-2 flex justify-end">
-                    <div className="flex gap-2">
+                  <CardFooter className="pt-2 flex flex-wrap justify-between gap-2">
+                    {/* Primeira linha de botões */}
+                    <div className="flex w-full gap-2">
                       <Button 
-                        variant="ghost" 
+                        variant="outline" 
                         size="sm"
+                        className="flex-1"
+                        onClick={() => window.location.href = `/edit-proposal/${proposal.id}`}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Editar
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => handleViewPayments(proposal)}
+                      >
+                        <History className="h-4 w-4 mr-1" />
+                        Pagamentos
+                      </Button>
+                    </div>
+                    
+                    {/* Segunda linha com botão de exclusão */}
+                    <div className="flex w-full gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="flex-1"
                         onClick={() => handleViewProposal(proposal)}
                       >
                         <Eye className="h-4 w-4 mr-1" />
-                        Ver
+                        Visualizar
                       </Button>
                       
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => handleViewPayments(proposal)}>
-                            <History className="h-4 w-4 mr-2" />
-                            Histórico de Pagamentos
-                          </DropdownMenuItem>
-                          {userRole === 'admin' && (
-                            <>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleEditProposal(proposal)}>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                className="text-red-600"
-                                onClick={() => {
-                                  setProposalToDelete(proposal);
-                                  setIsDeleteDialogOpen(true);
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="flex-1 text-red-600 hover:bg-red-50"
+                        onClick={() => {
+                          setProposalToDelete(proposal);
+                          setIsDeleteDialogOpen(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Excluir
+                      </Button>
                     </div>
                   </CardFooter>
                 </Card>

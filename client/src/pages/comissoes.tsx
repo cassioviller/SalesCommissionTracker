@@ -20,11 +20,11 @@ export default function Comissoes() {
       // Para debug
       console.log("Proposta:", proposal.proposta, "comissaoHabilitada:", proposal.comissaoHabilitada, typeof proposal.comissaoHabilitada);
       
-      // Filtro duplo: verifica se tem percentual de comissão E se comissão está habilitada 
-      // Aceita tanto boolean (true) quanto string ("true")
+      // Filtro duplo: verifica se tem percentual de comissão E se comissão está habilitada
+      const comissaoString = String(proposal.comissaoHabilitada);
       return proposal.percentComissao && 
         Number(proposal.percentComissao) > 0 && 
-        (proposal.comissaoHabilitada === true || proposal.comissaoHabilitada === "true");
+        (comissaoString === "true");
     })
     .map(proposal => {
       const saldoAberto = Number(proposal.valorTotal) - Number(proposal.valorPago);
