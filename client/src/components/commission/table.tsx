@@ -1,10 +1,11 @@
-import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import { useState, useEffect, forwardRef, useImperativeHandle, Ref } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -12,34 +13,33 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { formatCurrency, formatIntegerPercentage, parseCurrencyToNumber } from "@/lib/utils/format";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2, MoreHorizontal, History, Edit, Trash, Eye, FileText, Download } from "lucide-react";
-import type { SalesProposal, ProposalWithCalculations } from "@shared/schema";
-import PaymentHistoryModal from "./payment-history-modal";
-import { useAuth } from "@/context/AuthContext";
-import { saveAs } from "file-saver";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+  DialogClose,
+} from '@/components/ui/dialog';
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { ProposalWithCalculations, SalesProposal } from '@shared/schema';
+import { Edit, FileText, FilePdf, History } from 'lucide-react';
+import { saveAs } from 'file-saver';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import PaymentHistoryModal from './payment-history-modal';
 
-// Interface para as propriedades da tabela
 interface CommissionTableProps {
   proposals: ProposalWithCalculations[];
   isLoading: boolean;
 }
 
-// Interface para as funções expostas para o componente pai
 interface TableRefHandle {
   handleOpenPaymentHistoryById: (proposalId: number, proposalName: string) => void;
 }
 
-const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(function CommissionTable({ proposals, isLoading }, ref) {
+const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(function ({ proposals, isLoading }, ref) {
   // Obter o papel do usuário para mostrar controles diferentes baseado no papel
   const { userRole } = useAuth();
 
@@ -360,64 +360,41 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
     // Preparar dados para a tabela
     const tableData = localProposals.map(proposal => [
       proposal.proposta,
-      formatCurrency(Number(proposal.valorTotal)),
-      formatCurrency(Number(proposal.valorPago)),
-      formatCurrency(Number(proposal.saldoAberto)),
-      formatIntegerPercentage(Number(proposal.percentComissao)),
-      formatCurrency(Number(proposal.valorComissaoTotal)),
-      formatCurrency(Number(proposal.valorComissaoPaga)),
-      formatCurrency(Number(proposal.valorComissaoEmAberto)),
-      formatIntegerPercentage(Number(proposal.percentComissaoPaga)),
+      `R$ ${Number(proposal.valorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      `R$ ${Number(proposal.valorPago).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      `R$ ${Number(proposal.saldoAberto).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      `${Number(proposal.percentComissao).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}%`,
+      `R$ ${Number(proposal.valorComissaoTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      `R$ ${Number(proposal.valorComissaoPaga).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      `R$ ${Number(proposal.valorComissaoEmAberto).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      `${Number(proposal.percentComissaoPaga).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}%`,
     ]);
 
     // Adicionar linha de totais
     tableData.push([
       "TOTAL",
-      formatCurrency(totalValor),
-      formatCurrency(totalPago),
-      formatCurrency(totalAberto),
+      `R$ ${totalValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      `R$ ${totalPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      `R$ ${totalAberto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
       "-",
-      formatCurrency(totalComissao),
-      formatCurrency(totalComissaoPaga),
-      formatCurrency(totalComissaoEmAberto),
-      formatIntegerPercentage(percentComissaoPaga),
+      `R$ ${totalComissao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      `R$ ${totalComissaoPaga.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      `R$ ${totalComissaoEmAberto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      `${percentComissaoPaga.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}%`,
     ]);
 
-    // Definir cabeçalhos
-    const headers = [
-      "Proposta",
-      "Valor Total",
-      "Valor Pago",
-      "Saldo Aberto",
-      "% Comissão",
-      "Valor Comissão",
-      "Comissão Paga",
-      "Comissão em Aberto",
-      "% Comissão Paga"
-    ];
-
-    // Criar a tabela
+    // Gerar tabela PDF
     autoTable(doc, {
-      head: [headers],
+      head: [["Proposta", "Valor Total", "Valor Pago", "Saldo Aberto", "% Comissão", "Valor Comissão", "Comissão Paga", "Comissão em Aberto", "% Comissão Paga"]],
       body: tableData,
-      startY: 30,
-      theme: 'grid',
-      styles: {
-        fontSize: 8,
-        cellPadding: 2,
-      },
-      headStyles: {
-        fillColor: [41, 128, 185],
-        textColor: 255,
-        fontStyle: 'bold',
-      },
-      footStyles: {
-        fillColor: [200, 200, 200],
-        fontStyle: 'bold',
-      }
+      foot: [], // Não precisamos definir um rodapé, pois já adicionamos a linha de totais ao corpo
+      theme: 'striped',
+      headStyles: { fillColor: [53, 151, 255] },
+      footStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
+      margin: { top: 30 },
     });
 
-    // Salvar o PDF
+    // Salvar o documento
     doc.save(`comissoes_${new Date().toISOString().split('T')[0]}.pdf`);
 
     toast({
@@ -455,113 +432,32 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
           className="flex items-center gap-1 text-sm"
           onClick={exportToPDF}
         >
-          <Download className="h-4 w-4" />
+          <FilePdf className="h-4 w-4" />
           Exportar PDF
         </Button>
       </div>
 
-      {/* Modal de histórico de pagamentos */}
-      {selectedProposalDetails && (
-        <PaymentHistoryModal 
-          isOpen={isPaymentHistoryModalOpen}
-          onClose={() => setIsPaymentHistoryModalOpen(false)}
-          propostaId={selectedProposalId}
-          propostaNome={selectedProposalName}
-          pagamentosProposta={selectedProposalDetails.pagamentosProposta || []}
-          pagamentosComissao={selectedProposalDetails.pagamentosComissao || []}
-        />
-      )}
-
-      {/* Dialog de edição */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Editar Proposta</DialogTitle>
-            <DialogDescription>
-              Edite os detalhes da proposta e registre pagamentos de comissão.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="proposta">Proposta</Label>
-                <Input 
-                  id="proposta" 
-                  name="proposta" 
-                  value={formData.proposta} 
-                  onChange={handleInputChange} 
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="percentComissao">Percentual de Comissão (%)</Label>
-                <Input 
-                  id="percentComissao" 
-                  name="percentComissao" 
-                  type="number" 
-                  min="0" 
-                  max="100" 
-                  step="0.1" 
-                  value={formData.percentComissao} 
-                  onChange={handleInputChange} 
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="valorTotal">Valor Total do Contrato (R$)</Label>
-              <Input 
-                id="valorTotal" 
-                name="valorTotal" 
-                type="number" 
-                min="0" 
-                step="0.01" 
-                value={formData.valorTotal} 
-                onChange={handleInputChange} 
-              />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="percentComissao">Percentual de Comissão (%)</Label>
-                <span className="text-xs text-muted-foreground">
-                  Comissão Total: {formData.valorTotal && formData.percentComissao ? 
-                    formatCurrency(Number(formData.valorTotal) * (Number(formData.percentComissao) / 100)) : 
-                    formatCurrency(0)}
-                </span>
-              </div>
-            </div>
-
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSaveProposal}>Salvar Alterações</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <div className="w-full overflow-auto">
-        <div className="min-w-[1000px]">
-          <table className="w-full border-collapse">
-          <thead className="bg-white">
-            <tr className="border-b">
-              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[13%]">Proposta</th>
-              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[10%]">Valor Total</th>
-              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[10%]">Valor Pago</th>
-              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[10%]">Saldo Aberto</th>
-              <th className="py-3 px-2 text-center text-xs uppercase font-medium text-gray-600 w-[7%]">% Com</th>
-              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[10%]">Com Total</th>
-              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[10%]">Com Paga</th>
-              <th className="py-3 px-2 text-left text-xs uppercase font-medium text-gray-600 w-[10%]">Com Aberto</th>
-              <th className="py-3 px-2 text-center text-xs uppercase font-medium text-gray-600 w-[7%]">% Paga</th>
-              <th className="py-3 px-2 text-center text-xs uppercase font-medium text-gray-600 w-[13%]">Ações</th>
+      {/* Tabela */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-neutral-50 text-neutral-500 text-xs uppercase">
+              <th className="px-4 py-3 text-left font-medium">Proposta</th>
+              <th className="px-2 py-3 text-right font-medium">Valor Total</th>
+              <th className="px-2 py-3 text-right font-medium">Valor Pago</th>
+              <th className="px-2 py-3 text-right font-medium">Saldo Aberto</th>
+              <th className="px-2 py-3 text-right font-medium">% Comissão</th>
+              <th className="px-2 py-3 text-right font-medium">Valor Comissão</th>
+              <th className="px-2 py-3 text-right font-medium">Comissão Paga</th>
+              <th className="px-2 py-3 text-right font-medium">Comissão em Aberto</th>
+              <th className="px-2 py-3 text-right font-medium">% Comissão Paga</th>
+              <th className="px-2 py-3 text-center font-medium">Ações</th>
             </tr>
           </thead>
           <tbody>
             {localProposals.length === 0 ? (
               <tr>
-                <td colSpan={10} className="text-center py-6 text-sm text-neutral-500">
+                <td colSpan={10} className="text-center py-6 text-neutral-500">
                   Nenhuma proposta encontrada
                 </td>
               </tr>
@@ -569,132 +465,179 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
               localProposals.map((proposal) => (
                 <tr 
                   key={proposal.id} 
-                  className={`border-b hover:bg-gray-50 ${getRowColorClass(Number(proposal.percentComissaoPaga))}`}
+                  className={`border-t hover:bg-neutral-50 ${getRowColorClass(proposal.percentComissaoPaga)}`}
                 >
-                  <td className="py-3 px-2 font-medium text-sm truncate">{proposal.proposta}</td>
-                  <td className="py-3 px-2 text-sm">{formatCurrency(Number(proposal.valorTotal))}</td>
-                  <td className="py-3 px-2 text-sm">{formatCurrency(Number(proposal.valorPago))}</td>
-                  <td className="py-3 px-2 text-sm">{formatCurrency(Number(proposal.saldoAberto))}</td>
-                  <td className="py-3 px-2 text-center text-sm">{formatIntegerPercentage(Number(proposal.percentComissao))}</td>
-                  <td className="py-3 px-2 text-sm">{formatCurrency(Number(proposal.valorComissaoTotal))}</td>
-                  <td className="py-3 px-2 text-sm">{formatCurrency(Number(proposal.valorComissaoPaga))}</td>
-                  <td className="py-3 px-2 text-sm">{formatCurrency(Number(proposal.valorComissaoEmAberto))}</td>
-                  <td className="py-3 px-2 text-center text-sm">
-                    <span className={getPercentageColorClass(Number(proposal.percentComissaoPaga))}>
-                      {formatIntegerPercentage(Number(proposal.percentComissaoPaga))}
-                    </span>
+                  <td className="px-4 py-3">
+                    <div className="font-medium">{proposal.proposta}</div>
+                    {proposal.nomeCliente && (
+                      <div className="text-xs text-neutral-500">{proposal.nomeCliente}</div>
+                    )}
                   </td>
-                  <td className="py-3 px-2 text-center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            width="18" 
-                            height="18" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round"
-                            className="text-neutral-500"
-                          >
-                            <circle cx="12" cy="12" r="1" />
-                            <circle cx="12" cy="5" r="1" />
-                            <circle cx="12" cy="19" r="1" />
-                          </svg>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {/* Item comum a todos os usuários */}
-                        <DropdownMenuItem 
-                          className="text-neutral-700 cursor-pointer"
-                          onClick={() => handleOpenPaymentHistory(proposal)}
+                  <td className="px-2 py-3 text-right">
+                    R$ {Number(proposal.valorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </td>
+                  <td className="px-2 py-3 text-right">
+                    {userRole === 'admin' ? (
+                      <Input
+                        value={proposal.valorPago.toString()}
+                        onChange={(e) => handleFieldChange(proposal.id, 'valorPago', e.target.value)}
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        className="h-8 w-28 text-right"
+                      />
+                    ) : (
+                      <span>R$ {Number(proposal.valorPago).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    )}
+                  </td>
+                  <td className="px-2 py-3 text-right">
+                    R$ {Number(proposal.saldoAberto).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </td>
+                  <td className="px-2 py-3 text-right">
+                    {Number(proposal.percentComissao).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}%
+                  </td>
+                  <td className="px-2 py-3 text-right">
+                    R$ {Number(proposal.valorComissaoTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </td>
+                  <td className="px-2 py-3 text-right">
+                    {userRole === 'admin' ? (
+                      <Input
+                        value={proposal.valorComissaoPaga.toString()}
+                        onChange={(e) => handleFieldChange(proposal.id, 'valorComissaoPaga', e.target.value)}
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        className="h-8 w-28 text-right"
+                      />
+                    ) : (
+                      <span>R$ {Number(proposal.valorComissaoPaga).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    )}
+                  </td>
+                  <td className="px-2 py-3 text-right">
+                    R$ {Number(proposal.valorComissaoEmAberto).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </td>
+                  <td className={`px-2 py-3 text-right ${getPercentageColorClass(proposal.percentComissaoPaga)}`}>
+                    {Number(proposal.percentComissaoPaga).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}%
+                  </td>
+                  <td className="px-2 py-3 text-center">
+                    <div className="flex justify-center gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleOpenPaymentHistory(proposal)}
+                      >
+                        <History className="h-4 w-4" />
+                      </Button>
+                      {userRole === 'admin' && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleEdit(proposal)}
                         >
-                          <History className="mr-2 text-green-500 h-4 w-4" />
-                          <span>Histórico de Pagamentos</span>
-                        </DropdownMenuItem>
-
-                        {/* Items apenas para administradores */}
-                        {(userRole === 'admin' || !userRole) && (
-                          <>
-                            <DropdownMenuItem 
-                              className="text-neutral-700 cursor-pointer"
-                              onClick={() => handleEdit(proposal)}
-                            >
-                              <svg 
-                                xmlns="http://www.w3.org/2000/svg" 
-                                width="16" 
-                                height="16" 
-                                viewBox="0 0 24 24" 
-                                fill="none" 
-                                stroke="currentColor" 
-                                strokeWidth="2" 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round"
-                                className="mr-2 text-blue-500"
-                              >
-                                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                                <path d="m15 5 4 4" />
-                              </svg>
-                              <span>Editar</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              className="text-neutral-700 cursor-pointer"
-                              onClick={() => handleDelete(proposal.id)}
-                            >
-                              <svg 
-                                xmlns="http://www.w3.org/2000/svg" 
-                                width="16" 
-                                height="16" 
-                                viewBox="0 0 24 24" 
-                                fill="none" 
-                                stroke="currentColor" 
-                                strokeWidth="2" 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round"
-                                className="mr-2 text-red-500"
-                              >
-                                <path d="M3 6h18" />
-                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                <line x1="10" y1="11" x2="10" y2="17" />
-                                <line x1="14" y1="11" x2="14" y2="17" />
-                              </svg>
-                              <span>Excluir</span>
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
             )}
           </tbody>
-          <tfoot className="bg-gray-50 font-semibold">
-            <tr className="border-t">
-              <td className="py-3 px-2 text-sm">Total</td>
-              <td className="py-3 px-2 text-sm">{formatCurrency(totalValor)}</td>
-              <td className="py-3 px-2 text-sm">{formatCurrency(totalPago)}</td>
-              <td className="py-3 px-2 text-sm">{formatCurrency(totalAberto)}</td>
-              <td className="py-3 px-2 text-sm text-center">-</td>
-              <td className="py-3 px-2 text-sm">{formatCurrency(totalComissao)}</td>
-              <td className="py-3 px-2 text-sm">{formatCurrency(totalComissaoPaga)}</td>
-              <td className="py-3 px-2 text-sm">{formatCurrency(totalComissaoEmAberto)}</td>
-              <td className="py-3 px-2 text-sm text-center">
-                <span className={getPercentageColorClass(percentComissaoPaga)}>
-                  {formatIntegerPercentage(percentComissaoPaga)}
-                </span>
+          <tfoot>
+            <tr className="bg-neutral-100 font-medium">
+              <td className="px-4 py-3">TOTAL</td>
+              <td className="px-2 py-3 text-right">
+                R$ {totalValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </td>
-              <td className="py-3 px-2 text-sm text-center">-</td>
+              <td className="px-2 py-3 text-right">
+                R$ {totalPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </td>
+              <td className="px-2 py-3 text-right">
+                R$ {totalAberto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </td>
+              <td className="px-2 py-3 text-right">-</td>
+              <td className="px-2 py-3 text-right">
+                R$ {totalComissao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </td>
+              <td className="px-2 py-3 text-right">
+                R$ {totalComissaoPaga.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </td>
+              <td className="px-2 py-3 text-right">
+                R$ {totalComissaoEmAberto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </td>
+              <td className={`px-2 py-3 text-right ${getPercentageColorClass(percentComissaoPaga)}`}>
+                {percentComissaoPaga.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}%
+              </td>
+              <td className="px-2 py-3"></td>
             </tr>
           </tfoot>
         </table>
       </div>
+
+      {/* Diálogo de edição */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Proposta</DialogTitle>
+            <DialogDescription>
+              Edite os detalhes básicos da proposta. Campos de pagamento podem ser alterados diretamente na tabela.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="proposta">Nome da Proposta</Label>
+              <Input
+                id="proposta"
+                name="proposta"
+                value={formData.proposta}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div>
+              <Label htmlFor="valorTotal">Valor Total</Label>
+              <Input
+                id="valorTotal"
+                name="valorTotal"
+                type="number"
+                value={formData.valorTotal}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div>
+              <Label htmlFor="percentComissao">Percentual de Comissão (%)</Label>
+              <Input
+                id="percentComissao"
+                name="percentComissao"
+                type="number"
+                value={formData.percentComissao}
+                onChange={handleInputChange}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancelar</Button>
+            </DialogClose>
+            <Button onClick={handleSaveProposal}>Salvar Alterações</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de histórico de pagamentos */}
+      {selectedProposalId && (
+        <PaymentHistoryModal
+          isOpen={isPaymentHistoryModalOpen}
+          onClose={() => setIsPaymentHistoryModalOpen(false)}
+          propostaId={selectedProposalId}
+          propostaNome={selectedProposalName}
+          pagamentosProposta={selectedProposalDetails?.pagamentosProposta || []}
+          pagamentosComissao={selectedProposalDetails?.pagamentosComissao || []}
+        />
+      )}
     </div>
   );
 });
 
-export { CommissionTable as default };
+export default CommissionTable;
