@@ -36,6 +36,8 @@ import PaymentHistoryModal from "@/components/commission/payment-history-modal";
 
 export default function PropostasCards() {
   const { userRole } = useAuth();
+  // Debug: verificar o papel do usuário
+  console.log("UserRole na página de propostas:", userRole);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -313,43 +315,39 @@ export default function PropostasCards() {
                   <CardFooter className="pt-2 flex flex-wrap justify-between gap-2">
                     {/* Primeira linha de botões */}
                     <div className="flex w-full gap-2">
-                      {userRole === 'admin' && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => window.location.href = `/edit-proposal/${proposal.id}`}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Editar
+                      </Button>
+                      
+                      <div className="flex gap-2 flex-1">
                         <Button 
                           variant="outline" 
                           size="sm"
                           className="flex-1"
-                          onClick={() => window.location.href = `/edit-proposal/${proposal.id}`}
+                          onClick={() => handleViewPayments(proposal)}
                         >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Editar
+                          <History className="h-4 w-4 mr-1" />
+                          Pagamentos
                         </Button>
-                      )}
-                      
-                      {userRole === 'admin' && (
-                        <div className="flex gap-2 flex-1">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => handleViewPayments(proposal)}
-                          >
-                            <History className="h-4 w-4 mr-1" />
-                            Pagamentos
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => {
-                              setProposalToDelete(proposal);
-                              setIsDeleteDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Excluir
-                          </Button>
-                        </div>
-                      )}
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => {
+                            setProposalToDelete(proposal);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Excluir
+                        </Button>
+                      </div>
                     </div>
                     
                     {/* Segunda linha apenas com botão de visualizar */}
