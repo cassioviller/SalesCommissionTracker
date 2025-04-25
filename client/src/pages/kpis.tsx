@@ -14,6 +14,13 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'
 
 export default function KPIs() {
   const [activeTab, setActiveTab] = useState("geral");
+  const [propostasEmitidas, setPropostasEmitidas] = useState<number>(0);
+  
+  // Handler para mudança no número de propostas emitidas
+  const handlePropostasEmitidasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    setPropostasEmitidas(isNaN(value) ? 0 : value);
+  };
   
   // Buscar dados das propostas
   const { data: proposals = [], isLoading } = useQuery<ProposalWithCalculations[]>({
@@ -96,6 +103,20 @@ export default function KPIs() {
     };
   }, [proposals]);
   
+  // KPIs de Taxa de Conversão
+  const kpisTaxaConversao = useMemo(() => {
+    if (!proposals || proposals.length === 0 || propostasEmitidas <= 0) return null;
+    
+    const totalPropostasFechadas = proposals.length;
+    const taxaConversao = (totalPropostasFechadas / propostasEmitidas) * 100;
+    
+    return {
+      totalPropostasFechadas,
+      propostasEmitidas,
+      taxaConversao
+    };
+  }, [proposals, propostasEmitidas]);
+  
   // KPIs por Tipo de Projeto
   const kpisPorProjeto = useMemo(() => {
     if (!proposals || proposals.length === 0) return null;
@@ -123,6 +144,32 @@ export default function KPIs() {
       pe,
       pePc,
       semProjeto
+    };
+  }, [proposals]);
+  
+  // KPIs por Tipo de Serviço
+  const kpisPorServico = useMemo(() => {
+    if (!proposals || proposals.length === 0) return null;
+    
+    // Contagem de serviços
+    const servicosCount: Record<string, number> = {};
+    
+    // Para cada proposta, iterar sobre os serviços e contá-los
+    proposals.forEach(proposta => {
+      if (proposta.tiposServico && Array.isArray(proposta.tiposServico)) {
+        proposta.tiposServico.forEach(servico => {
+          servicosCount[servico] = (servicosCount[servico] || 0) + 1;
+        });
+      }
+    });
+    
+    // Converter para array para ordenar por quantidade
+    const servicosData = Object.entries(servicosCount)
+      .map(([nome, quantidade]) => ({ nome, quantidade }))
+      .sort((a, b) => b.quantidade - a.quantidade);
+    
+    return {
+      servicosData
     };
   }, [proposals]);
   
@@ -183,11 +230,20 @@ export default function KPIs() {
                   
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base font-medium">Clientes Atendidos</CardTitle>
+                      <CardTitle className="text-base font-medium">Propostas Emitidas</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-2xl font-bold">{kpisGerais.clientesUnicos}</p>
-                      <p className="text-xs text-gray-500">Total de clientes únicos</p>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="number"
+                          value={propostasEmitidas}
+                          onChange={handlePropostasEmitidasChange}
+                          className="w-24 h-9 text-lg"
+                          min="0"
+                        />
+                        <p className="text-xs text-gray-500">Editar valor</p>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Propostas emitidas (total)</p>
                     </CardContent>
                   </Card>
                   
@@ -198,6 +254,20 @@ export default function KPIs() {
                     <CardContent>
                       <p className="text-2xl font-bold">{kpisGerais.totalPropostas}</p>
                       <p className="text-xs text-gray-500">Total de propostas no sistema</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base font-medium">Taxa de Conversão</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-2xl font-bold">
+                        {propostasEmitidas > 0 
+                          ? ((kpisGerais.totalPropostas / propostasEmitidas) * 100).toFixed(1) + '%' 
+                          : 'N/A'}
+                      </p>
+                      <p className="text-xs text-gray-500">Propostas fechadas / emitidas</p>
                     </CardContent>
                   </Card>
                   
