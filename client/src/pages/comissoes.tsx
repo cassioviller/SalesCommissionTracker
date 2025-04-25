@@ -22,23 +22,25 @@ export default function Comissoes() {
     queryKey: ['/api/proposals'],
   });
   
-  // Calculate derived fields for each proposal
-  const proposalsWithCalculations: ProposalWithCalculations[] = (proposals || []).map(proposal => {
-    const saldoAberto = Number(proposal.valorTotal) - Number(proposal.valorPago);
-    const valorComissaoTotal = Number(proposal.valorTotal) * (Number(proposal.percentComissao) / 100);
-    const valorComissaoEmAberto = valorComissaoTotal - Number(proposal.valorComissaoPaga);
-    const percentComissaoPaga = valorComissaoTotal > 0 
-      ? (Number(proposal.valorComissaoPaga) / valorComissaoTotal) * 100
-      : 0;
-    
-    return {
-      ...proposal,
-      saldoAberto,
-      valorComissaoTotal,
-      valorComissaoEmAberto,
-      percentComissaoPaga
-    };
-  });
+  // Calculate derived fields for each proposal and filter out proposals without commission
+  const proposalsWithCalculations: ProposalWithCalculations[] = (proposals || [])
+    .filter(proposal => proposal.percentComissao && Number(proposal.percentComissao) > 0) // Remove propostas sem percentual de comissão
+    .map(proposal => {
+      const saldoAberto = Number(proposal.valorTotal) - Number(proposal.valorPago);
+      const valorComissaoTotal = Number(proposal.valorTotal) * (Number(proposal.percentComissao) / 100);
+      const valorComissaoEmAberto = valorComissaoTotal - Number(proposal.valorComissaoPaga);
+      const percentComissaoPaga = valorComissaoTotal > 0 
+        ? (Number(proposal.valorComissaoPaga) / valorComissaoTotal) * 100
+        : 0;
+      
+      return {
+        ...proposal,
+        saldoAberto,
+        valorComissaoTotal,
+        valorComissaoEmAberto,
+        percentComissaoPaga
+      };
+    });
   
   // Manipulador para mostrar o histórico de pagamentos
   const handleShowPaymentHistory = (proposalId: number, proposalName: string) => {

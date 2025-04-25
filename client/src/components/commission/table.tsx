@@ -697,4 +697,4 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
   );
 });
 
-export default CommissionTable;
+export { CommissionTable as default };

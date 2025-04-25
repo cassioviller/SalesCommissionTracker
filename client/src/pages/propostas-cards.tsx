@@ -297,35 +297,28 @@ export default function PropostasCards() {
                     </div>
                   </CardContent>
                   
-                  <CardFooter className="pt-2 flex gap-2 justify-between">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleViewProposal(proposal)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      Ver
-                    </Button>
-                    
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleViewPayments(proposal)}
-                    >
-                      <History className="h-4 w-4 mr-1" />
-                      Pagamentos
-                    </Button>
-                    
-                    {userRole === 'admin' && (
+                  <CardFooter className="pt-2 flex justify-end">
+                    <div className="flex gap-2">
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleEditProposal(proposal)}
+                        onClick={() => handleViewProposal(proposal)}
                       >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Editar
+                        <Eye className="h-4 w-4 mr-1" />
+                        Ver
                       </Button>
-                    )}
+                      
+                      {userRole !== 'admin' && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleViewPayments(proposal)}
+                        >
+                          <History className="h-4 w-4 mr-1" />
+                          Pagamentos
+                        </Button>
+                      )}
+                    </div>
                   </CardFooter>
                 </Card>
               ))
