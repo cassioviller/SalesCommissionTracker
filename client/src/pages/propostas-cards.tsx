@@ -310,18 +310,32 @@ export default function PropostasCards() {
                         Editar
                       </Button>
                       
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => handleViewPayments(proposal)}
-                      >
-                        <History className="h-4 w-4 mr-1" />
-                        Pagamentos
-                      </Button>
+                      <div className="flex gap-2 flex-1">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => handleViewPayments(proposal)}
+                        >
+                          <History className="h-4 w-4 mr-1" />
+                          Pagamentos
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => {
+                            setProposalToDelete(proposal);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Excluir
+                        </Button>
+                      </div>
                     </div>
                     
-                    {/* Segunda linha com botão de exclusão */}
+                    {/* Segunda linha apenas com botão de visualizar */}
                     <div className="flex w-full gap-2">
                       <Button 
                         variant="outline" 
@@ -331,19 +345,6 @@ export default function PropostasCards() {
                       >
                         <Eye className="h-4 w-4 mr-1" />
                         Visualizar
-                      </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="flex-1 text-red-600 hover:bg-red-50"
-                        onClick={() => {
-                          setProposalToDelete(proposal);
-                          setIsDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Excluir
                       </Button>
                     </div>
                   </CardFooter>
