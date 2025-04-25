@@ -308,16 +308,39 @@ export default function PropostasCards() {
                         Ver
                       </Button>
                       
-                      {userRole !== 'admin' && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleViewPayments(proposal)}
-                        >
-                          <History className="h-4 w-4 mr-1" />
-                          Pagamentos
-                        </Button>
-                      )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => handleViewPayments(proposal)}>
+                            <History className="h-4 w-4 mr-2" />
+                            Histórico de Pagamentos
+                          </DropdownMenuItem>
+                          {userRole === 'admin' && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleEditProposal(proposal)}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-red-600"
+                                onClick={() => {
+                                  setProposalToDelete(proposal);
+                                  setIsDeleteDialogOpen(true);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Excluir
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </CardFooter>
                 </Card>

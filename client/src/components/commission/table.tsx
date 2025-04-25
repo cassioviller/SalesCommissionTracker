@@ -24,7 +24,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { ProposalWithCalculations, SalesProposal } from '@shared/schema';
-import { Edit, FileText, FilePdf, History } from 'lucide-react';
+import { Edit, FileText, FileDown, History } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -432,7 +432,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
           className="flex items-center gap-1 text-sm"
           onClick={exportToPDF}
         >
-          <FilePdf className="h-4 w-4" />
+          <FileDown className="h-4 w-4" />
           Exportar PDF
         </Button>
       </div>
