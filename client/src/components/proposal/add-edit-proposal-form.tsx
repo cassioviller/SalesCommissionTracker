@@ -28,7 +28,7 @@ import {
   AlertDialogHeader, 
   AlertDialogTitle
 } from "@/components/ui/alert-dialog";
-import { CalendarIcon, ArrowLeft, Trash2 } from "lucide-react";
+import { CalendarIcon, ArrowLeft, Trash2, Receipt } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   InsertProposal,
@@ -325,17 +325,28 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
             <CardTitle>{editMode ? "Editar Proposta" : "Nova Proposta"}</CardTitle>
           </div>
           
-          {/* Botão de exclusão (apenas no modo de edição) */}
+          {/* Botões de ação (apenas no modo de edição) */}
           {editMode && (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setIsDeleteDialogOpen(true)}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              Excluir Proposta
-            </Button>
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setIsDeleteDialogOpen(true)}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Excluir Proposta
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => window.location.href = `/pagamentos-proposta/${proposal?.id}`}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Receipt className="h-4 w-4 mr-1" />
+                Pagamentos
+              </Button>
+            </div>
           )}
         </div>
       </CardHeader>
