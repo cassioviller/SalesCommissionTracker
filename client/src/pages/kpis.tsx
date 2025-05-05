@@ -129,15 +129,8 @@ export default function KPIs() {
     const propostasComRecompra = proposals.filter(p => p.clienteRecompra === "sim").length;
     const percentRecompra = (propostasComRecompra / totalPropostas) * 100;
     
-    // Contando clientes com mais de uma proposta
-    const propostasPorCliente = proposals.reduce((acc, p) => {
-      if (p.nomeCliente) {
-        acc[p.nomeCliente] = (acc[p.nomeCliente] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<string, number>);
-    
-    const clientesComRecompra = Object.values(propostasPorCliente).filter(count => count > 1).length;
+    // Contando clientes com recompra - usando o campo clienteRecompra
+    const clientesComRecompra = proposals.filter(p => p.clienteRecompra === "sim").length;
     
     // Top 10 vendas
     const propostasOrdenadas = [...proposals].sort((a, b) => Number(b.valorTotal) - Number(a.valorTotal));

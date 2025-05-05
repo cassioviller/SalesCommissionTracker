@@ -87,11 +87,11 @@ export default function Login() {
                   <path d="M19 6.37v11.26a.9.9 0 0 1-1.33.83l-1.47-.87a1.17 1.17 0 0 0-1.21.04l-3.11 2.14a1.17 1.17 0 0 1-1.21.04L7.6 17.9a1.17 1.17 0 0 0-1.21.04l-2.72 1.87A.9.9 0 0 1 2 19V5.5a.9.9 0 0 1 .33-.7l2.72-1.87a1.17 1.17 0 0 1 1.21-.04l3.07 1.91a1.17 1.17 0 0 0 1.21-.04l3.11-2.14a1.17 1.17 0 0 1 1.21-.04l1.47.87a.9.9 0 0 1 .67.92z" />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold">Sistema de Comissões</h1>
+              <h1 className="text-2xl font-bold">EstruturaDV</h1>
             </div>
-            <h2 className="text-3xl font-bold mb-4">Gerencie suas comissões de forma eficiente</h2>
+            <h2 className="text-3xl font-bold mb-4">Sistema de Gerenciamento</h2>
             <p className="text-lg opacity-90 mb-8">
-              Acompanhe propostas, pagamentos e comissões em um único lugar, com uma visão completa de seus negócios.
+              Plataforma integrada para acompanhamento de projetos e controle de vendas.
             </p>
           </div>
           
@@ -103,8 +103,8 @@ export default function Login() {
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Monitoramento em tempo real</h3>
-                <p className="opacity-80">Acompanhe o status de pagamentos e comissões com atualizações automáticas.</p>
+                <h3 className="font-semibold mb-1">Monitoramento</h3>
+                <p className="opacity-80">Acompanhe em tempo real suas métricas e resultados.</p>
               </div>
             </div>
             
@@ -117,8 +117,8 @@ export default function Login() {
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Dashboard intuitivo</h3>
-                <p className="opacity-80">Visualize todas as suas informações em um painel personalizado.</p>
+                <h3 className="font-semibold mb-1">Dashboard</h3>
+                <p className="opacity-80">Visualize suas informações em uma interface simples.</p>
               </div>
             </div>
             
@@ -130,8 +130,8 @@ export default function Login() {
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Exportação de relatórios</h3>
-                <p className="opacity-80">Exporte seus dados em diversos formatos para análise detalhada.</p>
+                <h3 className="font-semibold mb-1">Relatórios</h3>
+                <p className="opacity-80">Acesse dados em formatos de fácil análise.</p>
               </div>
             </div>
           </div>
@@ -158,7 +158,7 @@ export default function Login() {
                   <CardHeader>
                     <CardTitle>Login de Administrador</CardTitle>
                     <CardDescription>
-                      Acesse o painel administrativo para gerenciar todas as propostas e parceiros.
+                      Acesse o painel administrativo do sistema.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -196,7 +196,7 @@ export default function Login() {
                   <CardHeader>
                     <CardTitle>Login de Parceiro</CardTitle>
                     <CardDescription>
-                      Acesse o portal de parceiros para visualizar suas propostas e comissões.
+                      Acesse o portal de parceiros do sistema.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -231,7 +231,7 @@ export default function Login() {
           </Tabs>
           
           <p className="text-center text-gray-500 text-sm mt-6">
-            Sistema de Gerenciamento de Comissões &copy; {new Date().getFullYear()}
+            EstruturaDV &copy; {new Date().getFullYear()}
           </p>
         </div>
       </div>
