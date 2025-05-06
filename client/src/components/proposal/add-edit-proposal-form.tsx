@@ -28,7 +28,7 @@ import {
   AlertDialogHeader, 
   AlertDialogTitle
 } from "@/components/ui/alert-dialog";
-import { CalendarIcon, ArrowLeft, Trash2, Receipt } from "lucide-react";
+import { CalendarIcon, ArrowLeft, Trash2, Receipt, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   InsertProposal,
@@ -47,6 +47,30 @@ const formSchema = insertProposalSchema.extend({
   // Ex: proposta: z.string().min(1, "Número da proposta é obrigatório"),
 });
 
+interface ItemServico {
+  tipo: keyof typeof UNIDADES_SERVICO;
+  nome: string;
+  quantidade: number;
+  precoUnitario: number;
+  subtotal: number;
+}
+
+const UNIDADES_SERVICO = {
+  "Estrutura": "kg",
+  "Escada Metálica": "kg",
+  "Pergolado": "kg",
+  "Manta Termo Plástica": "m²",
+  "Escada Helicoidal": "kg",
+  "Laje": "m²",
+  "Telha": "m²",
+  "Cobertura Metálica": "m²",
+  "Manta PVC": "m²",
+  "Cobertura Policarbonato": "m²",
+  "Beiral": "m²",
+  "Reforço Metálico": "kg",
+  "Mezanino": "kg",
+};
+
 type Props = {
   editMode?: boolean;
   proposal?: SalesProposal;
@@ -59,12 +83,12 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   const queryClient = useQueryClient();
   const [_, navigate] = useLocation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  
+
   // Estado para controlar se os campos de comissão estão habilitados
   const [comissaoHabilitada, setComissaoHabilitada] = useState<boolean>(
     editMode ? (proposal?.percentComissao ? Number(proposal.percentComissao) > 0 : false) : false
   );
-  
+
   // Form setup
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -99,13 +123,13 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       clienteRecompra: "nao",
     },
   });
-  
+
   // Estado para data e serviços selecionados  
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     proposal?.dataProposta ? new Date(proposal.dataProposta) : undefined
   );
   const [serviceItems, setServiceItems] = useState<ItemServico[]>([]);
-  
+
   const handleServiceAdd = (tipo: keyof typeof UNIDADES_SERVICO) => {
     setServiceItems(prev => [...prev, {
       tipo,
@@ -134,12 +158,12 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   const handleServiceRemove = (index: number) => {
     setServiceItems(prev => prev.filter((_, i) => i !== index));
   };
-  
+
   // Atualizar o formulário quando a proposta mudar (importante para edições)
   useEffect(() => {
     if (editMode && proposal) {
       console.log("Atualizando formulário com proposta:", proposal);
-      
+
       // Reset do formulário com os dados novos
       form.reset({
         proposta: proposal.proposta || "",
@@ -161,15 +185,15 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
         tempoNegociacao: proposal.tempoNegociacao ? String(proposal.tempoNegociacao) : "",
         clienteRecompra: proposal.clienteRecompra as "sim" | "nao" || "nao",
       });
-      
+
       // Atualizar estados derivados
       setSelectedDate(proposal.dataProposta ? new Date(proposal.dataProposta) : undefined);
-      setSelectedServices((proposal.tiposServico as (typeof TIPOS_SERVICO)[number][]) || []);
+      //setSelectedServices((proposal.tiposServico as (typeof TIPOS_SERVICO)[number][]) || []);
     }
   }, [proposal, editMode, form]);
 
   const { watch } = form;
-  
+
   // Observar valores para cálculos em tempo real
   const watchValorTotal = watch("valorTotal");
   const watchPercentComissao = watch("percentComissao");
@@ -187,12 +211,12 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   const percentComissaoPaga = valorComissaoTotal > 0 
     ? (Number(watchValorComissaoPaga || 0) / valorComissaoTotal) * 100
     : 0;
-    
+
   // Calcular valor total do material quando peso e valor por quilo são preenchidos
   useEffect(() => {
     const pesoEstrutura = Number(watchPesoEstrutura) || 0;
     const valorPorQuilo = Number(watchValorPorQuilo) || 0;
-    
+
     if (pesoEstrutura > 0 && valorPorQuilo > 0) {
       const valorTotalMaterial = pesoEstrutura * valorPorQuilo;
       form.setValue("valorTotalMaterial", valorTotalMaterial.toString());
@@ -214,10 +238,10 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
           ? "A proposta foi atualizada com sucesso" 
           : "A nova proposta foi criada com sucesso",
       });
-      
+
       // Invalidar cache para atualizar lista
       queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
-      
+
       // Callback de sucesso ou navegação
       if (onSuccess) {
         onSuccess();
@@ -233,14 +257,14 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       });
     },
   });
-  
+
   // Mutation para excluir proposta
   const deleteMutation = useMutation({
     mutationFn: async () => {
       if (!proposal?.id) {
         throw new Error("ID da proposta não encontrado");
       }
-      
+
       await apiRequest("DELETE", `/api/proposals/${proposal.id}`);
     },
     onSuccess: () => {
@@ -248,10 +272,10 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
         title: "Proposta excluída",
         description: "A proposta foi excluída com sucesso",
       });
-      
+
       // Invalidar cache para atualizar lista
       queryClient.invalidateQueries({ queryKey: ['/api/proposals'] });
-      
+
       // Navegar de volta para a lista de propostas
       navigate("/propostas");
     },
@@ -265,13 +289,13 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   });
 
   // Lidar com mudanças nos serviços selecionados
-  const handleServicesChange = (service: (typeof TIPOS_SERVICO)[number], checked: boolean) => {
-    if (checked) {
-      setSelectedServices(prev => [...prev, service]);
-    } else {
-      setSelectedServices(prev => prev.filter(s => s !== service));
-    }
-  };
+  //const handleServicesChange = (service: (typeof TIPOS_SERVICO)[number], checked: boolean) => {
+  //  if (checked) {
+  //    setSelectedServices(prev => [...prev, service]);
+  //  } else {
+  //    setSelectedServices(prev => prev.filter(s => s !== service));
+  //  }
+  //};
 
   // Atualizar o form quando a data for selecionada
   useEffect(() => {
@@ -282,8 +306,8 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
 
   // Atualizar o form quando os serviços forem selecionados
   useEffect(() => {
-    form.setValue('tiposServico', selectedServices);
-  }, [selectedServices, form]);
+    //form.setValue('tiposServico', selectedServices);
+  }, [serviceItems, form]);
 
   // Submit form
   const onSubmit = (data: z.infer<typeof formSchema>) => {
@@ -304,13 +328,13 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
 
     // Precisamos manter os dados no formato correto para cada modo
     const dataToSend = { ...processedData };
-    
+
     // Lista de campos numéricos
     const numericFields = [
       'valorTotal', 'valorPago', 'percentComissao', 'valorComissaoPaga', 
       'pesoEstrutura', 'valorPorQuilo', 'valorTotalMaterial', 'tempoNegociacao'
     ];
-    
+
     // Se estiver no modo de edição, converte para numbers
     // Se estiver criando, garante que sejam strings
     if (editMode) {
@@ -331,14 +355,14 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
         }
       });
     }
-    
+
     // Converter para o formato esperado pela API
     const formattedData: any = {
       ...dataToSend,
-      tiposServico: selectedServices,
+      tiposServico: serviceItems.map(item => item.tipo),
       comissaoHabilitada: comissaoHabilitada ? "true" : "false" // Enviar como string conforme esperado pelo schema
     };
-    
+
     console.log("Enviando dados para API:", formattedData);
     mutation.mutate(formattedData);
   };
@@ -363,7 +387,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
             </Button>
             <CardTitle>{editMode ? "Editar Proposta" : "Nova Proposta"}</CardTitle>
           </div>
-          
+
           {/* Botões de ação (apenas no modo de edição) */}
           {editMode && (
             <div className="flex flex-col gap-2">
@@ -390,13 +414,13 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
           )}
         </div>
       </CardHeader>
-      
+
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <CardContent className="space-y-6">
           {/* Seção de dados básicos */}
           <div className="space-y-4">
             <h2 className="text-lg font-medium">Informações Básicas</h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="proposta">Número da Proposta</Label>
@@ -469,87 +493,87 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
 
           {/* Serviços */}
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-medium">Serviços</h2>
-              <Select onValueChange={handleServiceAdd}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Adicionar serviço" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIPOS_SERVICO.map((tipo) => (
-                    <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-medium">Serviços</h2>
+                <Select onValueChange={handleServiceAdd}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Adicionar serviço" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIPOS_SERVICO.map((tipo) => (
+                      <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-4">
+                {serviceItems.map((item, index) => (
+                  <div key={index} className="border rounded-lg p-4 space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-medium">{item.tipo}</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleServiceRemove(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="space-y-2">
+                        <Label>Nome do serviço</Label>
+                        <Input
+                          value={item.nome}
+                          onChange={(e) => handleServiceChange(index, 'nome', e.target.value)}
+                          placeholder="Nome do serviço"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Quantidade</Label>
+                        <Input
+                          type="number"
+                          value={item.quantidade}
+                          onChange={(e) => handleServiceChange(index, 'quantidade', parseFloat(e.target.value))}
+                          step="any"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Unidade</Label>
+                        <Input
+                          value={UNIDADES_SERVICO[item.tipo]}
+                          disabled
+                          className="bg-gray-50"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Preço unitário (R$)</Label>
+                        <Input
+                          type="number"
+                          value={item.precoUnitario}
+                          onChange={(e) => handleServiceChange(index, 'precoUnitario', parseFloat(e.target.value))}
+                          step="any"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="font-medium">Subtotal: </span>
+                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.subtotal)}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            
-            <div className="space-y-4">
-              {serviceItems.map((item, index) => (
-                <div key={index} className="border rounded-lg p-4 space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-medium">{item.tipo}</h3>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleServiceRemove(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="space-y-2">
-                      <Label>Nome do serviço</Label>
-                      <Input
-                        value={item.nome}
-                        onChange={(e) => handleServiceChange(index, 'nome', e.target.value)}
-                        placeholder="Nome do serviço"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Quantidade</Label>
-                      <Input
-                        type="number"
-                        value={item.quantidade}
-                        onChange={(e) => handleServiceChange(index, 'quantidade', parseFloat(e.target.value))}
-                        step="any"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Unidade</Label>
-                      <Input
-                        value={UNIDADES_SERVICO[item.tipo]}
-                        disabled
-                        className="bg-gray-50"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Preço unitário (R$)</Label>
-                      <Input
-                        type="number"
-                        value={item.precoUnitario}
-                        onChange={(e) => handleServiceChange(index, 'precoUnitario', parseFloat(e.target.value))}
-                        step="any"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="text-right">
-                    <span className="font-medium">Subtotal: </span>
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.subtotal)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* Detalhes do Projeto */}
           <div className="space-y-4">
             <h2 className="text-lg font-medium">Detalhes do Projeto</h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="tipoProjeto">Tipo de Projeto</Label>
@@ -650,7 +674,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="valorTotal">Valor Total da Proposta (R$)</Label>
@@ -741,7 +765,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
           {/* Informações Adicionais */}
           <div className="space-y-4">
             <h2 className="text-lg font-medium">Informações Adicionais</h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="tempoNegociacao">Tempo de Negociação (dias)</Label>
@@ -799,7 +823,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
                   onValueChange={(value) => form.setValue("clienteRecompra", value as "sim" | "nao")}
                   className="flex gap-4"
                 >
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x2">
                     <RadioGroupItem value="sim" id="recompra-sim" />
                     <Label htmlFor="recompra-sim" className="font-normal">Sim</Label>
                   </div>
@@ -812,7 +836,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
             </div>
           </div>
         </CardContent>
-        
+
         <CardFooter className="flex justify-between border-t pt-6">
           <Button 
             type="button" 
@@ -838,7 +862,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
           </Button>
         </CardFooter>
       </form>
-      
+
       {/* Diálogo de confirmação para excluir proposta */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
