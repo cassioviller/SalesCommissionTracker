@@ -48,7 +48,7 @@ export const salesProposals = pgTable("sales_proposals", {
   percentComissao: numeric("percent_comissao", { precision: 5, scale: 2 }).notNull(),
   valorComissaoPaga: numeric("valor_comissao_paga", { precision: 10, scale: 2 }).notNull(),
   comissaoHabilitada: text("comissao_habilitada").default("true").notNull(),
-  
+
   // Novos campos para proposta detalhada
   nomeCliente: text("nome_cliente"),
   tipoCliente: text("tipo_cliente"), // "Arquiteto", "Construtor", "Cliente Final"
@@ -67,9 +67,32 @@ export const salesProposals = pgTable("sales_proposals", {
 
 // Constantes para opções selecionáveis
 export const TIPOS_CLIENTE = ["Arquiteto", "Construtor", "Cliente Final", "Trafego Pago/Redes Sociais", "BNI", "POLO"] as const;
-export const TIPOS_SERVICO = ["Estrutura", "Telha", "Manta PVC", "Manta Termo Plástica", "Cobertura Metálica", 
-                              "Cobertura Policarbonato", "Escada Metálica", "Pergolado", "Beiral", 
-                              "Escada Helicoidal", "Mezanino", "Reforço Metálico", "Laje"] as const;
+export const UNIDADES_SERVICO = {
+  'Estrutura': 'kg',
+  'Escada Metálica': 'kg',
+  'Pergolado': 'kg',
+  'Manta Termo Plástica': 'm²',
+  'Escada Helicoidal': 'kg',
+  'Laje': 'm²',
+  'Telha': 'm²',
+  'Cobertura Metálica': 'm²',
+  'Manta PVC': 'm²',
+  'Cobertura Policarbonato': 'm²',
+  'Beiral': 'm²',
+  'Reforço Metálico': 'kg',
+  'Mezanino': 'kg',
+} as const;
+
+export const TIPOS_SERVICO = Object.keys(UNIDADES_SERVICO) as (keyof typeof UNIDADES_SERVICO)[];
+
+export type ItemServico = {
+  tipo: keyof typeof UNIDADES_SERVICO;
+  nome: string;
+  quantidade: number;
+  precoUnitario: number;
+  subtotal: number;
+};
+
 export const TIPOS_PROJETO = ["PE", "PE + PC", "Nenhum"] as const;
 export const TIPOS_CONTRATO = ["MP", "MO", "MP + MO"] as const;
 
@@ -81,7 +104,7 @@ export const insertProposalSchema = z.object({
   percentComissao: z.string(),
   valorComissaoPaga: z.string(),
   comissaoHabilitada: z.enum(["true", "false"]).default("true"),
-  
+
   // Campos opcionais para proposta detalhada
   nomeCliente: z.string().optional(),
   tipoCliente: z.enum(TIPOS_CLIENTE).optional(),
@@ -106,7 +129,7 @@ export const updateProposalSchema = z.object({
   percentComissao: z.number().min(0).max(100).optional(),
   valorComissaoPaga: z.number().nonnegative().optional(),
   comissaoHabilitada: z.enum(["true", "false"]).optional(),
-  
+
   // Campos opcionais para proposta detalhada
   nomeCliente: z.string().optional(),
   tipoCliente: z.enum(TIPOS_CLIENTE).optional(),

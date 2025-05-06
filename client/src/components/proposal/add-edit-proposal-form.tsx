@@ -104,9 +104,36 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     proposal?.dataProposta ? new Date(proposal.dataProposta) : undefined
   );
-  const [selectedServices, setSelectedServices] = useState<(typeof TIPOS_SERVICO)[number][]>(
-    (proposal?.tiposServico as (typeof TIPOS_SERVICO)[number][]) || []
-  );
+  const [serviceItems, setServiceItems] = useState<ItemServico[]>([]);
+  
+  const handleServiceAdd = (tipo: keyof typeof UNIDADES_SERVICO) => {
+    setServiceItems(prev => [...prev, {
+      tipo,
+      nome: '',
+      quantidade: 0,
+      precoUnitario: 0,
+      subtotal: 0
+    }]);
+  };
+
+  const handleServiceChange = (index: number, field: keyof ItemServico, value: any) => {
+    setServiceItems(prev => {
+      const newItems = [...prev];
+      newItems[index] = {
+        ...newItems[index],
+        [field]: value,
+        subtotal: field === 'quantidade' || field === 'precoUnitario' 
+          ? (field === 'quantidade' ? value : newItems[index].quantidade) * 
+            (field === 'precoUnitario' ? value : newItems[index].precoUnitario)
+          : newItems[index].subtotal
+      };
+      return newItems;
+    });
+  };
+
+  const handleServiceRemove = (index: number) => {
+    setServiceItems(prev => prev.filter((_, i) => i !== index));
+  };
   
   // Atualizar o formulário quando a proposta mudar (importante para edições)
   useEffect(() => {
@@ -440,25 +467,80 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
             </div>
           </div>
 
-          {/* Tipos de Serviço */}
+          {/* Serviços */}
           <div className="space-y-4">
-            <h2 className="text-lg font-medium">Tipos de Serviço</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-              {TIPOS_SERVICO.map((servico) => (
-                <div key={servico} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`servico-${servico}`}
-                    checked={selectedServices.includes(servico)}
-                    onCheckedChange={(checked) => 
-                      handleServicesChange(servico, checked as boolean)
-                    }
-                  />
-                  <label
-                    htmlFor={`servico-${servico}`}
-                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {servico}
-                  </label>
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-medium">Serviços</h2>
+              <Select onValueChange={handleServiceAdd}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Adicionar serviço" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIPOS_SERVICO.map((tipo) => (
+                    <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-4">
+              {serviceItems.map((item, index) => (
+                <div key={index} className="border rounded-lg p-4 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-medium">{item.tipo}</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleServiceRemove(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label>Nome do serviço</Label>
+                      <Input
+                        value={item.nome}
+                        onChange={(e) => handleServiceChange(index, 'nome', e.target.value)}
+                        placeholder="Nome do serviço"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Quantidade</Label>
+                      <Input
+                        type="number"
+                        value={item.quantidade}
+                        onChange={(e) => handleServiceChange(index, 'quantidade', parseFloat(e.target.value))}
+                        step="any"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Unidade</Label>
+                      <Input
+                        value={UNIDADES_SERVICO[item.tipo]}
+                        disabled
+                        className="bg-gray-50"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Preço unitário (R$)</Label>
+                      <Input
+                        type="number"
+                        value={item.precoUnitario}
+                        onChange={(e) => handleServiceChange(index, 'precoUnitario', parseFloat(e.target.value))}
+                        step="any"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="text-right">
+                    <span className="font-medium">Subtotal: </span>
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.subtotal)}
+                  </div>
                 </div>
               ))}
             </div>
@@ -607,7 +689,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
                   type="number"
                   min="0"
                   max="100"
-                  step="0.1"
+                  step="any"
                   placeholder="0.00"
                   disabled={!comissaoHabilitada}
                   className={!comissaoHabilitada ? "bg-gray-50" : ""}
