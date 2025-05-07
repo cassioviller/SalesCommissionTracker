@@ -5,11 +5,13 @@ import { apiRequest } from "@/lib/queryClient";
 import { SalesProposal } from "@shared/schema";
 import AddEditProposalForm from "@/components/proposal/add-edit-proposal-form";
 import NavigationHeader from "@/components/navigation-header";
+import ServiceManagerModal from "@/components/proposal/service-manager-modal";
 
 export default function EditProposalPage() {
   const [, params] = useRoute<{ id: string }>("/edit-proposal/:id");
   const proposalId = params?.id;
   const [proposal, setProposal] = useState<SalesProposal | null>(null);
+  const [isServiceManagerOpen, setIsServiceManagerOpen] = useState(false);
   
   const { data, isLoading, error, refetch } = useQuery<SalesProposal>({
     queryKey: [`/api/proposals/${proposalId}`],
@@ -70,6 +72,15 @@ export default function EditProposalPage() {
     <div className="h-screen bg-neutral-100 overflow-auto">
       <NavigationHeader />
       <div className="py-6 px-4 md:px-6">
+        <button 
+          id="service-manager-modal-button" 
+          className="hidden"
+          onClick={() => setIsServiceManagerOpen(true)}
+        />
+        <ServiceManagerModal 
+          isOpen={isServiceManagerOpen} 
+          onClose={() => setIsServiceManagerOpen(false)} 
+        />
         <AddEditProposalForm editMode proposal={proposal} />
       </div>
     </div>

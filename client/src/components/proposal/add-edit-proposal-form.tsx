@@ -303,8 +303,11 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       ...dataToSend,
       tiposServico: selectedServices,
       detalhesServicos: serviceDetails,
-      comissaoHabilitada: comissaoHabilitada ? "true" : "false" // Enviar como string conforme esperado pelo schema
+      comissaoHabilitada: comissaoHabilitada ? (editMode ? true : "true") : (editMode ? false : "false") // Formatos diferentes para POST e PATCH
     };
+    
+    // Verificar o valor da comissão habilitada
+    console.log("Enviando comissaoHabilitada:", formattedData.comissaoHabilitada, typeof formattedData.comissaoHabilitada);
     
     // Garantir que detalhesServicos estejam completos e com subtotais calculados
     if (serviceDetails && serviceDetails.length > 0) {
