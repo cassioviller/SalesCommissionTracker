@@ -53,6 +53,7 @@ export const salesProposals = pgTable("sales_proposals", {
   nomeCliente: text("nome_cliente"),
   tipoCliente: text("tipo_cliente"), // "Arquiteto", "Construtor", "Cliente Final"
   tiposServico: json("tipos_servico").$type<string[]>().default([]), // Array de serviços
+  detalhesServicos: json("detalhes_servicos").$type<ServicoDetalhe[]>().default([]), // Detalhes dos serviços
   dataProposta: date("data_proposta"),
   tipoProjeto: text("tipo_projeto"), // "PE", "PE + PC", "Nenhum"
   tipoContrato: text("tipo_contrato"), // "MP", "MO", "MP + MO"
@@ -70,8 +71,21 @@ export const TIPOS_CLIENTE = ["Arquiteto", "Construtor", "Cliente Final", "Trafe
 export const TIPOS_SERVICO = ["Estrutura", "Telha", "Manta PVC", "Manta Termo Plástica", "Cobertura Metálica", 
                               "Cobertura Policarbonato", "Escada Metálica", "Pergolado", "Beiral", 
                               "Escada Helicoidal", "Mezanino", "Reforço Metálico", "Laje"] as const;
+export const TIPOS_UNIDADE = ["kg", "m²", "m", "uni", "vb", "pç"] as const;
 export const TIPOS_PROJETO = ["PE", "PE + PC", "Nenhum"] as const;
 export const TIPOS_CONTRATO = ["MP", "MO", "MP + MO"] as const;
+
+// Interface para detalhes do serviço
+export interface ServicoDetalhe {
+  tipo: string; // Tipo do serviço
+  quantidade: number; // Quantidade
+  unidade: typeof TIPOS_UNIDADE[number]; // Unidade de medida
+  precoUnitario: number; // Preço unitário
+  subtotal: number; // Subtotal calculado
+}
+
+// Array de serviços detalhados
+export type ServicosDetalhados = ServicoDetalhe[];
 
 // For frontend use: we still accept strings for the form input
 export const insertProposalSchema = z.object({
@@ -86,6 +100,15 @@ export const insertProposalSchema = z.object({
   nomeCliente: z.string().optional(),
   tipoCliente: z.enum(TIPOS_CLIENTE).optional(),
   tiposServico: z.array(z.enum(TIPOS_SERVICO)).optional(),
+  detalhesServicos: z.array(
+    z.object({
+      tipo: z.string(),
+      quantidade: z.number(),
+      unidade: z.enum(TIPOS_UNIDADE),
+      precoUnitario: z.number(),
+      subtotal: z.number()
+    })
+  ).optional(),
   dataProposta: z.string().optional(), // data em formato string
   tipoProjeto: z.enum(TIPOS_PROJETO).optional(),
   tipoContrato: z.enum(TIPOS_CONTRATO).optional(),
@@ -111,6 +134,15 @@ export const updateProposalSchema = z.object({
   nomeCliente: z.string().optional(),
   tipoCliente: z.enum(TIPOS_CLIENTE).optional(),
   tiposServico: z.array(z.enum(TIPOS_SERVICO)).optional(),
+  detalhesServicos: z.array(
+    z.object({
+      tipo: z.string(),
+      quantidade: z.number(),
+      unidade: z.enum(TIPOS_UNIDADE),
+      precoUnitario: z.number(),
+      subtotal: z.number()
+    })
+  ).optional(),
   dataProposta: z.string().optional(), // data em formato string
   tipoProjeto: z.enum(TIPOS_PROJETO).optional(),
   tipoContrato: z.enum(TIPOS_CONTRATO).optional(),

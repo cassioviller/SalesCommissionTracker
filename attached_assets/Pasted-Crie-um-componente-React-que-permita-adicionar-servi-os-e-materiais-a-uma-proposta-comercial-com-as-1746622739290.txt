@@ -1,0 +1,48 @@
+Crie um componente React que permita adicionar serviços e materiais a uma proposta comercial, com as seguintes funcionalidades:
+
+---
+
+**1. Correção do Problema de Salvamento**
+
+- Corrigir o bug onde, ao atualizar a proposta, os valores digitados (quantidade, unidade, preço unitário, subtotal) são perdidos.
+- Certifique-se de que:
+  - O estado do formulário seja atualizado corretamente via `useState`.
+  - O evento de salvar (submit/update) envie os dados completos para o backend (via API ou persistência local).
+  - O backend responda com sucesso antes de exibir a notificação “Proposta atualizada com sucesso”.
+  - Após salvar, os dados devem continuar visíveis no componente e também na listagem da proposta.
+
+---
+
+**2. Dropdown para Seleção de Unidade de Medida**
+
+Substitua o campo "Unidade" por um dropdown com as seguintes opções fixas:
+
+| Nome da Unidade | Valor (sigla) |
+|------------------|----------------|
+| Quilograma       | `kg`           |
+| Metro quadrado   | `m²`           |
+| Metro linear     | `m`            |
+| Unidade          | `uni`          |
+| Valor bruto      | `vb`           |
+| Peça             | `pç`           |
+
+- O dropdown deve exibir o **nome da unidade** (ex: "Metro quadrado") e salvar internamente a **sigla** (ex: `"m²"`).
+- O campo deve ser obrigatório.
+- Ao editar um serviço já salvo, o dropdown deve mostrar a unidade previamente escolhida.
+
+---
+
+**3. Cálculo e Atualização Dinâmica**
+
+- Ao preencher **quantidade** e **preço unitário**, calcular automaticamente o **subtotal**.
+- Somar todos os subtotais para exibir o **Valor Total Material (R$)**.
+- Se a unidade for `vb` (valor bruto), ainda assim permitir o campo de preço, mas desabilitar o campo de quantidade ou deixar sempre 1 por padrão.
+
+---
+
+**4. Extras**
+
+- Exibir uma tabela com os serviços adicionados: Tipo, Quantidade, Unidade, Preço Unitário, Subtotal, Ações (Editar/Remover).
+- Permitir editar qualquer serviço clicando em “Editar” (trazendo de volta os dados ao formulário).
+- Todos os valores devem ser exibidos com formatação de moeda brasileira (`R$ 0.000,00`).
+
