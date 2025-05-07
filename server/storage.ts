@@ -166,6 +166,11 @@ export class DatabaseStorage implements IStorage {
       dbUpdateData.tiposServico = updateData.tiposServico;
     }
     
+    // Detalhes de serviços (IMPORTANTE: preservar durante a atualização)
+    if ('detalhesServicos' in updateData) {
+      dbUpdateData.detalhesServicos = updateData.detalhesServicos;
+    }
+    
     // console.log('Atualizando proposta:', id, 'com dados:', dbUpdateData);
     
     const [updatedProposal] = await db
