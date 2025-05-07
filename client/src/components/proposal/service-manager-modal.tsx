@@ -66,8 +66,13 @@ export default function ServiceManagerModal({
       return;
     }
 
-    // Aqui precisaria de uma chamada de API para adicionar efetivamente o serviço
-    // Por enquanto, apenas atualizamos a lista local
+    // Adicionar o serviço à lista global TIPOS_SERVICO
+    // Esta é uma modificação temporária da lista em memória
+    // Uma solução completa exigiria que esses serviços fossem armazenados no banco de dados
+    // @ts-ignore - Isso permite modificar TIPOS_SERVICO mesmo sendo const
+    TIPOS_SERVICO.push(newServiceName);
+    
+    // Atualizar a lista local de serviços
     setServices((prev) => [...prev, newServiceName]);
     
     toast({

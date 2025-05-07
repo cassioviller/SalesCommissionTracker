@@ -303,7 +303,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       ...dataToSend,
       tiposServico: selectedServices,
       detalhesServicos: serviceDetails,
-      comissaoHabilitada: comissaoHabilitada ? (editMode ? true : "true") : (editMode ? false : "false") // Formatos diferentes para POST e PATCH
+      comissaoHabilitada: comissaoHabilitada ? "true" : "false" // Sempre enviar como string
     };
     
     // Verificar o valor da comissão habilitada
