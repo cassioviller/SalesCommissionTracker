@@ -8,7 +8,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Calendar } from "@/components/ui/calendar";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +39,7 @@ import {
   insertProposalSchema
 } from "@shared/schema";
 import { Link, useLocation } from "wouter";
+import ServiceSelector from "./service-selector";
 
 // Estendendo o schema para validação de formulário
 const formSchema = insertProposalSchema.extend({
@@ -237,14 +237,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
     },
   });
 
-  // Lidar com mudanças nos serviços selecionados
-  const handleServicesChange = (service: (typeof TIPOS_SERVICO)[number], checked: boolean) => {
-    if (checked) {
-      setSelectedServices(prev => [...prev, service]);
-    } else {
-      setSelectedServices(prev => prev.filter(s => s !== service));
-    }
-  };
+  // Função para manipular serviços removida, agora tratada pelo componente ServiceSelector
 
   // Atualizar o form quando a data for selecionada
   useEffect(() => {
@@ -442,26 +435,15 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
 
           {/* Tipos de Serviço */}
           <div className="space-y-4">
-            <h2 className="text-lg font-medium">Tipos de Serviço</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-              {TIPOS_SERVICO.map((servico) => (
-                <div key={servico} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`servico-${servico}`}
-                    checked={selectedServices.includes(servico)}
-                    onCheckedChange={(checked) => 
-                      handleServicesChange(servico, checked as boolean)
-                    }
-                  />
-                  <label
-                    htmlFor={`servico-${servico}`}
-                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {servico}
-                  </label>
-                </div>
-              ))}
-            </div>
+            <h2 className="text-lg font-medium">Tipos de Serviço e Materiais</h2>
+            <ServiceSelector
+              initialServices={selectedServices}
+              initialMaterialValue={form.getValues("valorTotalMaterial")}
+              onChange={(services, valorTotalMaterial) => {
+                setSelectedServices(services);
+                form.setValue("valorTotalMaterial", valorTotalMaterial.toString());
+              }}
+            />
           </div>
 
           {/* Detalhes do Projeto */}

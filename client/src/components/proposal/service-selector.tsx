@@ -32,9 +32,9 @@ interface ServicoDetalhe {
 
 // Props para o componente
 interface ServiceSelectorProps {
-  initialServices?: string[];
+  initialServices?: Array<typeof TIPOS_SERVICO[number]>;
   initialMaterialValue?: string;
-  onChange: (services: string[], valorTotalMaterial: number) => void;
+  onChange: (services: Array<typeof TIPOS_SERVICO[number]>, valorTotalMaterial: number) => void;
 }
 
 // Formatar valores em Reais
@@ -54,10 +54,10 @@ export default function ServiceSelector({
 }: ServiceSelectorProps) {
   // Estados
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredServices, setFilteredServices] = useState<string[]>([]);
-  const [selectedServices, setSelectedServices] = useState<string[]>(initialServices);
+  const [filteredServices, setFilteredServices] = useState<Array<typeof TIPOS_SERVICO[number]>>([]);
+  const [selectedServices, setSelectedServices] = useState<Array<typeof TIPOS_SERVICO[number]>>(initialServices || []);
   const [serviceDetails, setServiceDetails] = useState<ServicoDetalhe[]>([]);
-  const [currentService, setCurrentService] = useState<string | null>(null);
+  const [currentService, setCurrentService] = useState<typeof TIPOS_SERVICO[number] | null>(null);
   const [quantidade, setQuantidade] = useState<number>(0);
   const [precoUnitario, setPrecoUnitario] = useState<number>(0);
   const [valorTotalMaterial, setValorTotalMaterial] = useState<number>(Number(initialMaterialValue) || 0);
@@ -65,12 +65,12 @@ export default function ServiceSelector({
   // Atualizar serviços filtrados baseado no termo de busca
   useEffect(() => {
     if (searchTerm.trim() === "") {
-      setFilteredServices(TIPOS_SERVICO);
+      setFilteredServices([...TIPOS_SERVICO]);
     } else {
       const filtered = TIPOS_SERVICO.filter(service =>
         service.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setFilteredServices(filtered);
+      setFilteredServices([...filtered]);
     }
   }, [searchTerm]);
 
@@ -287,7 +287,7 @@ export default function ServiceSelector({
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          setCurrentService(detail.tipo);
+                          setCurrentService(detail.tipo as typeof TIPOS_SERVICO[number]);
                           setQuantidade(detail.quantidade);
                           setPrecoUnitario(detail.precoUnitario);
                         }}
