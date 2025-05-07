@@ -538,11 +538,11 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
               initialDetails={serviceDetails}
               onChange={(services, valorTotalMaterial, detalhes) => {
                 // Atualizando estado e formulário com os novos valores
-                setSelectedServices(services as any);
+                setSelectedServices(services);
                 setServiceDetails(detalhes);
                 
                 // Atualizar valores no formulário
-                form.setValue("tiposServico", services as any);
+                form.setValue("tiposServico", services);
                 form.setValue("valorTotalMaterial", valorTotalMaterial.toString());
                 form.setValue("detalhesServicos", detalhes);
                 
