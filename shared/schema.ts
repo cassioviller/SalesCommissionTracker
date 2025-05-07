@@ -109,8 +109,8 @@ export const insertProposalSchema = z.object({
     })
   ).optional(),
   dataProposta: z.string().optional(), // data em formato string
-  tipoProjeto: z.enum(TIPOS_PROJETO).optional(),
-  tipoContrato: z.enum(TIPOS_CONTRATO).optional(),
+  tipoProjeto: z.enum(TIPOS_PROJETO).nullable().optional(),
+  tipoContrato: z.enum(TIPOS_CONTRATO).nullable().optional(),
   pesoEstrutura: z.string().optional(), // número em formato string
   valorPorQuilo: z.string().optional(), // número em formato string
   valorTotalMaterial: z.string().optional(), // número em formato string
@@ -143,9 +143,9 @@ export const updateProposalSchema = z.object({
     })
   ).optional(),
   dataProposta: z.string().optional(), // data em formato string
-  tipoProjeto: z.enum(TIPOS_PROJETO).optional(),
-  tipoContrato: z.enum(TIPOS_CONTRATO).optional(),
-  pesoEstrutura: z.number().nonnegative().optional(),
+  tipoProjeto: z.enum(TIPOS_PROJETO).nullable().optional(),
+  tipoContrato: z.enum(TIPOS_CONTRATO).nullable().optional(),
+  pesoEstrutura: z.number().nonnegative().nullable().optional(),
   valorPorQuilo: z.number().nonnegative().optional(),
   valorTotalMaterial: z.number().nonnegative().optional(),
   recomendacaoDireta: z.enum(["sim", "nao"]).optional(),
