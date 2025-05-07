@@ -2,11 +2,18 @@ import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X, Plus, Search } from "lucide-react";
-import { TIPOS_SERVICO } from "@shared/schema";
+import { X, Plus, Search, ChevronDown } from "lucide-react";
+import { TIPOS_SERVICO, TIPOS_UNIDADE } from "@shared/schema";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-// Tabela de correspondência para as unidades de medida
-const UNIDADES_MEDIDA: Record<string, string> = {
+// Tabela de correspondência padrão para as unidades de medida
+const UNIDADES_MEDIDA_PADRÃO: Record<string, typeof TIPOS_UNIDADE[number]> = {
   "Estrutura": "kg",
   "Escada Metálica": "kg",
   "Pergolado": "kg",
@@ -22,10 +29,11 @@ const UNIDADES_MEDIDA: Record<string, string> = {
   "Mezanino": "kg"
 };
 
-// Interface para detalhes de um serviço
+// Interface para detalhes de um serviço (versão local)
 interface ServicoDetalhe {
   tipo: typeof TIPOS_SERVICO[number];
   quantidade: number;
+  unidade: typeof TIPOS_UNIDADE[number];
   precoUnitario: number;
   subtotal: number;
 }
@@ -34,7 +42,8 @@ interface ServicoDetalhe {
 interface ServiceSelectorProps {
   initialServices?: Array<typeof TIPOS_SERVICO[number]>;
   initialMaterialValue?: string;
-  onChange: (services: Array<typeof TIPOS_SERVICO[number]>, valorTotalMaterial: number) => void;
+  initialDetails?: ServicoDetalhe[];
+  onChange: (services: Array<typeof TIPOS_SERVICO[number]>, valorTotalMaterial: number, detalhes: ServicoDetalhe[]) => void;
 }
 
 // Formatar valores em Reais
@@ -50,15 +59,17 @@ const formatCurrency = (value: number): string => {
 export default function ServiceSelector({
   initialServices = [],
   initialMaterialValue = "0",
+  initialDetails = [],
   onChange
 }: ServiceSelectorProps) {
   // Estados
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredServices, setFilteredServices] = useState<Array<typeof TIPOS_SERVICO[number]>>([]);
   const [selectedServices, setSelectedServices] = useState<Array<typeof TIPOS_SERVICO[number]>>(initialServices || []);
-  const [serviceDetails, setServiceDetails] = useState<ServicoDetalhe[]>([]);
+  const [serviceDetails, setServiceDetails] = useState<ServicoDetalhe[]>(initialDetails || []);
   const [currentService, setCurrentService] = useState<typeof TIPOS_SERVICO[number] | null>(null);
   const [quantidade, setQuantidade] = useState<number>(0);
+  const [unidade, setUnidade] = useState<typeof TIPOS_UNIDADE[number]>("kg");
   const [precoUnitario, setPrecoUnitario] = useState<number>(0);
   const [valorTotalMaterial, setValorTotalMaterial] = useState<number>(Number(initialMaterialValue) || 0);
 
@@ -74,6 +85,14 @@ export default function ServiceSelector({
     }
   }, [searchTerm]);
 
+  // Usar a unidade padrão quando um serviço for selecionado
+  useEffect(() => {
+    if (currentService) {
+      const unidadePadrao = UNIDADES_MEDIDA_PADRÃO[currentService] || "kg";
+      setUnidade(unidadePadrao);
+    }
+  }, [currentService]);
+
   // Calcular subtotal
   const subtotal = quantidade * precoUnitario;
 
@@ -84,6 +103,7 @@ export default function ServiceSelector({
     const newDetail: ServicoDetalhe = {
       tipo: currentService,
       quantidade,
+      unidade,
       precoUnitario,
       subtotal
     };
@@ -118,7 +138,7 @@ export default function ServiceSelector({
     setValorTotalMaterial(total);
     
     // Notificar o componente pai sobre as mudanças
-    onChange(selectedServices, total);
+    onChange(selectedServices, total, serviceDetails);
   }, [serviceDetails, selectedServices, onChange]);
 
   return (
@@ -192,12 +212,21 @@ export default function ServiceSelector({
             
             <div className="space-y-2">
               <Label htmlFor="unidade">Unidade</Label>
-              <Input
-                id="unidade"
-                value={UNIDADES_MEDIDA[currentService] || "un"}
-                disabled
-                className="bg-gray-100"
-              />
+              <Select
+                value={unidade}
+                onValueChange={(value) => setUnidade(value as typeof TIPOS_UNIDADE[number])}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione a unidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIPOS_UNIDADE.map((un) => (
+                    <SelectItem key={un} value={un}>
+                      {un}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">
@@ -274,7 +303,7 @@ export default function ServiceSelector({
                       {detail.quantidade.toLocaleString('pt-BR')}
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center">
-                      {UNIDADES_MEDIDA[detail.tipo] || "un"}
+                      {detail.unidade}
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-right">
                       {formatCurrency(detail.precoUnitario)}
@@ -287,8 +316,9 @@ export default function ServiceSelector({
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          setCurrentService(detail.tipo as typeof TIPOS_SERVICO[number]);
+                          setCurrentService(detail.tipo);
                           setQuantidade(detail.quantidade);
+                          setUnidade(detail.unidade);
                           setPrecoUnitario(detail.precoUnitario);
                         }}
                         className="mr-1"
