@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { X, Plus, Search, ChevronDown, Check, Info } from "lucide-react";
-import { TIPOS_SERVICO, TIPOS_UNIDADE } from "@shared/schema";
+import { TIPOS_SERVICO, TIPOS_UNIDADE, ServicoDetalhe } from "@shared/schema";
 import {
   Select,
   SelectContent,
@@ -30,21 +30,14 @@ const UNIDADES_MEDIDA_PADRÃO: Record<string, typeof TIPOS_UNIDADE[number]> = {
   "Mezanino": "kg"
 };
 
-// Interface para detalhes de um serviço (versão local)
-interface ServicoDetalhe {
-  tipo: typeof TIPOS_SERVICO[number];
-  quantidade: number;
-  unidade: typeof TIPOS_UNIDADE[number];
-  precoUnitario: number;
-  subtotal: number;
-}
+// Usando ServicoDetalhe do schema compartilhado
 
 // Props para o componente
 interface ServiceSelectorProps {
-  initialServices?: Array<typeof TIPOS_SERVICO[number]>;
+  initialServices?: Array<string>;
   initialMaterialValue?: string;
   initialDetails?: ServicoDetalhe[];
-  onChange: (services: Array<typeof TIPOS_SERVICO[number]>, valorTotalMaterial: number, detalhes: ServicoDetalhe[]) => void;
+  onChange: (services: Array<string>, valorTotalMaterial: number, detalhes: ServicoDetalhe[]) => void;
 }
 
 // Formatar valores em Reais
@@ -66,12 +59,12 @@ export default function ServiceSelector({
   // Estados
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredServices, setFilteredServices] = useState<Array<typeof TIPOS_SERVICO[number]>>([]);
-  const [selectedServices, setSelectedServices] = useState<Array<typeof TIPOS_SERVICO[number]>>(initialServices || []);
+  const [filteredServices, setFilteredServices] = useState<Array<string>>([]);
+  const [selectedServices, setSelectedServices] = useState<Array<string>>(initialServices || []);
   const [serviceDetails, setServiceDetails] = useState<ServicoDetalhe[]>(initialDetails || []);
-  const [currentService, setCurrentService] = useState<typeof TIPOS_SERVICO[number] | null>(null);
+  const [currentService, setCurrentService] = useState<string | null>(null);
   const [quantidade, setQuantidade] = useState<number>(0);
-  const [unidade, setUnidade] = useState<typeof TIPOS_UNIDADE[number]>("kg");
+  const [unidade, setUnidade] = useState<string>("kg");
   const [precoUnitario, setPrecoUnitario] = useState<number>(0);
   const [valorTotalMaterial, setValorTotalMaterial] = useState<number>(Number(initialMaterialValue) || 0);
   const [isEditing, setIsEditing] = useState(false);
@@ -136,7 +129,7 @@ export default function ServiceSelector({
     if (!validateForm()) return;
 
     const newDetail: ServicoDetalhe = {
-      tipo: currentService!,
+      tipo: currentService! as string,
       quantidade,
       unidade,
       precoUnitario,
@@ -237,7 +230,7 @@ export default function ServiceSelector({
     // Apenas inicializa uma vez para evitar problemas com re-renderizações
     if (!initializedRef.current) {
       let details: ServicoDetalhe[] = [];
-      let services: Array<typeof TIPOS_SERVICO[number]> = [];
+      let services: Array<string> = [];
       
       if (initialDetails && initialDetails.length > 0) {
         details = [...initialDetails];
@@ -259,7 +252,7 @@ export default function ServiceSelector({
       
       // Configura os estados
       setServiceDetails(details);
-      setSelectedServices(services);
+      setSelectedServices(services as any);
       
       // Calcula o valor total para os detalhes iniciais
       const total = details.reduce((sum, detail) => sum + detail.subtotal, 0);

@@ -303,6 +303,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
     const formattedData: any = {
       ...dataToSend,
       tiposServico: selectedServices,
+      detalhesServicos: serviceDetails,
       comissaoHabilitada: comissaoHabilitada ? "true" : "false" // Enviar como string conforme esperado pelo schema
     };
     
@@ -440,11 +441,21 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
             <ServiceSelector
               initialServices={selectedServices}
               initialMaterialValue={form.getValues("valorTotalMaterial")}
+              initialDetails={serviceDetails}
               onChange={(services, valorTotalMaterial, detalhes) => {
                 setSelectedServices(services);
+                setServiceDetails(detalhes);
                 form.setValue("valorTotalMaterial", valorTotalMaterial.toString());
-                // Armazenar detalhes para passar para a API posteriormente
                 form.setValue("detalhesServicos", detalhes);
+                
+                // Calcular o peso da estrutura baseado em serviços com unidade "kg"
+                const pesoTotal = detalhes
+                  .filter(detalhe => detalhe.unidade === 'kg')
+                  .reduce((total, detalhe) => total + detalhe.quantidade, 0);
+                
+                if (pesoTotal > 0) {
+                  form.setValue('pesoEstrutura', pesoTotal.toString());
+                }
               }}
             />
           </div>

@@ -215,4 +215,5 @@ export interface ProposalWithCalculations extends SalesProposal {
   percentComissaoPaga: number;
   pagamentosProposta?: PagamentoProposta[];
   pagamentosComissao?: PagamentoComissao[];
+  detalhesServicos?: ServicoDetalhe[];
 }

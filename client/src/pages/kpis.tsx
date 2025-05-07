@@ -117,8 +117,24 @@ export default function KPIs() {
       mesesAtivos = Math.max(1, mesesDiferenca);
     }
     
-    // Peso médio por mês com base no intervalo real
-    const pesoTotal = proposals.reduce((sum, p) => sum + (Number(p.pesoEstrutura) || 0), 0);
+    // Peso médio por mês com base no intervalo real e na soma dos itens com unidade "kg"
+    // Se temos detalhes de serviço, usamos eles para cálculos mais precisos
+    let pesoTotal = 0;
+    
+    for (const p of proposals) {
+      if (p.detalhesServicos && p.detalhesServicos.length > 0) {
+        // Soma apenas os serviços com unidade "kg"
+        const pesoServicos = p.detalhesServicos
+          .filter(s => s.unidade === 'kg')
+          .reduce((sum, s) => sum + s.quantidade, 0);
+          
+        pesoTotal += pesoServicos;
+      } else if (p.pesoEstrutura) {
+        // Fallback para o campo pesoEstrutura se não houver detalhes
+        pesoTotal += Number(p.pesoEstrutura);
+      }
+    }
+    
     const pesoMedioPorMes = pesoTotal / mesesAtivos;
     
     // Tempo médio de negociação
