@@ -82,7 +82,7 @@ export default function ServiceManagerModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
             Gerenciar Tipos de Serviço
@@ -105,7 +105,7 @@ export default function ServiceManagerModal({
 
           {/* Lista de serviços */}
           <div className="border rounded-md overflow-hidden">
-            <div className="max-h-[300px] overflow-y-auto">
+            <div className="max-h-[200px] overflow-y-auto">
               {filteredServices.length > 0 ? (
                 <div className="divide-y">
                   {filteredServices.map((service) => (
