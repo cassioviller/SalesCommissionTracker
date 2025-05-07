@@ -53,6 +53,7 @@ export const salesProposals = pgTable("sales_proposals", {
   nomeCliente: text("nome_cliente"),
   tipoCliente: text("tipo_cliente"), // "Arquiteto", "Construtor", "Cliente Final"
   tiposServico: json("tipos_servico").$type<string[]>().default([]), // Array de serviços
+  detalhesServicos: json("detalhes_servicos").$type<ServicoDetalhe[]>().default([]), // Detalhes dos serviços
   dataProposta: date("data_proposta"),
   tipoProjeto: text("tipo_projeto"), // "PE", "PE + PC", "Nenhum"
   tipoContrato: text("tipo_contrato"), // "MP", "MO", "MP + MO"
