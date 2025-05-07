@@ -495,7 +495,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
           <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h2 className="text-lg font-medium">Serviços</h2>
-                <Command className="w-[200px]">
+                <Command.Root className="w-[200px]">
                 <CommandInput placeholder="Buscar serviço..." className="h-9" />
                 <CommandList>
                   <CommandEmpty>Nenhum serviço encontrado.</CommandEmpty>
