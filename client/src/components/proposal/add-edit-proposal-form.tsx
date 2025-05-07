@@ -428,9 +428,11 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
             <ServiceSelector
               initialServices={selectedServices}
               initialMaterialValue={form.getValues("valorTotalMaterial")}
-              onChange={(services, valorTotalMaterial) => {
+              onChange={(services, valorTotalMaterial, detalhes) => {
                 setSelectedServices(services);
                 form.setValue("valorTotalMaterial", valorTotalMaterial.toString());
+                // Armazenar detalhes para passar para a API posteriormente
+                form.setValue("detalhesServicos", detalhes);
               }}
             />
           </div>
