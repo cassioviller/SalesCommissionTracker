@@ -28,6 +28,14 @@ import {
   AlertDialogHeader, 
   AlertDialogTitle
 } from "@/components/ui/alert-dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from "@/components/ui/command";
 import { CalendarIcon, ArrowLeft, Trash2, Receipt, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
