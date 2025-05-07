@@ -73,7 +73,8 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
   const [isPaymentHistoryModalOpen, setIsPaymentHistoryModalOpen] = useState(false);
   const [selectedProposalId, setSelectedProposalId] = useState<number | null>(null);
   const [selectedProposalName, setSelectedProposalName] = useState("");
-
+  const [searchTerm, setSearchTerm] = useState("");
+  
   // Estado para armazenar os dados da proposta selecionada com os pagamentos
   const { data: selectedProposalDetails } = useQuery({
     queryKey: ['/api/proposals', selectedProposalId],
@@ -86,8 +87,18 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
   });
 
   useEffect(() => {
-    setLocalProposals(proposals);
-  }, [proposals]);
+    if (!searchTerm.trim()) {
+      setLocalProposals(proposals);
+    } else {
+      const lowerSearchTerm = searchTerm.toLowerCase().trim();
+      const filtered = proposals.filter(
+        proposal => 
+          proposal.proposta.toLowerCase().includes(lowerSearchTerm) ||
+          (proposal.nomeCliente && proposal.nomeCliente.toLowerCase().includes(lowerSearchTerm))
+      );
+      setLocalProposals(filtered);
+    }
+  }, [proposals, searchTerm]);
 
   // Funções para abrir o modal de histórico de pagamentos
   const handleOpenPaymentHistory = (proposal: ProposalWithCalculations) => {
@@ -416,25 +427,53 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       {/* Barra de ferramentas */}
-      <div className="flex justify-end items-center gap-2 p-3 border-b">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex items-center gap-1 text-sm"
-          onClick={exportToCSV}
-        >
-          <FileText className="h-4 w-4" />
-          Exportar CSV
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex items-center gap-1 text-sm"
-          onClick={exportToPDF}
-        >
-          <FileDown className="h-4 w-4" />
-          Exportar PDF
-        </Button>
+      <div className="flex justify-between items-center gap-2 p-3 border-b">
+        {/* Campo de pesquisa */}
+        <div className="relative w-full max-w-md">
+          <Input
+            type="text"
+            placeholder="Pesquisar por número da proposta ou nome do cliente..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8 text-sm"
+          />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4 absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+        
+        {/* Botões de exportação */}
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1 text-sm"
+            onClick={exportToCSV}
+          >
+            <FileText className="h-4 w-4" />
+            Exportar CSV
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1 text-sm"
+            onClick={exportToPDF}
+          >
+            <FileDown className="h-4 w-4" />
+            Exportar PDF
+          </Button>
+        </div>
       </div>
 
       {/* Tabela */}
