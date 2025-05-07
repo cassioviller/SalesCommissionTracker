@@ -99,6 +99,12 @@ export default function Comissoes() {
         </div>
       </main>
 
+      
+      {/* Modal de Gerenciamento de Serviços */}
+      <ServiceManagerModal 
+        isOpen={isServiceModalOpen} 
+        onClose={() => setIsServiceModalOpen(false)} 
+      />
     </div>
   );
 }

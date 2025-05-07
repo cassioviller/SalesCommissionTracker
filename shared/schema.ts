@@ -226,7 +226,7 @@ export type PagamentoProposta = typeof pagamentoPropostas.$inferSelect;
 export type InsertPagamentoComissao = z.infer<typeof insertPagamentoComissaoSchema>;
 export type PagamentoComissao = typeof pagamentoComissoes.$inferSelect;
 
-export interface ProposalWithCalculations extends SalesProposal {
+export interface ProposalWithCalculations extends Omit<SalesProposal, 'detalhesServicos'> {
   saldoAberto: number;
   valorComissaoTotal: number;
   valorComissaoEmAberto: number;
