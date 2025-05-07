@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X, Plus, Search, ChevronDown, Check } from "lucide-react";
+import { X, Plus, Search, ChevronDown, Check, Info } from "lucide-react";
 import { TIPOS_SERVICO, TIPOS_UNIDADE } from "@shared/schema";
 import {
   Select,
@@ -146,11 +146,12 @@ export default function ServiceSelector({
     // Verificar se o serviço já existe
     const existingIndex = serviceDetails.findIndex(d => d.tipo === currentService);
     
+    let updatedDetails: ServicoDetalhe[];
+    
     if (existingIndex >= 0) {
       // Atualizar serviço existente
-      const updatedDetails = [...serviceDetails];
+      updatedDetails = [...serviceDetails];
       updatedDetails[existingIndex] = newDetail;
-      setServiceDetails(updatedDetails);
       
       toast({
         title: "Serviço atualizado",
@@ -158,14 +159,24 @@ export default function ServiceSelector({
       });
     } else {
       // Adicionar novo serviço
-      setServiceDetails(prev => [...prev, newDetail]);
-      setSelectedServices(prev => [...prev, currentService!]);
+      updatedDetails = [...serviceDetails, newDetail];
       
       toast({
         title: "Serviço adicionado",
         description: `${currentService} adicionado com sucesso!`,
       });
     }
+    
+    // Atualizar o estado em uma única operação para evitar inconsistências
+    setServiceDetails(updatedDetails);
+    
+    // Sempre reconstruir a lista de serviços selecionados a partir dos detalhes
+    const updatedServiceTypes = updatedDetails.map(detail => detail.tipo);
+    setSelectedServices(updatedServiceTypes);
+    
+    // Notificar o componente pai sobre a mudança imediatamente
+    const total = updatedDetails.reduce((sum, detail) => sum + detail.subtotal, 0);
+    onChange(updatedServiceTypes, total, updatedDetails);
 
     // Limpar campos
     resetForm();
@@ -181,8 +192,17 @@ export default function ServiceSelector({
 
   // Remover serviço
   const removeService = (tipo: typeof TIPOS_SERVICO[number]) => {
-    setServiceDetails(prev => prev.filter(d => d.tipo !== tipo));
-    setSelectedServices(prev => prev.filter(s => s !== tipo));
+    // Filtrar os arrays em uma única operação para manter consistência
+    const updatedDetails = serviceDetails.filter(d => d.tipo !== tipo);
+    const updatedServices = updatedDetails.map(d => d.tipo);
+    
+    // Atualizar ambos os estados
+    setServiceDetails(updatedDetails);
+    setSelectedServices(updatedServices);
+    
+    // Calcular o novo total e notificar o componente pai imediatamente
+    const total = updatedDetails.reduce((sum, detail) => sum + detail.subtotal, 0);
+    onChange(updatedServices, total, updatedDetails);
     
     toast({
       title: "Serviço removido",
@@ -204,24 +224,53 @@ export default function ServiceSelector({
     setIsEditing(true);
   };
 
-  // Recalcular valor total material quando os detalhes mudarem
+  // Atualizar valor total material quando os detalhes mudarem
   useEffect(() => {
     const total = serviceDetails.reduce((sum, detail) => sum + detail.subtotal, 0);
     setValorTotalMaterial(total);
-    
-    // Notificar o componente pai sobre as mudanças
-    onChange(selectedServices, total, serviceDetails);
-  }, [serviceDetails, selectedServices, onChange]);
+  }, [serviceDetails]);
 
   // Carregar detalhes iniciais
+  const initializedRef = useRef(false);
+  
   useEffect(() => {
-    if (initialDetails && initialDetails.length > 0) {
-      setServiceDetails(initialDetails);
-      // Extrair tipos de serviço dos detalhes
-      const serviceTypes = initialDetails.map(detail => detail.tipo);
-      setSelectedServices(serviceTypes);
+    // Apenas inicializa uma vez para evitar problemas com re-renderizações
+    if (!initializedRef.current) {
+      let details: ServicoDetalhe[] = [];
+      let services: Array<typeof TIPOS_SERVICO[number]> = [];
+      
+      if (initialDetails && initialDetails.length > 0) {
+        details = [...initialDetails];
+        // Extrair tipos de serviço dos detalhes
+        services = initialDetails.map(detail => detail.tipo);
+        console.log("Inicializando com detalhes:", details, "Serviços:", services);
+      } else if (initialServices && initialServices.length > 0) {
+        // Se não temos detalhes, mas temos serviços, criar detalhes do zero
+        details = initialServices.map(service => ({
+          tipo: service,
+          quantidade: 0,
+          unidade: UNIDADES_MEDIDA_PADRÃO[service] || "kg",
+          precoUnitario: 0,
+          subtotal: 0
+        }));
+        services = [...initialServices];
+        console.log("Inicializando apenas com serviços:", services);
+      }
+      
+      // Configura os estados
+      setServiceDetails(details);
+      setSelectedServices(services);
+      
+      // Calcula o valor total para os detalhes iniciais
+      const total = details.reduce((sum, detail) => sum + detail.subtotal, 0);
+      setValorTotalMaterial(total);
+      
+      // Notifica o componente pai sobre os valores iniciais
+      onChange(services, total, details);
+      
+      initializedRef.current = true;
     }
-  }, [initialDetails]);
+  }, [initialDetails, initialServices, onChange]);
 
   return (
     <div className="space-y-4">
@@ -244,20 +293,36 @@ export default function ServiceSelector({
         {!isEditing && searchTerm.trim() !== "" && (
           <div className="border rounded-md bg-white shadow-sm max-h-60 overflow-y-auto">
             <ul className="py-1">
-              {filteredServices.map(service => (
-                <li 
-                  key={service}
-                  onClick={() => {
-                    setCurrentService(service);
-                    setSearchTerm("");
-                  }}
-                  className={`px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm ${
-                    selectedServices.includes(service) ? 'bg-blue-50' : ''
-                  }`}
-                >
-                  {service} {selectedServices.includes(service) && '(já adicionado)'}
-                </li>
-              ))}
+              {filteredServices.map(service => {
+                // Verificar se o serviço já existe em serviceDetails, não apenas em selectedServices
+                const isAlreadyAdded = serviceDetails.some(detail => detail.tipo === service);
+                
+                return (
+                  <li 
+                    key={service}
+                    onClick={() => {
+                      if (isAlreadyAdded) {
+                        // Se já está adicionado, preencher o formulário para edição
+                        const detail = serviceDetails.find(d => d.tipo === service);
+                        if (detail) {
+                          editService(detail);
+                        }
+                      } else {
+                        // Se não está adicionado, iniciar novo serviço
+                        setCurrentService(service);
+                      }
+                      setSearchTerm("");
+                    }}
+                    className={`px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm ${
+                      isAlreadyAdded ? 'bg-blue-50' : ''
+                    }`}
+                  >
+                    {service} {isAlreadyAdded && (
+                      <span className="text-blue-500 font-medium ml-1">(já adicionado)</span>
+                    )}
+                  </li>
+                );
+              })}
               {filteredServices.length === 0 && (
                 <li className="px-4 py-2 text-gray-500 text-sm">Nenhum serviço encontrado</li>
               )}

@@ -1,0 +1,62 @@
+Entendido! O seu novo problema é o seguinte:
+
+> Ao buscar um serviço para adicionar, o item aparece como “(já adicionado)”, **mas ele não está visível na lista/tabela abaixo**, ou seja, o sistema **acha que foi adicionado, mas o usuário não consegue ver**.
+
+---
+
+### 🧠 Diagnóstico funcional
+
+Isso é um **problema de inconsistência entre o estado interno e a interface**. O sistema provavelmente está verificando se o item já foi adicionado com base em um array de controle, mas **a tabela de visualização não está exibindo esse array corretamente**, ou a renderização falhou.
+
+---
+
+## ✅ Prompt para Replit AI Agent – Corrigir exibição de serviços adicionados
+
+**Corrija o componente React para garantir que os serviços adicionados apareçam corretamente na tabela.**
+
+---
+
+### 🎯 Objetivo
+
+Corrigir a lógica de exibição dos itens adicionados para que:
+
+* Se um item estiver marcado como “(já adicionado)”, ele **também esteja visível na tabela** de serviços.
+* Se não estiver visível, o sistema **não deve marcá-lo como adicionado**.
+
+---
+
+### 🛠️ Instruções detalhadas
+
+#### 1. **Lista de controle**
+
+* Verifique qual array está sendo usado para definir se um serviço está “já adicionado”.
+* Esse array deve ser **o mesmo usado para renderizar a tabela de serviços adicionados**.
+* Se houver dois arrays (ex: `servicosSelecionados` e `itensVisiveis`), unifique ou sincronize ambos.
+
+#### 2. **Renderização da tabela**
+
+* Confirme se a tabela de serviços adicionados está renderizando com base no estado correto.
+* Verifique se o estado está vazio mesmo após adicionar.
+* Corrija a renderização para usar o array que contém os itens adicionados.
+
+#### 3. **Sincronização pós-salvamento**
+
+* Após adicionar um novo serviço, **garanta que ele seja incluído imediatamente no estado visível da tabela**.
+* A função de adicionar deve atualizar corretamente o estado principal (ex: `setServicos([...])`).
+
+#### 4. **Filtro de duplicidade**
+
+* A verificação de “já adicionado” deve ser baseada em **chave única** (ex: `id` ou `nome do serviço`).
+* Se o item não estiver no array de visualização, **não o marque como adicionado**.
+
+---
+
+### ✅ Resultado esperado
+
+* Ao adicionar um serviço, ele aparece imediatamente na tabela abaixo.
+* Se um item estiver marcado como “(já adicionado)”, ele deve estar visível na tabela.
+* A lista de busca reflete corretamente o que está visível e o que ainda pode ser adicionado.
+
+---
+
+Quer incluir neste prompt uma **validação para evitar conflitos entre serviços com o mesmo nome** ou limitar a adição por categoria?
