@@ -30,17 +30,17 @@ export default function KPIs() {
   const [propostasEmitidas, setPropostasEmitidas] = useState<number>(0);
   const [dataInicio, setDataInicio] = useState<Date | undefined>(undefined);
   const [dataFim, setDataFim] = useState<Date | undefined>(undefined);
-
+  
   // Handler para mudança no número de propostas emitidas
   const handlePropostasEmitidasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     const newValue = isNaN(value) ? 0 : value;
     setPropostasEmitidas(newValue);
-
+    
     // Salvar no localStorage para persistir entre navegações
     localStorage.setItem('propostasEmitidas', newValue.toString());
   };
-
+  
   // Carregar valor salvo do localStorage ao montar o componente
   useEffect(() => {
     const savedValue = localStorage.getItem('propostasEmitidas');
@@ -54,7 +54,7 @@ export default function KPIs() {
     setDataInicio(undefined);
     setDataFim(undefined);
   };
-
+  
   // Buscar dados das propostas
   const { data: allProposals = [], isLoading } = useQuery<ProposalWithCalculations[]>({
     queryKey: ['/api/proposals'],
@@ -63,95 +63,95 @@ export default function KPIs() {
   // Filtrar propostas por período se as datas estiverem definidas
   const proposals = useMemo(() => {
     if (!allProposals.length) return [];
-
+    
     // Se nenhuma data for selecionada, retorna todas as propostas
     if (!dataInicio && !dataFim) return allProposals;
-
+    
     return allProposals.filter(proposta => {
       // Se a proposta não tem data, não podemos filtrar
       if (!proposta.dataProposta) return false;
-
+      
       const dataPropostaObj = new Date(proposta.dataProposta);
-
+      
       // Verificar se a data da proposta está dentro do intervalo selecionado
       const passaDataInicio = !dataInicio || dataPropostaObj >= dataInicio;
       const passaDataFim = !dataFim || dataPropostaObj <= dataFim;
-
+      
       return passaDataInicio && passaDataFim;
     });
   }, [allProposals, dataInicio, dataFim]);
-
+  
   // KPIs Gerais
   const kpisGerais = useMemo(() => {
     if (!proposals || proposals.length === 0) return null;
-
+    
     const totalPropostas = proposals.length;
     const valorTotalPropostas = proposals.reduce((sum, p) => sum + Number(p.valorTotal), 0);
     const ticketMedio = valorTotalPropostas / totalPropostas;
     const totalPago = proposals.reduce((sum, p) => sum + Number(p.valorPago), 0);
     const totalEmAberto = valorTotalPropostas - totalPago;
-
+    
     // Contagem de clientes únicos
     const clientesUnicos = new Set(proposals.map(p => p.nomeCliente).filter(Boolean)).size;
-
+    
     // Filtrar propostas com data válida para calcular intervalo de tempo
     const propostasComData = proposals.filter(p => p.dataProposta);
-
+    
     // Calculando intervalo de tempo entre a proposta mais antiga e a mais recente
     let mesesAtivos = 6; // Valor padrão como fallback
-
+    
     if (propostasComData.length > 0) {
       // Converter strings de data para objetos Date
       const datas = propostasComData.map(p => new Date(p.dataProposta as string));
-
+      
       // Encontrar a data mais antiga e a mais recente
       const dataInicial = new Date(Math.min(...datas.map(d => d.getTime())));
       const dataFinal = new Date(Math.max(...datas.map(d => d.getTime())));
-
+      
       // Calcular a diferença em meses
       const mesesDiferenca = 
         (dataFinal.getFullYear() - dataInicial.getFullYear()) * 12 + 
         (dataFinal.getMonth() - dataInicial.getMonth()) + 1; // +1 para incluir o mês atual
-
+      
       // Usar pelo menos 1 mês para evitar divisão por zero
       mesesAtivos = Math.max(1, mesesDiferenca);
     }
-
+    
     // Peso médio por mês com base no intervalo real
     const pesoTotal = proposals.reduce((sum, p) => sum + (Number(p.pesoEstrutura) || 0), 0);
     const pesoMedioPorMes = pesoTotal / mesesAtivos;
-
+    
     // Tempo médio de negociação
     const tempoNegociacaoTotal = proposals.reduce((sum, p) => sum + (Number(p.tempoNegociacao) || 0), 0);
     const tempoMedioNegociacao = tempoNegociacaoTotal / totalPropostas;
-
+    
     // Propostas com recompra
     const propostasComRecompra = proposals.filter(p => p.clienteRecompra === "sim").length;
     const percentRecompra = (propostasComRecompra / totalPropostas) * 100;
-
+    
     // Contando clientes com recompra - usando o campo clienteRecompra
     const clientesComRecompra = proposals.filter(p => p.clienteRecompra === "sim").length;
-
+    
     // Top 10 vendas
     const propostasOrdenadas = [...proposals].sort((a, b) => Number(b.valorTotal) - Number(a.valorTotal));
     const top10Vendas = propostasOrdenadas.slice(0, 10);
     const valorTop10 = top10Vendas.reduce((sum, p) => sum + Number(p.valorTotal), 0);
     const percentTop10 = (valorTop10 / valorTotalPropostas) * 100;
-
+    
     // Receita por tipo de cliente
     const receitaPorTipoCliente = proposals.reduce((acc, p) => {
       const tipo = p.tipoCliente || "Não especificado";
       acc[tipo] = (acc[tipo] || 0) + Number(p.valorTotal);
       return acc;
     }, {} as Record<string, number>);
-
+    
     // Porcentagem por tipo de cliente
     const percentPorTipoCliente = Object.entries(receitaPorTipoCliente).map(([tipo, valor]) => ({
       tipo,
       valor,
       percentual: (valor / valorTotalPropostas) * 100
     }));
-
+    
     return {
       totalPropostas,
       valorTotalPropostas,
@@ -167,43 +167,43 @@ export default function KPIs() {
       percentPorTipoCliente
     };
   }, [proposals]);
-
+  
   // KPIs de Taxa de Conversão
   const kpisTaxaConversao = useMemo(() => {
     if (!proposals || proposals.length === 0 || propostasEmitidas <= 0) return null;
-
+    
     const totalPropostasFechadas = proposals.length;
     const taxaConversao = (totalPropostasFechadas / propostasEmitidas) * 100;
-
+    
     return {
       totalPropostasFechadas,
       propostasEmitidas,
       taxaConversao
     };
   }, [proposals, propostasEmitidas]);
-
+  
   // KPIs por Tipo de Projeto
   const kpisPorProjeto = useMemo(() => {
     if (!proposals || proposals.length === 0) return null;
-
+    
     const totalPropostas = proposals.length;
     const projetosCount = proposals.reduce((acc, p) => {
       const tipo = p.tipoProjeto || "Não especificado";
       acc[tipo] = (acc[tipo] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-
+    
     const percentPorProjeto = Object.entries(projetosCount).map(([tipo, count]) => ({
       tipo,
       count,
       percentual: (count / totalPropostas) * 100
     }));
-
+    
     // Porcentagens específicas
     const pe = percentPorProjeto.find(p => p.tipo === "PE")?.percentual || 0;
     const pePc = percentPorProjeto.find(p => p.tipo === "PE + PC")?.percentual || 0;
     const semProjeto = percentPorProjeto.find(p => p.tipo === "Nenhum" || p.tipo === "Não especificado")?.percentual || 0;
-
+    
     return {
       percentPorProjeto,
       pe,
@@ -211,14 +211,14 @@ export default function KPIs() {
       semProjeto
     };
   }, [proposals]);
-
+  
   // KPIs por Tipo de Serviço
   const kpisPorServico = useMemo(() => {
     if (!proposals || proposals.length === 0) return null;
-
+    
     // Contagem de serviços
     const servicosCount: Record<string, number> = {};
-
+    
     // Para cada proposta, iterar sobre os serviços e contá-los
     proposals.forEach(proposta => {
       if (proposta.tiposServico && Array.isArray(proposta.tiposServico)) {
@@ -227,17 +227,17 @@ export default function KPIs() {
         });
       }
     });
-
+    
     // Converter para array para ordenar por quantidade
     const servicosData = Object.entries(servicosCount)
       .map(([nome, quantidade]) => ({ nome, quantidade }))
       .sort((a, b) => b.quantidade - a.quantidade);
-
+    
     return {
       servicosData
     };
   }, [proposals]);
-
+  
   if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-100">
@@ -249,17 +249,17 @@ export default function KPIs() {
       </div>
     );
   }
-
+  
   return (
     <div className="min-h-screen bg-neutral-100">
       <NavigationHeader />
-
+      
       <main className="container mx-auto py-6 px-4">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-800">KPIs - Indicadores de Desempenho</h1>
           <p className="text-gray-500">Análise detalhada das métricas de negócio</p>
         </div>
-
+        
         {/* Filtro de período */}
         <div className="mb-6 p-4 bg-white rounded-lg shadow-sm">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
@@ -294,7 +294,7 @@ export default function KPIs() {
                     </PopoverContent>
                   </Popover>
                 </div>
-
+                
                 <div className="flex-1">
                   <Label htmlFor="dataFim" className="text-xs mb-1 block">Data Fim</Label>
                   <Popover>
@@ -324,7 +324,7 @@ export default function KPIs() {
                     </PopoverContent>
                   </Popover>
                 </div>
-
+                
                 <div className="flex items-end">
                   <Button variant="outline" size="sm" onClick={limparFiltros} className="h-9">
                     Limpar filtros
@@ -332,7 +332,7 @@ export default function KPIs() {
                 </div>
               </div>
             </div>
-
+            
             <div className="flex-none text-sm">
               {dataInicio || dataFim ? (
                 <div className="p-2 bg-blue-50 rounded border border-blue-100">
@@ -352,14 +352,14 @@ export default function KPIs() {
             </div>
           </div>
         </div>
-
+        
         <Tabs defaultValue="geral" onValueChange={setActiveTab} className="w-full">
           <TabsList className="mb-6 grid grid-cols-3 max-w-md">
             <TabsTrigger value="geral">Geral</TabsTrigger>
             <TabsTrigger value="canal">Canal de Venda</TabsTrigger>
             <TabsTrigger value="projeto">Tipo de Projeto</TabsTrigger>
           </TabsList>
-
+          
           {/* Tab: KPIs Gerais */}
           <TabsContent value="geral" className="space-y-6">
             {kpisGerais ? (
@@ -375,7 +375,7 @@ export default function KPIs() {
                       <p className="text-xs text-gray-500">Média do valor das propostas</p>
                     </CardContent>
                   </Card>
-
+                  
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base font-medium">Peso Médio/Mês</CardTitle>
@@ -385,7 +385,7 @@ export default function KPIs() {
                       <p className="text-xs text-gray-500">Média mensal de peso das estruturas</p>
                     </CardContent>
                   </Card>
-
+                  
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base font-medium">Propostas Emitidas</CardTitle>
@@ -404,7 +404,7 @@ export default function KPIs() {
                       <p className="text-xs text-gray-500 mt-1">Propostas emitidas (total)</p>
                     </CardContent>
                   </Card>
-
+                  
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base font-medium">Propostas Fechadas</CardTitle>
@@ -414,7 +414,7 @@ export default function KPIs() {
                       <p className="text-xs text-gray-500">Total de propostas no sistema</p>
                     </CardContent>
                   </Card>
-
+                  
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base font-medium">Taxa de Conversão</CardTitle>
@@ -428,7 +428,7 @@ export default function KPIs() {
                       <p className="text-xs text-gray-500">Propostas fechadas / emitidas</p>
                     </CardContent>
                   </Card>
-
+                  
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base font-medium">Total Faturado</CardTitle>
@@ -438,7 +438,7 @@ export default function KPIs() {
                       <p className="text-xs text-gray-500">Soma do valor de todas as propostas</p>
                     </CardContent>
                   </Card>
-
+                  
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base font-medium">Total Pago</CardTitle>
@@ -448,7 +448,7 @@ export default function KPIs() {
                       <p className="text-xs text-gray-500">Valor já recebido dos clientes</p>
                     </CardContent>
                   </Card>
-
+                  
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base font-medium">Total em Aberto</CardTitle>
@@ -458,7 +458,7 @@ export default function KPIs() {
                       <p className="text-xs text-gray-500">Valor a receber</p>
                     </CardContent>
                   </Card>
-
+                  
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base font-medium">Tempo Médio Negociação</CardTitle>
@@ -469,7 +469,7 @@ export default function KPIs() {
                     </CardContent>
                   </Card>
                 </div>
-
+                
                 {/* KPIs de Recompra e Performance - sem subtítulos */}
                 <div className="mt-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -507,7 +507,7 @@ export default function KPIs() {
                         </div>
                       </CardContent>
                     </Card>
-
+                    
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-base">Percentual de Recompra</CardTitle>
@@ -537,7 +537,7 @@ export default function KPIs() {
                     </Card>
                   </div>
                 </div>
-
+                
                 {/* KPIs de Performance - sem subtítulo */}
                 <div className="mt-8">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -548,7 +548,7 @@ export default function KPIs() {
                       <CardContent>
                         <p className="text-2xl font-bold">{kpisGerais.percentTop10.toFixed(1)}%</p>
                         <p className="text-xs text-gray-500 mb-4">Participação das 10 maiores vendas</p>
-
+                        
                         <div className="relative pt-1">
                           <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
                             <div
@@ -559,7 +559,7 @@ export default function KPIs() {
                         </div>
                       </CardContent>
                     </Card>
-
+                    
                     <Card className="col-span-1 lg:col-span-1 h-full">
                       <CardHeader>
                         <CardTitle className="text-base">Top 10 Vendas por Tipo de Cliente</CardTitle>
@@ -576,7 +576,7 @@ export default function KPIs() {
                             </>
                           )}
                         </p>
-
+                        
                         <div className="h-64">
                           <ResponsiveContainer width="100%" height="100%">
                             <BarChart 
@@ -603,7 +603,7 @@ export default function KPIs() {
               </div>
             )}
           </TabsContent>
-
+          
           {/* Tab: Canal de Venda */}
           <TabsContent value="canal">
             {kpisGerais ? (
@@ -639,7 +639,7 @@ export default function KPIs() {
                     </div>
                   </CardContent>
                 </Card>
-
+                
                 {/* Gráfico de barras Distribuição da Receita por Canal */}
                 <Card className="col-span-1 lg:col-span-2">
                   <CardHeader>
@@ -660,7 +660,7 @@ export default function KPIs() {
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
-
+                    
                     <div className="mt-6 space-y-2">
                       {kpisGerais.percentPorTipoCliente.map((item, index) => (
                         <div key={index} className="flex justify-between items-center">
@@ -684,7 +684,7 @@ export default function KPIs() {
               </div>
             )}
           </TabsContent>
-
+          
           {/* Tab: Tipo de Projeto */}
           <TabsContent value="projeto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -724,7 +724,7 @@ export default function KPIs() {
                   <p className="text-gray-500">Sem dados suficientes para análise de projetos</p>
                 </div>
               )}
-
+              
               {kpisPorServico ? (
                 <Card className="col-span-1 lg:col-span-1">
                   <CardHeader>
@@ -773,6 +773,6 @@ export default function KPIs() {
           </TabsContent>
         </Tabs>
       </main>
-        </div>
+    </div>
   );
 }

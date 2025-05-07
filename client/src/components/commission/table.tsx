@@ -73,14 +73,6 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
   const [isPaymentHistoryModalOpen, setIsPaymentHistoryModalOpen] = useState(false);
   const [selectedProposalId, setSelectedProposalId] = useState<number | null>(null);
   const [selectedProposalName, setSelectedProposalName] = useState("");
-  const [searchProposta, setSearchProposta] = useState("");
-  const [searchCliente, setSearchCliente] = useState("");
-
-  const filteredProposals = proposals.filter(proposal => {
-    const matchProposta = proposal.proposta.toLowerCase().includes(searchProposta.toLowerCase());
-    const matchCliente = proposal.nomeCliente?.toLowerCase().includes(searchCliente.toLowerCase()) || false; // Handle potential null
-    return matchProposta && matchCliente;
-  });
 
   // Estado para armazenar os dados da proposta selecionada com os pagamentos
   const { data: selectedProposalDetails } = useQuery({
@@ -128,12 +120,12 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
   };
 
   // Calculate totals for the footer
-  const totalValor = filteredProposals.reduce((sum, proposal) => sum + Number(proposal.valorTotal), 0);
-  const totalPago = filteredProposals.reduce((sum, proposal) => sum + Number(proposal.valorPago), 0);
-  const totalAberto = filteredProposals.reduce((sum, proposal) => sum + Number(proposal.saldoAberto), 0);
-  const totalComissao = filteredProposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoTotal), 0);
-  const totalComissaoPaga = filteredProposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoPaga), 0);
-  const totalComissaoEmAberto = filteredProposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoEmAberto), 0);
+  const totalValor = localProposals.reduce((sum, proposal) => sum + Number(proposal.valorTotal), 0);
+  const totalPago = localProposals.reduce((sum, proposal) => sum + Number(proposal.valorPago), 0);
+  const totalAberto = localProposals.reduce((sum, proposal) => sum + Number(proposal.saldoAberto), 0);
+  const totalComissao = localProposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoTotal), 0);
+  const totalComissaoPaga = localProposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoPaga), 0);
+  const totalComissaoEmAberto = localProposals.reduce((sum, proposal) => sum + Number(proposal.valorComissaoEmAberto), 0);
   const percentComissaoPaga = totalComissao > 0 ? (totalComissaoPaga / totalComissao) * 100 : 0;
 
   // Update field mutation
@@ -188,7 +180,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
 
     if (!isNaN(numValue) && numValue >= 0) {
       // Update locally first for immediate feedback
-      setLocalProposals(prev =>
+      setLocalProposals(prev => 
         prev.map(proposal => {
           if (proposal.id === id) {
             const updatedProposal = { ...proposal, [field]: numValue };
@@ -205,7 +197,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
             if (field === 'valorTotal' || field === 'percentComissao' || field === 'valorComissaoPaga') {
               const valorComissaoTotal = Number(updatedProposal.valorTotal) * (Number(updatedProposal.percentComissao) / 100);
               updatedProposal.valorComissaoEmAberto = valorComissaoTotal - Number(updatedProposal.valorComissaoPaga);
-              updatedProposal.percentComissaoPaga = valorComissaoTotal > 0
+              updatedProposal.percentComissaoPaga = valorComissaoTotal > 0 
                 ? (Number(updatedProposal.valorComissaoPaga) / valorComissaoTotal) * 100
                 : 0;
             }
@@ -236,7 +228,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
     const percentComissao = parseFloat(formData.percentComissao);
 
     if (isNaN(valorTotal) || valorTotal < 0 ||
-      isNaN(percentComissao) || percentComissao < 0 || percentComissao > 100) {
+        isNaN(percentComissao) || percentComissao < 0 || percentComissao > 100) {
       toast({
         title: "Dados inválidos",
         description: "Verifique os valores informados",
@@ -280,7 +272,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
 
   // Função para exportar dados para CSV
   const exportToCSV = () => {
-    if (filteredProposals.length === 0) {
+    if (localProposals.length === 0) {
       toast({
         title: "Sem dados",
         description: "Não há dados para exportar",
@@ -303,7 +295,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
     ];
 
     // Preparar dados
-    const csvData = filteredProposals.map(proposal => [
+    const csvData = localProposals.map(proposal => [
       proposal.proposta,
       Number(proposal.valorTotal).toFixed(2),
       Number(proposal.valorPago).toFixed(2),
@@ -329,8 +321,8 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
     ]);
 
     // Converter para string CSV
-    const csvContent =
-      headers.join(",") + "\n" +
+    const csvContent = 
+      headers.join(",") + "\n" + 
       csvData.map(row => row.join(",")).join("\n");
 
     // Criar blob e salvar
@@ -346,7 +338,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
 
   // Função para exportar dados para PDF
   const exportToPDF = () => {
-    if (filteredProposals.length === 0) {
+    if (localProposals.length === 0) {
       toast({
         title: "Sem dados",
         description: "Não há dados para exportar",
@@ -366,7 +358,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
     doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth / 2, 22, { align: 'center' });
 
     // Preparar dados para a tabela
-    const tableData = filteredProposals.map(proposal => [
+    const tableData = localProposals.map(proposal => [
       proposal.proposta,
       `R$ ${Number(proposal.valorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
       `R$ ${Number(proposal.valorPago).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
@@ -412,25 +404,6 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
     });
   };
 
-  const renderSearch = () => (
-    <div className="flex gap-4 mb-4">
-      <div className="flex-1">
-        <Input
-          placeholder="Buscar por número da proposta"
-          value={searchProposta}
-          onChange={(e) => setSearchProposta(e.target.value)}
-        />
-      </div>
-      <div className="flex-1">
-        <Input
-          placeholder="Buscar por nome do cliente"
-          value={searchCliente}
-          onChange={(e) => setSearchCliente(e.target.value)}
-        />
-      </div>
-    </div>
-  );
-
   if (isLoading) {
     return (
       <div className="p-8 text-center">
@@ -444,18 +417,18 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       {/* Barra de ferramentas */}
       <div className="flex justify-end items-center gap-2 p-3 border-b">
-        <Button
-          variant="outline"
-          size="sm"
+        <Button 
+          variant="outline" 
+          size="sm" 
           className="flex items-center gap-1 text-sm"
           onClick={exportToCSV}
         >
           <FileText className="h-4 w-4" />
           Exportar CSV
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
+        <Button 
+          variant="outline" 
+          size="sm" 
           className="flex items-center gap-1 text-sm"
           onClick={exportToPDF}
         >
@@ -463,8 +436,6 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
           Exportar PDF
         </Button>
       </div>
-
-      {renderSearch()}
 
       {/* Tabela */}
       <div className="overflow-x-auto">
@@ -483,16 +454,16 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
             </tr>
           </thead>
           <tbody>
-            {filteredProposals.length === 0 ? (
+            {localProposals.length === 0 ? (
               <tr>
                 <td colSpan={10} className="text-center py-6 text-neutral-500">
                   Nenhuma proposta encontrada
                 </td>
               </tr>
             ) : (
-              filteredProposals.map((proposal) => (
-                <tr
-                  key={proposal.id}
+              localProposals.map((proposal) => (
+                <tr 
+                  key={proposal.id} 
                   className={`border-t hover:bg-neutral-50 ${getRowColorClass(proposal.percentComissaoPaga)}`}
                 >
                   <td className="px-4 py-3">
