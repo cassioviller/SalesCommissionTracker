@@ -295,8 +295,8 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
     
     // Garantir que detalhesServicos estejam completos e com subtotais calculados
     if (serviceDetails && serviceDetails.length > 0) {
-      // Manter os valores numéricos para cálculos internos
-      const detalhesParaCalculo = serviceDetails.map(detalhe => ({
+      // Converter todos os valores para números para o backend
+      formattedData.detalhesServicos = serviceDetails.map(detalhe => ({
         ...detalhe,
         quantidade: Number(detalhe.quantidade),
         precoUnitario: Number(detalhe.precoUnitario),
@@ -304,25 +304,22 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       }));
       
       // Calcular o valor total do material
-      const valorTotalMaterial = detalhesParaCalculo.reduce(
+      const valorTotalMaterial = formattedData.detalhesServicos.reduce(
         (total: number, detalhe: ServicoDetalhe) => total + detalhe.subtotal, 0
       );
       
-      // Armazenar como string para o backend
-      formattedData.valorTotalMaterial = String(valorTotalMaterial);
+      // Armazenar como número para o backend
+      formattedData.valorTotalMaterial = Number(valorTotalMaterial);
       
       // Calcular o peso da estrutura (total de itens com unidade kg)
-      const pesoTotal = detalhesParaCalculo
+      const pesoTotal = formattedData.detalhesServicos
         .filter((detalhe: ServicoDetalhe) => detalhe.unidade === 'kg')
         .reduce((total: number, detalhe: ServicoDetalhe) => total + detalhe.quantidade, 0);
         
       if (pesoTotal > 0) {
-        // Armazenar como string para o backend
-        formattedData.pesoEstrutura = String(pesoTotal);
+        // Armazenar como número para o backend
+        formattedData.pesoEstrutura = Number(pesoTotal);
       }
-      
-      // Usar os detalhes originais para o backend, pois o backend espera números para os campos dentro de detalhesServicos
-      formattedData.detalhesServicos = serviceDetails;
     }
     
     // Criar uma cópia corretamente tipada para a API
@@ -347,15 +344,15 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       tipoProjeto: formattedData.tipoProjeto || null,
       tipoContrato: formattedData.tipoContrato || null,
       
-      // Campos numéricos - converter para strings conforme esperado pelo backend
-      valorTotal: String(formattedData.valorTotal || "0"),
-      valorPago: String(formattedData.valorPago || "0"),
-      percentComissao: String(formattedData.percentComissao || "0"),
-      valorComissaoPaga: String(formattedData.valorComissaoPaga || "0"),
-      pesoEstrutura: String(formattedData.pesoEstrutura || "0"),
-      valorPorQuilo: String(formattedData.valorPorQuilo || "0"), 
-      valorTotalMaterial: String(formattedData.valorTotalMaterial || "0"),
-      tempoNegociacao: String(formattedData.tempoNegociacao || "0")
+      // Campos numéricos - converter para números conforme esperado pelo backend
+      valorTotal: Number(formattedData.valorTotal || 0),
+      valorPago: Number(formattedData.valorPago || 0),
+      percentComissao: Number(formattedData.percentComissao || 0),
+      valorComissaoPaga: Number(formattedData.valorComissaoPaga || 0),
+      pesoEstrutura: Number(formattedData.pesoEstrutura || 0),
+      valorPorQuilo: Number(formattedData.valorPorQuilo || 0), 
+      valorTotalMaterial: Number(formattedData.valorTotalMaterial || 0),
+      tempoNegociacao: Number(formattedData.tempoNegociacao || 0)
     };
     
     console.log("Enviando dados para API:", apiData);

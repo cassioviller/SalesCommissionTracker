@@ -1,0 +1,68 @@
+Ótimo pedido. A seguir está o **prompt atualizado e preciso para o Replit AI Agent**, especificando **exatamente quais campos devem ser enviados como `string` e quais como `number`**, com base no erro retornado pelo backend.
+
+---
+
+## ✅ Prompt para Replit AI Agent – Corrigir tipos de dados no envio da proposta
+
+**Corrija o envio da proposta garantindo que cada campo seja enviado com o tipo esperado pelo backend, conforme a lista abaixo.**
+
+---
+
+### 🧨 Erro atual
+
+O backend está retornando erro 400 com a seguinte mensagem:
+**"Expected number, received string"**
+
+Ou seja, os campos estão sendo enviados com tipo errado — por exemplo, `valorPago` enviado como `"2000"` em vez de `2000`.
+
+---
+
+### 🧾 Corrija os tipos dos seguintes campos no payload de envio:
+
+#### 🔢 Enviar como **number**:
+
+Estes campos devem ser convertidos para número (sem aspas) antes de enviar:
+
+* `valorTotal`
+* `valorPago`
+* `valorComissaoPaga`
+* `pesoEstrutura`
+* `valorPorQuilo`
+* `valorTotalMaterial`
+* `tempoNegociacao`
+* `percentComissao`
+
+✅ Exemplo:
+Se o campo estiver com `"1500,00"` (string formatada), remova formatação e converta para `1500.00` (number).
+
+---
+
+#### 🔤 Campos que devem ser enviados como **string**:
+
+✅ Se aparecerem, mantenha como string:
+
+* `tipoProjeto` → valores como `"PE"`, `"PE + PC"`, `"Nenhum"`
+* `tipoContrato` → `"MP"`, `"MO"`, `"MP + MO"`
+
+---
+
+### ✅ Requisitos adicionais
+
+* Se algum campo estiver vazio ou não preenchido pelo usuário, **não envie `null` nem `""`**.
+  Em vez disso:
+
+  * Para `number`: envie `0` ou não envie o campo.
+  * Para `string`: envie `""` se for necessário.
+
+---
+
+### ✅ Resultado esperado
+
+* O backend recebe os dados com os tipos corretos.
+* O erro 400 desaparece.
+* Os valores salvos refletem exatamente o que o usuário digitou.
+* A proposta pode ser salva com ou sem todos os campos preenchidos.
+
+---
+
+Este prompt já cobre tanto a correção técnica quanto a estrutura exata exigida pelo backend. Deseja incluir no frontend um resumo visual com o tipo de cada campo para debug?
