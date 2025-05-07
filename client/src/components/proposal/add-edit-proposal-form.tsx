@@ -36,6 +36,7 @@ import {
   TIPOS_CONTRATO,
   TIPOS_PROJETO,
   TIPOS_SERVICO,
+  ServicoDetalhe,
   insertProposalSchema
 } from "@shared/schema";
 import { Link, useLocation } from "wouter";
@@ -47,9 +48,13 @@ const formSchema = insertProposalSchema.extend({
   // Ex: proposta: z.string().min(1, "Número da proposta é obrigatório"),
 });
 
+type ExtendedProposal = SalesProposal & {
+  detalhesServicos?: ServicoDetalhe[];
+};
+
 type Props = {
   editMode?: boolean;
-  proposal?: SalesProposal;
+  proposal?: ExtendedProposal;
   onSuccess?: () => void;
   onCancel?: () => void;
 };
@@ -107,6 +112,9 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   const [selectedServices, setSelectedServices] = useState<(typeof TIPOS_SERVICO)[number][]>(
     (proposal?.tiposServico as (typeof TIPOS_SERVICO)[number][]) || []
   );
+  const [serviceDetails, setServiceDetails] = useState<ServicoDetalhe[]>(
+    proposal?.detalhesServicos || []
+  );
   
   // Atualizar o formulário quando a proposta mudar (importante para edições)
   useEffect(() => {
@@ -133,11 +141,15 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
         faturamentoDireto: proposal.faturamentoDireto as "sim" | "nao" || "nao",
         tempoNegociacao: proposal.tempoNegociacao ? String(proposal.tempoNegociacao) : "",
         clienteRecompra: proposal.clienteRecompra as "sim" | "nao" || "nao",
+        detalhesServicos: proposal.detalhesServicos || [],
       });
       
       // Atualizar estados derivados
       setSelectedDate(proposal.dataProposta ? new Date(proposal.dataProposta) : undefined);
       setSelectedServices((proposal.tiposServico as (typeof TIPOS_SERVICO)[number][]) || []);
+      setServiceDetails(proposal.detalhesServicos || []);
+      
+      console.log("Inicializando serviços detalhados:", proposal.detalhesServicos || []);
     }
   }, [proposal, editMode, form]);
 
