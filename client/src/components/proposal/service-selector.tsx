@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X, Plus, Search, ChevronDown } from "lucide-react";
+import { X, Plus, Search, ChevronDown, Check } from "lucide-react";
 import { TIPOS_SERVICO, TIPOS_UNIDADE } from "@shared/schema";
 import {
   Select,
@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 // Tabela de correspondência padrão para as unidades de medida
 const UNIDADES_MEDIDA_PADRÃO: Record<string, typeof TIPOS_UNIDADE[number]> = {
@@ -63,6 +64,7 @@ export default function ServiceSelector({
   onChange
 }: ServiceSelectorProps) {
   // Estados
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredServices, setFilteredServices] = useState<Array<typeof TIPOS_SERVICO[number]>>([]);
   const [selectedServices, setSelectedServices] = useState<Array<typeof TIPOS_SERVICO[number]>>(initialServices || []);
@@ -72,6 +74,7 @@ export default function ServiceSelector({
   const [unidade, setUnidade] = useState<typeof TIPOS_UNIDADE[number]>("kg");
   const [precoUnitario, setPrecoUnitario] = useState<number>(0);
   const [valorTotalMaterial, setValorTotalMaterial] = useState<number>(Number(initialMaterialValue) || 0);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Atualizar serviços filtrados baseado no termo de busca
   useEffect(() => {
@@ -85,51 +88,120 @@ export default function ServiceSelector({
     }
   }, [searchTerm]);
 
-  // Usar a unidade padrão quando um serviço for selecionado
+  // Usar a unidade padrão quando um serviço for selecionado (apenas se não estiver editando)
   useEffect(() => {
-    if (currentService) {
+    if (currentService && !isEditing) {
       const unidadePadrao = UNIDADES_MEDIDA_PADRÃO[currentService] || "kg";
       setUnidade(unidadePadrao);
     }
-  }, [currentService]);
+  }, [currentService, isEditing]);
 
   // Calcular subtotal
   const subtotal = quantidade * precoUnitario;
 
-  // Adicionar serviço aos detalhes
-  const addServiceDetail = () => {
-    if (!currentService || quantidade <= 0 || precoUnitario <= 0) return;
+  // Validar campos do formulário
+  const validateForm = (): boolean => {
+    if (!currentService) {
+      toast({
+        title: "Erro de validação",
+        description: "Selecione um tipo de serviço",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    if (quantidade <= 0) {
+      toast({
+        title: "Erro de validação",
+        description: "A quantidade deve ser maior que zero",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    if (precoUnitario <= 0) {
+      toast({
+        title: "Erro de validação",
+        description: "O preço unitário deve ser maior que zero",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    return true;
+  };
+
+  // Adicionar ou atualizar serviço
+  const addOrUpdateServiceDetail = () => {
+    if (!validateForm()) return;
 
     const newDetail: ServicoDetalhe = {
-      tipo: currentService,
+      tipo: currentService!,
       quantidade,
       unidade,
       precoUnitario,
       subtotal
     };
 
-    // Verificar se o serviço já existe e atualizar em vez de adicionar novo
+    // Verificar se o serviço já existe
     const existingIndex = serviceDetails.findIndex(d => d.tipo === currentService);
     
     if (existingIndex >= 0) {
+      // Atualizar serviço existente
       const updatedDetails = [...serviceDetails];
       updatedDetails[existingIndex] = newDetail;
       setServiceDetails(updatedDetails);
+      
+      toast({
+        title: "Serviço atualizado",
+        description: `${currentService} atualizado com sucesso!`,
+      });
     } else {
+      // Adicionar novo serviço
       setServiceDetails(prev => [...prev, newDetail]);
-      setSelectedServices(prev => [...prev, currentService]);
+      setSelectedServices(prev => [...prev, currentService!]);
+      
+      toast({
+        title: "Serviço adicionado",
+        description: `${currentService} adicionado com sucesso!`,
+      });
     }
 
     // Limpar campos
+    resetForm();
+  };
+
+  // Resetar formulário
+  const resetForm = () => {
     setCurrentService(null);
     setQuantidade(0);
     setPrecoUnitario(0);
+    setIsEditing(false);
   };
 
   // Remover serviço
   const removeService = (tipo: typeof TIPOS_SERVICO[number]) => {
     setServiceDetails(prev => prev.filter(d => d.tipo !== tipo));
     setSelectedServices(prev => prev.filter(s => s !== tipo));
+    
+    toast({
+      title: "Serviço removido",
+      description: `${tipo} removido com sucesso!`,
+    });
+    
+    // Se estiver editando este serviço, limpar o formulário
+    if (currentService === tipo) {
+      resetForm();
+    }
+  };
+  
+  // Editar serviço
+  const editService = (detail: ServicoDetalhe) => {
+    setCurrentService(detail.tipo);
+    setQuantidade(detail.quantidade);
+    setUnidade(detail.unidade);
+    setPrecoUnitario(detail.precoUnitario);
+    setIsEditing(true);
   };
 
   // Recalcular valor total material quando os detalhes mudarem
@@ -141,23 +213,35 @@ export default function ServiceSelector({
     onChange(selectedServices, total, serviceDetails);
   }, [serviceDetails, selectedServices, onChange]);
 
+  // Carregar detalhes iniciais
+  useEffect(() => {
+    if (initialDetails && initialDetails.length > 0) {
+      setServiceDetails(initialDetails);
+      // Extrair tipos de serviço dos detalhes
+      const serviceTypes = initialDetails.map(detail => detail.tipo);
+      setSelectedServices(serviceTypes);
+    }
+  }, [initialDetails]);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col space-y-2">
-        <Label>Adicionar Serviço</Label>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <Search className="h-4 w-4 text-gray-400" />
+        <Label>{isEditing ? "Editar Serviço" : "Adicionar Serviço"}</Label>
+        {!isEditing && (
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <Search className="h-4 w-4 text-gray-400" />
+            </div>
+            <Input
+              placeholder="Buscar serviço..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
-          <Input
-            placeholder="Buscar serviço..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        )}
 
-        {searchTerm.trim() !== "" && (
+        {!isEditing && searchTerm.trim() !== "" && (
           <div className="border rounded-md bg-white shadow-sm max-h-60 overflow-y-auto">
             <ul className="py-1">
               {filteredServices.map(service => (
@@ -185,11 +269,13 @@ export default function ServiceSelector({
       {currentService && (
         <div className="p-4 border rounded-md bg-gray-50">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-md font-medium">{currentService}</h3>
+            <h3 className="text-md font-medium">
+              {isEditing ? `Editando: ${currentService}` : currentService}
+            </h3>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setCurrentService(null)}
+              onClick={resetForm}
               className="h-8 w-8 p-0"
             >
               <X className="h-4 w-4" />
@@ -255,12 +341,29 @@ export default function ServiceSelector({
           
           <div className="mt-4 flex justify-end">
             <Button 
+              type="button"
+              variant={isEditing ? "default" : "outline"}
+              onClick={resetForm}
+              className="mr-2"
+            >
+              Cancelar
+            </Button>
+            <Button 
               type="button" 
-              onClick={addServiceDetail}
+              onClick={addOrUpdateServiceDetail}
               disabled={!quantidade || !precoUnitario}
             >
-              <Plus className="h-4 w-4 mr-1" />
-              Adicionar
+              {isEditing ? (
+                <>
+                  <Check className="h-4 w-4 mr-1" />
+                  Salvar
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Adicionar
+                </>
+              )}
             </Button>
           </div>
         </div>
@@ -295,7 +398,7 @@ export default function ServiceSelector({
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {serviceDetails.map((detail, index) => (
-                  <tr key={index}>
+                  <tr key={index} className={currentService === detail.tipo ? "bg-blue-50" : ""}>
                     <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
                       {detail.tipo}
                     </td>
@@ -315,12 +418,7 @@ export default function ServiceSelector({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => {
-                          setCurrentService(detail.tipo);
-                          setQuantidade(detail.quantidade);
-                          setUnidade(detail.unidade);
-                          setPrecoUnitario(detail.precoUnitario);
-                        }}
+                        onClick={() => editService(detail)}
                         className="mr-1"
                       >
                         Editar

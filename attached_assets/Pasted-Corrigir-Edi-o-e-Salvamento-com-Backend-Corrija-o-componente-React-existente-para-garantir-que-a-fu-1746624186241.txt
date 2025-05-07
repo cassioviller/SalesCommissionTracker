@@ -1,0 +1,71 @@
+Corrigir Edição e Salvamento com Backend
+Corrija o componente React existente para garantir que a funcionalidade de editar e salvar itens funcione corretamente, mantendo os dados atualizados na tabela após o salvamento.
+
+🎯 Objetivo
+Garantir que, ao editar um item e clicar em Salvar, os dados atualizados sejam:
+
+Enviados corretamente ao backend.
+
+Refletidos imediatamente na interface (tabela).
+
+Mantidos no estado local sem recarregar a página.
+
+Validados antes do envio.
+
+🛠️ Instruções detalhadas
+1. Formulário de Edição
+Ao clicar em Editar, os campos do formulário devem ser preenchidos com os dados do item selecionado.
+
+Certifique-se de que os valores populados no formulário estejam sincronizados com o estado local (useState).
+
+O campo de unidade deve manter a sigla corretamente selecionada no dropdown (<select>).
+
+O formulário deve permitir alterações e manter o controle sobre os campos (onChange ligado ao estado).
+
+2. Salvar Modificações
+Ao clicar em Salvar:
+
+Verifique se o formulário está em modo de edição (ex: identificando o id do item editado).
+
+Valide se todos os campos obrigatórios estão preenchidos.
+
+Substitua o item antigo no array de dados (ex: listaDeItens) pelo novo, com base no id ou índice.
+
+Envie os dados atualizados ao backend por meio da função já existente no componente (não é necessário criar uma nova função, apenas garantir que os dados certos estão sendo enviados).
+
+Após a confirmação de salvamento (ex: retorno do backend ou função de sucesso), atualize o estado da lista (useState) com o item corrigido.
+
+Limpe o formulário, mas não altere ou apague os dados da tabela.
+
+Exiba uma mensagem de sucesso clara: "Proposta atualizada com sucesso".
+
+3. Tabela
+A tabela deve refletir imediatamente os dados atualizados após o salvamento.
+
+Não deve haver duplicação de itens (ou seja, não adicionar como novo — apenas atualizar o existente).
+
+Os campos devem estar corretamente formatados, inclusive os valores numéricos (formato monetário brasileiro para preço unitário e subtotal, se houver).
+
+Ações na tabela:
+
+Editar: preenche o formulário com os dados do item correspondente.
+
+Remover: remove o item da lista e atualiza a tabela em tempo real.
+
+4. Backend
+Certifique-se de que os dados do item (tipo, quantidade, unidade, preço, etc.) estejam sendo enviados corretamente ao backend.
+
+Verifique que o backend está respondendo de forma esperada.
+
+Se houver erros na comunicação, capture e trate de forma adequada (ex: mensagem de erro, sem travar o app).
+
+✅ Resultado esperado
+Editar um item e clicar em "Salvar" substitui corretamente os dados anteriores.
+
+Os dados são atualizados na tabela imediatamente.
+
+O backend recebe os valores atualizados corretamente.
+
+O formulário é limpo após salvar, e uma mensagem de sucesso é exibida.
+
+Nenhum dado é perdido ou apagado incorretamente.
