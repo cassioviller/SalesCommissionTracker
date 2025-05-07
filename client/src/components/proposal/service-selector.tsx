@@ -64,7 +64,7 @@ export default function ServiceSelector({
   const [serviceDetails, setServiceDetails] = useState<ServicoDetalhe[]>(initialDetails || []);
   const [currentService, setCurrentService] = useState<string | null>(null);
   const [quantidade, setQuantidade] = useState<number>(0);
-  const [unidade, setUnidade] = useState<string>("kg");
+  const [unidade, setUnidade] = useState<typeof TIPOS_UNIDADE[number]>("kg");
   const [precoUnitario, setPrecoUnitario] = useState<number>(0);
   const [valorTotalMaterial, setValorTotalMaterial] = useState<number>(Number(initialMaterialValue) || 0);
   const [isEditing, setIsEditing] = useState(false);
@@ -131,7 +131,7 @@ export default function ServiceSelector({
     const newDetail: ServicoDetalhe = {
       tipo: currentService! as string,
       quantidade,
-      unidade,
+      unidade: unidade as any,
       precoUnitario,
       subtotal
     };

@@ -126,6 +126,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? (valorComissaoPagaCalculado / valorComissaoTotal) * 100 
         : 0;
       
+      // Se não temos detalhes de serviço mas temos tipos de serviço,
+      // criar detalhes iniciais para cada serviço
+      let detalhesServicos = [];
+      if (proposal.tiposServico && Array.isArray(proposal.tiposServico) && proposal.tiposServico.length > 0) {
+        const UNIDADES_PADRAO = {
+          "Estrutura": "kg",
+          "Escada Metálica": "kg", 
+          "Pergolado": "kg",
+          "Manta Termo Plástica": "m²",
+          "Escada Helicoidal": "kg",
+          "Laje": "m²",
+          "Telha": "m²",
+          "Cobertura Metálica": "kg",
+          "Manta PVC": "m²",
+          "Cobertura Policarbonato": "m²",
+          "Beiral": "m",
+          "Reforço Metálico": "kg",
+          "Mezanino": "m²"
+        };
+        
+        // Criar detalhes para cada serviço se não existirem
+        detalhesServicos = proposal.tiposServico.map(servico => {
+          const unidadePadrao = UNIDADES_PADRAO[servico] || "kg";
+          const valorInicial = unidadePadrao === "kg" ? 15 : 100;
+          
+          return {
+            tipo: servico,
+            quantidade: 10,
+            unidade: unidadePadrao,
+            precoUnitario: valorInicial,
+            subtotal: 10 * valorInicial
+          };
+        });
+      }
+      
       const proposalWithDetails = {
         ...proposal,
         valorPago: valorPagoCalculado.toString(), // Substituir pelos valores calculados
@@ -135,7 +170,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         valorComissaoEmAberto,
         percentComissaoPaga,
         pagamentosProposta,
-        pagamentosComissao
+        pagamentosComissao,
+        detalhesServicos
       };
 
       res.json(proposalWithDetails);
