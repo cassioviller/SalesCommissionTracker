@@ -64,7 +64,7 @@ export default function ServiceSelector({
   const [serviceDetails, setServiceDetails] = useState<ServicoDetalhe[]>(initialDetails || []);
   const [currentService, setCurrentService] = useState<string | null>(null);
   const [quantidade, setQuantidade] = useState<number>(0);
-  const [unidade, setUnidade] = useState<typeof TIPOS_UNIDADE[number]>("kg");
+  const [unidade, setUnidade] = useState<string>("kg");
   const [precoUnitario, setPrecoUnitario] = useState<number>(0);
   const [valorTotalMaterial, setValorTotalMaterial] = useState<number>(Number(initialMaterialValue) || 0);
   const [isEditing, setIsEditing] = useState(false);
@@ -144,7 +144,7 @@ export default function ServiceSelector({
     const newDetail: ServicoDetalhe = {
       tipo: currentService! as string,
       quantidade: qtdNumerica,
-      unidade: unidade as any,
+      unidade: unidade,
       precoUnitario: precoNumerico,
       subtotal: subtotalCalculado
     };
@@ -213,7 +213,7 @@ export default function ServiceSelector({
     
     // Atualizar ambos os estados
     setServiceDetails(updatedDetails);
-    setSelectedServices(updatedServices as any);
+    setSelectedServices(updatedServices);
     
     // Calcular o novo total garantindo valores numéricos
     const total = updatedDetails.reduce((sum, detail) => {
@@ -305,7 +305,7 @@ export default function ServiceSelector({
       
       // Configura os estados
       setServiceDetails(details);
-      setSelectedServices(services as any);
+      setSelectedServices(services);
       
       // Calcula o valor total garantindo que estamos usando números
       const total = details.reduce((sum, detail) => {
@@ -433,7 +433,7 @@ export default function ServiceSelector({
               <Label htmlFor="unidade">Unidade</Label>
               <Select
                 value={unidade}
-                onValueChange={(value) => setUnidade(value as typeof TIPOS_UNIDADE[number])}
+                onValueChange={(value) => setUnidade(value)}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione a unidade" />
