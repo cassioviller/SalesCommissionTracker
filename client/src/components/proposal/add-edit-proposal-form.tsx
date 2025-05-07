@@ -532,7 +532,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
                 <Label htmlFor="tipoProjeto">Tipo de Projeto</Label>
                 <Select
                   onValueChange={(value) => form.setValue("tipoProjeto", value as any)}
-                  defaultValue={form.getValues("tipoProjeto")}
+                  defaultValue={form.getValues("tipoProjeto") ? String(form.getValues("tipoProjeto")) : undefined}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o tipo de projeto" />
@@ -551,7 +551,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
                 <Label htmlFor="tipoContrato">Tipo de Contrato</Label>
                 <Select
                   onValueChange={(value) => form.setValue("tipoContrato", value as any)}
-                  defaultValue={form.getValues("tipoContrato")}
+                  defaultValue={form.getValues("tipoContrato") ? String(form.getValues("tipoContrato")) : undefined}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o tipo de contrato" />
