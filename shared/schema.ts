@@ -97,7 +97,7 @@ export const UNIDADES_MEDIDA_PADRÃO: Record<string, typeof TIPOS_UNIDADE[number
 export interface ServicoDetalhe {
   tipo: string; // Tipo do serviço
   quantidade: number; // Quantidade
-  unidade: typeof TIPOS_UNIDADE[number]; // Unidade de medida
+  unidade: string; // Unidade de medida - mais flexível para aceitar valores dinâmicos
   precoUnitario: number; // Preço unitário
   subtotal: number; // Subtotal calculado
 }
@@ -117,7 +117,7 @@ export const insertProposalSchema = z.object({
   // Campos opcionais para proposta detalhada
   nomeCliente: z.string().optional(),
   tipoCliente: z.enum(TIPOS_CLIENTE).optional(),
-  tiposServico: z.array(z.enum(TIPOS_SERVICO)).optional(),
+  tiposServico: z.array(z.string()).optional(),
   detalhesServicos: z.array(
     z.object({
       tipo: z.string(),
@@ -151,7 +151,7 @@ export const updateProposalSchema = z.object({
   // Campos opcionais para proposta detalhada
   nomeCliente: z.string().optional(),
   tipoCliente: z.enum(TIPOS_CLIENTE).optional(),
-  tiposServico: z.array(z.enum(TIPOS_SERVICO)).optional(),
+  tiposServico: z.array(z.string()).optional(),
   detalhesServicos: z.array(
     z.object({
       tipo: z.string(),
