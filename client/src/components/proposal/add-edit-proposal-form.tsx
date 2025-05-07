@@ -66,9 +66,22 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   // Estado para controlar se os campos de comissão estão habilitados
-  const [comissaoHabilitada, setComissaoHabilitada] = useState<boolean>(
-    editMode ? (proposal?.comissaoHabilitada === "true" || proposal?.comissaoHabilitada === true as any) : false
-  );
+  // Verificamos múltiplos formatos possíveis para comissaoHabilitada
+  const [comissaoHabilitada, setComissaoHabilitada] = useState<boolean>(() => {
+    if (!editMode) return false;
+    
+    // Se não temos uma proposta, retornar false
+    if (!proposal) return false;
+    
+    // Log para debug
+    console.log("comissaoHabilitada inicial:", proposal.comissaoHabilitada, typeof proposal.comissaoHabilitada);
+    
+    // Verificar se é uma string "true" ou um booleano true
+    if (typeof proposal.comissaoHabilitada === 'string' && proposal.comissaoHabilitada === "true") return true;
+    if (typeof proposal.comissaoHabilitada === 'boolean' && proposal.comissaoHabilitada === true) return true;
+    
+    return false;
+  });
   
   // Form setup
   const form = useForm<z.infer<typeof formSchema>>({

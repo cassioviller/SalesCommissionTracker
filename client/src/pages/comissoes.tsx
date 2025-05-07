@@ -27,8 +27,18 @@ export default function Comissoes() {
       console.log("Proposta:", proposal.proposta, "comissaoHabilitada:", proposal.comissaoHabilitada, typeof proposal.comissaoHabilitada);
       
       // Filtro duplo: verifica se tem percentual de comissão E se comissão está habilitada
-      // Tratamos tanto o caso em que comissaoHabilitada pode ser string "true" ou boolean true
-      const comissaoHabilitada = proposal.comissaoHabilitada === "true" || proposal.comissaoHabilitada === true as any;
+      // Tratamos vários formatos possíveis para comissaoHabilitada
+      const comissaoHabilitadaValue = proposal.comissaoHabilitada;
+      let comissaoHabilitada = false;
+      
+      // Verificar tipo string "true"
+      if (typeof comissaoHabilitadaValue === 'string' && comissaoHabilitadaValue === 'true') {
+        comissaoHabilitada = true;
+      } 
+      // Verificar tipo booleano true
+      else if (typeof comissaoHabilitadaValue === 'boolean' && comissaoHabilitadaValue === true) {
+        comissaoHabilitada = true;
+      }
       return proposal.percentComissao && 
         Number(proposal.percentComissao) > 0 && 
         comissaoHabilitada;
