@@ -238,14 +238,22 @@ export default function ServiceSelector({
         services = initialDetails.map(detail => detail.tipo);
         console.log("Inicializando com detalhes:", details, "Serviços:", services);
       } else if (initialServices && initialServices.length > 0) {
-        // Se não temos detalhes, mas temos serviços, criar detalhes do zero
-        details = initialServices.map(service => ({
-          tipo: service,
-          quantidade: 0,
-          unidade: UNIDADES_MEDIDA_PADRÃO[service] || "kg",
-          precoUnitario: 0,
-          subtotal: 0
-        }));
+        // Se não temos detalhes, mas temos serviços, criar detalhes iniciais com valores padrão
+        details = initialServices.map(service => {
+          // Define valores padrão para cada tipo de serviço
+          const unidadePadrao = UNIDADES_MEDIDA_PADRÃO[service] || "kg";
+          // Valores iniciais sugeridos - podem ser editados pelo usuário
+          const qtdPadrao = 10; // Quantidade padrão inicial
+          const precoPadrao = unidadePadrao === "kg" ? 15 : 100; // Preço sugerido
+          
+          return {
+            tipo: service,
+            quantidade: qtdPadrao,
+            unidade: unidadePadrao,
+            precoUnitario: precoPadrao,
+            subtotal: qtdPadrao * precoPadrao
+          };
+        });
         services = [...initialServices];
         console.log("Inicializando apenas com serviços:", services);
       }
