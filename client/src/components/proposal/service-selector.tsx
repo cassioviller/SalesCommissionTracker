@@ -249,7 +249,7 @@ export default function ServiceSelector({
           return {
             tipo: service,
             quantidade: qtdPadrao,
-            unidade: unidadePadrao,
+            unidade: unidadePadrao as typeof TIPOS_UNIDADE[number],
             precoUnitario: precoPadrao,
             subtotal: qtdPadrao * precoPadrao
           };
