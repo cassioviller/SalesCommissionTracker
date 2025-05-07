@@ -280,33 +280,6 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
     // Precisamos manter os dados no formato correto para cada modo
     const dataToSend = { ...processedData };
     
-    // Lista de campos numéricos
-    const numericFields = [
-      'valorTotal', 'valorPago', 'percentComissao', 'valorComissaoPaga', 
-      'pesoEstrutura', 'valorPorQuilo', 'valorTotalMaterial', 'tempoNegociacao'
-    ];
-    
-    // Se estiver no modo de edição, converte para numbers
-    // Se estiver criando, garante que sejam strings
-    if (editMode) {
-      // Para edição, convertemos todos os campos numéricos para number
-      numericFields.forEach(field => {
-        if (field in dataToSend) {
-          dataToSend[field] = Number(dataToSend[field]);
-        }
-      });
-    } else {
-      // Para criação, garantimos que todos os campos numéricos sejam strings
-      numericFields.forEach(field => {
-        if (field in dataToSend) {
-          // Se já for string, mantém. Se for number, converte para string
-          if (typeof dataToSend[field] === 'number') {
-            dataToSend[field] = String(dataToSend[field]);
-          }
-        }
-      });
-    }
-    
     // Converter para o formato esperado pela API
     const formattedData: any = {
       ...dataToSend,
@@ -320,14 +293,18 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       // Recalcular subtotais para evitar inconsistências
       formattedData.detalhesServicos = serviceDetails.map(detalhe => ({
         ...detalhe,
-        subtotal: detalhe.quantidade * detalhe.precoUnitario
+        quantidade: Number(detalhe.quantidade),
+        precoUnitario: Number(detalhe.precoUnitario),
+        subtotal: Number(detalhe.quantidade) * Number(detalhe.precoUnitario)
       }));
       
       // Calcular o valor total do material
       const valorTotalMaterial = formattedData.detalhesServicos.reduce(
         (total: number, detalhe: ServicoDetalhe) => total + detalhe.subtotal, 0
       );
-      formattedData.valorTotalMaterial = valorTotalMaterial.toString();
+      
+      // Armazenar como número, não como string
+      formattedData.valorTotalMaterial = Number(valorTotalMaterial);
       
       // Calcular o peso da estrutura (total de itens com unidade kg)
       const pesoTotal = formattedData.detalhesServicos
@@ -335,9 +312,20 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
         .reduce((total: number, detalhe: ServicoDetalhe) => total + detalhe.quantidade, 0);
         
       if (pesoTotal > 0) {
-        formattedData.pesoEstrutura = pesoTotal.toString();
+        // Armazenar como número, não como string
+        formattedData.pesoEstrutura = Number(pesoTotal);
       }
     }
+    
+    // Converter explicitamente cada campo numérico para número
+    if ('valorTotal' in formattedData) formattedData.valorTotal = Number(formattedData.valorTotal || 0);
+    if ('valorPago' in formattedData) formattedData.valorPago = Number(formattedData.valorPago || 0);
+    if ('percentComissao' in formattedData) formattedData.percentComissao = Number(formattedData.percentComissao || 0);
+    if ('valorComissaoPaga' in formattedData) formattedData.valorComissaoPaga = Number(formattedData.valorComissaoPaga || 0);
+    if ('pesoEstrutura' in formattedData) formattedData.pesoEstrutura = Number(formattedData.pesoEstrutura || 0);
+    if ('valorPorQuilo' in formattedData) formattedData.valorPorQuilo = Number(formattedData.valorPorQuilo || 0);
+    if ('valorTotalMaterial' in formattedData) formattedData.valorTotalMaterial = Number(formattedData.valorTotalMaterial || 0);
+    if ('tempoNegociacao' in formattedData) formattedData.tempoNegociacao = Number(formattedData.tempoNegociacao || 0);
     
     console.log("Enviando dados para API:", formattedData);
     mutation.mutate(formattedData);
