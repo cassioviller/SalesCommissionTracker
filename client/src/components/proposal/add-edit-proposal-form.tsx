@@ -67,7 +67,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   
   // Estado para controlar se os campos de comissão estão habilitados
   const [comissaoHabilitada, setComissaoHabilitada] = useState<boolean>(
-    editMode ? (proposal?.percentComissao ? Number(proposal.percentComissao) > 0 : false) : false
+    editMode ? (proposal?.comissaoHabilitada === "true" || proposal?.comissaoHabilitada === true as any) : false
   );
   
   // Form setup
