@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, FileDown } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import NavigationHeader from "@/components/navigation-header";
 import { BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Bar, PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid } from "recharts";
@@ -17,6 +17,9 @@ import { Loader2 } from "lucide-react";
 import type { ProposalWithCalculations } from "@shared/schema";
 import { formatCurrency } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Cores para os gráficos
 const COLORS = [
@@ -30,6 +33,7 @@ export default function KPIs() {
   const [propostasEmitidas, setPropostasEmitidas] = useState<number>(0);
   const [dataInicio, setDataInicio] = useState<Date | undefined>(undefined);
   const [dataFim, setDataFim] = useState<Date | undefined>(undefined);
+  const { toast } = useToast();
   
   // Handler para mudança no número de propostas emitidas
   const handlePropostasEmitidasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +57,143 @@ export default function KPIs() {
   const limparFiltros = () => {
     setDataInicio(undefined);
     setDataFim(undefined);
+  };
+  
+  // Função para exportar KPIs para PDF
+  const exportarKPIsPDF = () => {
+    if (!kpisGerais || !kpisPorProjeto) {
+      toast({
+        title: "Sem dados",
+        description: "Não há dados suficientes para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Criar documento PDF
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 15;
+    const contentWidth = pageWidth - (margin * 2);
+    
+    // Adicionar título e data
+    doc.setFontSize(20);
+    doc.text("Relatório de KPIs", pageWidth / 2, 20, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth / 2, 27, { align: 'center' });
+    
+    if (dataInicio || dataFim) {
+      doc.text(`Período: ${dataInicio ? format(dataInicio, "dd/MM/yyyy") : "Início"} até ${dataFim ? format(dataFim, "dd/MM/yyyy") : "Hoje"}`, pageWidth / 2, 32, { align: 'center' });
+    }
+    
+    // Seção 1: KPIs Gerais
+    doc.setFontSize(16);
+    doc.text("1. KPIs Gerais", margin, 45);
+    
+    // Tabela de KPIs Gerais
+    const kpisGeraisData = [
+      ["Total de Propostas", kpisGerais.totalPropostas.toString()],
+      ["Valor Total (R$)", formatCurrency(kpisGerais.valorTotalPropostas)],
+      ["Ticket Médio (R$)", formatCurrency(kpisGerais.ticketMedio)],
+      ["Total Pago (R$)", formatCurrency(kpisGerais.totalPago)],
+      ["Saldo em Aberto (R$)", formatCurrency(kpisGerais.totalEmAberto)],
+      ["Clientes Únicos", kpisGerais.clientesUnicos.toString()],
+      ["Peso Médio por Mês (kg)", kpisGerais.pesoMedioPorMes.toFixed(2)],
+      ["Tempo Médio de Negociação (dias)", kpisGerais.tempoMedioNegociacao.toFixed(1)],
+      ["% Clientes com Recompra", `${kpisGerais.percentRecompra.toFixed(1)}%`]
+    ];
+    
+    autoTable(doc, {
+      startY: 50,
+      head: [["Indicador", "Valor"]],
+      body: kpisGeraisData,
+      theme: 'grid',
+      headStyles: { fillColor: [53, 151, 255] },
+      margin: { top: 50, left: margin, right: margin },
+    });
+    
+    // Seção 2: Canal de Vendas
+    const finalY = (doc as any).lastAutoTable.finalY || 150;
+    doc.setFontSize(16);
+    doc.text("2. Canal de Vendas (Tipo de Cliente)", margin, finalY + 15);
+    
+    // Tabela de Canal de Vendas
+    const canalVendasData = kpisGerais.percentPorTipoCliente.map(item => [
+      item.tipo,
+      formatCurrency(item.valor),
+      `${item.percentual.toFixed(1)}%`
+    ]);
+    
+    autoTable(doc, {
+      startY: finalY + 20,
+      head: [["Tipo de Cliente", "Valor (R$)", "Percentual"]],
+      body: canalVendasData,
+      theme: 'grid',
+      headStyles: { fillColor: [53, 151, 255] },
+      margin: { top: finalY + 20, left: margin, right: margin },
+    });
+    
+    // Seção 3: Tipo de Projeto
+    const finalY2 = (doc as any).lastAutoTable.finalY || 200;
+    
+    // Adicionar nova página se necessário
+    if (finalY2 > doc.internal.pageSize.getHeight() - 80) {
+      doc.addPage();
+      doc.setFontSize(16);
+      doc.text("3. Tipo de Projeto", margin, 20);
+      
+      // Tabela de Tipo de Projeto
+      const tipoProjetoData = kpisPorProjeto.percentPorProjeto.map(item => [
+        item.tipo,
+        item.count.toString(),
+        `${item.percentual.toFixed(1)}%`
+      ]);
+      
+      autoTable(doc, {
+        startY: 25,
+        head: [["Tipo de Projeto", "Quantidade", "Percentual"]],
+        body: tipoProjetoData,
+        theme: 'grid',
+        headStyles: { fillColor: [53, 151, 255] },
+        margin: { top: 25, left: margin, right: margin },
+      });
+    } else {
+      doc.setFontSize(16);
+      doc.text("3. Tipo de Projeto", margin, finalY2 + 15);
+      
+      // Tabela de Tipo de Projeto
+      const tipoProjetoData = kpisPorProjeto.percentPorProjeto.map(item => [
+        item.tipo,
+        item.count.toString(),
+        `${item.percentual.toFixed(1)}%`
+      ]);
+      
+      autoTable(doc, {
+        startY: finalY2 + 20,
+        head: [["Tipo de Projeto", "Quantidade", "Percentual"]],
+        body: tipoProjetoData,
+        theme: 'grid',
+        headStyles: { fillColor: [53, 151, 255] },
+        margin: { top: finalY2 + 20, left: margin, right: margin },
+      });
+    }
+    
+    // Rodapé com informação de página
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text(`Página ${i} de ${pageCount}`, pageWidth - margin, doc.internal.pageSize.getHeight() - 10);
+    }
+    
+    // Salvar o documento
+    doc.save(`kpis_${new Date().toISOString().split('T')[0]}.pdf`);
+    
+    toast({
+      title: "Exportação concluída",
+      description: "Os dados foram exportados para PDF com sucesso",
+      variant: "default",
+    });
   };
   
   // Buscar dados das propostas
@@ -271,9 +412,19 @@ export default function KPIs() {
       <NavigationHeader />
       
       <main className="container mx-auto py-6 px-4">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">KPIs - Indicadores de Desempenho</h1>
-          <p className="text-gray-500">Análise detalhada das métricas de negócio</p>
+        <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">KPIs - Indicadores de Desempenho</h1>
+            <p className="text-gray-500">Análise detalhada das métricas de negócio</p>
+          </div>
+          <Button 
+            onClick={exportarKPIsPDF}
+            className="mt-3 md:mt-0 flex items-center gap-1"
+            variant="outline"
+          >
+            <FileDown className="h-4 w-4" />
+            Exportar KPIs para PDF
+          </Button>
         </div>
         
         {/* Filtro de período */}
