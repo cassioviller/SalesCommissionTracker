@@ -75,6 +75,23 @@ export const TIPOS_UNIDADE = ["kg", "m²", "m", "uni", "vb", "pç"] as const;
 export const TIPOS_PROJETO = ["PE", "PE + PC", "Nenhum"] as const;
 export const TIPOS_CONTRATO = ["MP", "MO", "MP + MO"] as const;
 
+// Tabela de correspondência padrão para as unidades de medida
+export const UNIDADES_MEDIDA_PADRÃO: Record<string, typeof TIPOS_UNIDADE[number]> = {
+  "Estrutura": "kg",
+  "Escada Metálica": "kg",
+  "Pergolado": "kg",
+  "Manta Termo Plástica": "m²",
+  "Escada Helicoidal": "kg",
+  "Laje": "m²",
+  "Telha": "m²",
+  "Cobertura Metálica": "m²",
+  "Manta PVC": "m²",
+  "Cobertura Policarbonato": "m²",
+  "Beiral": "m²",
+  "Reforço Metálico": "kg",
+  "Mezanino": "kg"
+};
+
 // Interface para detalhes do serviço
 export interface ServicoDetalhe {
   tipo: string; // Tipo do serviço
@@ -216,5 +233,5 @@ export interface ProposalWithCalculations extends SalesProposal {
   percentComissaoPaga: number;
   pagamentosProposta?: PagamentoProposta[];
   pagamentosComissao?: PagamentoComissao[];
-  detalhesServicos?: ServicoDetalhe[];
+  detalhesServicos?: ServicoDetalhe[] | null;
 }

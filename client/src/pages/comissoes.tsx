@@ -1,13 +1,19 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import CommissionTable from "@/components/commission/table";
 import ChartPanel from "@/components/commission/chart-panel";
 import type { SalesProposal, ProposalWithCalculations } from "@shared/schema";
 import NavigationHeader from "@/components/navigation-header";
+import ServiceManagerModal from "@/components/proposal/service-manager-modal";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 export default function Comissoes() {
   // Ref para o componente da tabela
   const tableRef = useRef<any>(null);
+  
+  // Estado para controlar o modal de gerenciamento de serviços
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   
   // Fetch proposals from API
   const { data: proposals = [], isLoading } = useQuery<SalesProposal[]>({
@@ -61,6 +67,16 @@ export default function Comissoes() {
               <a href="/partner-login" className="text-primary text-sm hover:underline">Portal do Parceiro</a>
             </div>
           </div>
+          
+          {/* Botão "+" para gerenciar serviços */}
+          <Button
+            variant="default"
+            size="icon"
+            className="w-10 h-10 bg-blue-500 hover:bg-blue-600 flex items-center justify-center"
+            onClick={() => setIsServiceModalOpen(true)}
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
         </header>
         
         {/* Content area */}
