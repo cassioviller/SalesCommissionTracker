@@ -532,7 +532,11 @@ export default function ServiceSelector({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => editService(detail)}
+                        onClick={(e) => {
+                          e.preventDefault(); // Prevenir eventos em formulários
+                          e.stopPropagation(); // Evitar propagação para outros handlers
+                          editService(detail);
+                        }}
                         className="mr-1"
                       >
                         Editar
@@ -540,7 +544,11 @@ export default function ServiceSelector({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeService(detail.tipo)}
+                        onClick={(e) => {
+                          e.preventDefault(); // Prevenir eventos em formulários
+                          e.stopPropagation(); // Evitar propagação para outros handlers
+                          removeService(detail.tipo);
+                        }}
                         className="text-red-500 hover:text-red-700"
                       >
                         Remover
