@@ -1,19 +1,13 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import CommissionTable from "@/components/commission/table";
 import ChartPanel from "@/components/commission/chart-panel";
 import type { SalesProposal, ProposalWithCalculations } from "@shared/schema";
 import NavigationHeader from "@/components/navigation-header";
-import ServiceManagerModal from "@/components/proposal/service-manager-modal";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 export default function Comissoes() {
   // Ref para o componente da tabela
   const tableRef = useRef<any>(null);
-  
-  // Estado para controlar o modal de gerenciamento de serviços
-  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   
   // Fetch proposals from API
   const { data: proposals = [], isLoading } = useQuery<SalesProposal[]>({

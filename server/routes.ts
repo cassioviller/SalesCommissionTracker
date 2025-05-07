@@ -211,8 +211,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid ID format" });
       }
 
+      // Converter boolean para string se necessário
+      const proposalData = { ...req.body };
+      
+      // Garantir que comissaoHabilitada é sempre string "true" ou "false"
+      if (proposalData.comissaoHabilitada !== undefined) {
+        if (typeof proposalData.comissaoHabilitada === 'boolean') {
+          proposalData.comissaoHabilitada = proposalData.comissaoHabilitada ? "true" : "false";
+        }
+      }
+
       // Use the custom update schema that handles numbers properly
-      const validatedData = updateProposalSchema.parse(req.body);
+      const validatedData = updateProposalSchema.parse(proposalData);
+      
+      // Preservar detalhes de serviços existentes se não forem enviados
+      if (validatedData.detalhesServicos === undefined) {
+        const existingProposal = await storage.getProposal(id);
+        if (existingProposal && existingProposal.detalhesServicos) {
+          validatedData.detalhesServicos = existingProposal.detalhesServicos;
+        }
+      }
+      
       const updatedProposal = await storage.updateProposal(id, validatedData);
       
       if (!updatedProposal) {
