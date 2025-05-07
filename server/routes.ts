@@ -151,7 +151,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Se não há detalhes de serviço, criá-los do zero
         if (!detalhesServicos || !Array.isArray(detalhesServicos) || detalhesServicos.length === 0) {
           detalhesServicos = proposal.tiposServico.map(servico => {
-            const unidadePadrao = UNIDADES_PADRAO[servico] || "kg";
+            // Verificação segura do tipo para evitar erro de TypeScript
+      let unidadePadrao = "kg"; // valor padrão
+      if (UNIDADES_PADRAO.hasOwnProperty(servico)) {
+        unidadePadrao = UNIDADES_PADRAO[servico as keyof typeof UNIDADES_PADRAO];
+      }
             const valorInicial = unidadePadrao === "kg" ? 15 : 100;
             
             return {
