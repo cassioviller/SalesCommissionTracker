@@ -343,12 +343,15 @@ export default function ServiceSelector({
             <Button 
               size="icon" 
               className="bg-blue-500 hover:bg-blue-600 text-white"
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault(); // Prevenir submissão do formulário
+                e.stopPropagation(); // Parar propagação do evento
                 const serviceManagerModal = document.getElementById('service-manager-modal-button');
                 if (serviceManagerModal) {
                   (serviceManagerModal as HTMLButtonElement).click();
                 }
               }}
+              type="button" // Garantir que não seja um botão de submissão
             >
               <Plus className="h-4 w-4" />
             </Button>
