@@ -261,7 +261,12 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   }, [selectedServices, form]);
 
   // Submit form
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
+  const onSubmit = (data: z.infer<typeof formSchema>, e?: React.FormEvent) => {
+    // Prevenir comportamento padrão do formulário
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     // Processar os dados para garantir que campos numéricos vazios sejam enviados como "0"
     const processedData = Object.entries(data).reduce((acc: any, [key, value]) => {
       // Se for um campo numérico e estiver vazio, substitua por "0"
@@ -317,18 +322,41 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       }
     }
     
-    // Converter explicitamente cada campo numérico para número
-    if ('valorTotal' in formattedData) formattedData.valorTotal = Number(formattedData.valorTotal || 0);
-    if ('valorPago' in formattedData) formattedData.valorPago = Number(formattedData.valorPago || 0);
-    if ('percentComissao' in formattedData) formattedData.percentComissao = Number(formattedData.percentComissao || 0);
-    if ('valorComissaoPaga' in formattedData) formattedData.valorComissaoPaga = Number(formattedData.valorComissaoPaga || 0);
-    if ('pesoEstrutura' in formattedData) formattedData.pesoEstrutura = Number(formattedData.pesoEstrutura || 0);
-    if ('valorPorQuilo' in formattedData) formattedData.valorPorQuilo = Number(formattedData.valorPorQuilo || 0);
-    if ('valorTotalMaterial' in formattedData) formattedData.valorTotalMaterial = Number(formattedData.valorTotalMaterial || 0);
-    if ('tempoNegociacao' in formattedData) formattedData.tempoNegociacao = Number(formattedData.tempoNegociacao || 0);
+    // Criar uma cópia corretamente tipada para a API
+    const apiData: any = {
+      // Campos de texto
+      proposta: formattedData.proposta || "",
+      nomeCliente: formattedData.nomeCliente || "",
+      tipoCliente: formattedData.tipoCliente || "Cliente Final",
+      dataProposta: formattedData.dataProposta || format(new Date(), 'yyyy-MM-dd'),
+      
+      // Campos booleanos como strings para API
+      comissaoHabilitada: formattedData.comissaoHabilitada || "false",
+      recomendacaoDireta: formattedData.recomendacaoDireta || "nao",
+      faturamentoDireto: formattedData.faturamentoDireto || "nao",
+      clienteRecompra: formattedData.clienteRecompra || "nao",
+      
+      // Campos de seleção múltipla
+      tiposServico: formattedData.tiposServico || [],
+      detalhesServicos: formattedData.detalhesServicos || [],
+      
+      // Campos típicamente opcionais
+      tipoProjeto: formattedData.tipoProjeto || null,
+      tipoContrato: formattedData.tipoContrato || null,
+      
+      // Campos numéricos - converter explicitamente
+      valorTotal: Number(formattedData.valorTotal || 0),
+      valorPago: Number(formattedData.valorPago || 0),
+      percentComissao: Number(formattedData.percentComissao || 0),
+      valorComissaoPaga: Number(formattedData.valorComissaoPaga || 0),
+      pesoEstrutura: Number(formattedData.pesoEstrutura || 0),
+      valorPorQuilo: Number(formattedData.valorPorQuilo || 0), 
+      valorTotalMaterial: Number(formattedData.valorTotalMaterial || 0),
+      tempoNegociacao: Number(formattedData.tempoNegociacao || 0)
+    };
     
-    console.log("Enviando dados para API:", formattedData);
-    mutation.mutate(formattedData);
+    console.log("Enviando dados para API:", apiData);
+    mutation.mutate(apiData);
   };
 
   return (
@@ -379,7 +407,12 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
         </div>
       </CardHeader>
       
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const data = form.getValues();
+          onSubmit(data, e);
+        }}>
         <CardContent className="space-y-6">
           {/* Seção de dados básicos */}
           <div className="space-y-4">
