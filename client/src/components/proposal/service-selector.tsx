@@ -240,11 +240,27 @@ export default function ServiceSelector({
   
   // Editar serviço
   const editService = (detail: ServicoDetalhe) => {
-    setCurrentService(detail.tipo);
-    setQuantidade(detail.quantidade);
-    setUnidade(detail.unidade);
-    setPrecoUnitario(detail.precoUnitario);
-    setIsEditing(true);
+    try {
+      // Garantir que estamos trabalhando com valores numéricos
+      setCurrentService(detail.tipo);
+      setQuantidade(Number(detail.quantidade));
+      setUnidade(detail.unidade);
+      setPrecoUnitario(Number(detail.precoUnitario));
+      setIsEditing(true);
+      
+      // Rolar para o formulário para facilitar a edição
+      const formElement = document.getElementById('service-form');
+      if (formElement) {
+        formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } catch (error) {
+      console.error("Erro ao editar serviço:", error);
+      toast({
+        title: "Erro ao editar",
+        description: "Não foi possível editar o serviço. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Atualizar valor total material quando os detalhes mudarem
@@ -381,7 +397,7 @@ export default function ServiceSelector({
       </div>
 
       {currentService && (
-        <div className="p-4 border rounded-md bg-gray-50">
+        <div id="service-form" className="p-4 border rounded-md bg-gray-50">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-md font-medium">
               {isEditing ? `Editando: ${currentService}` : currentService}
