@@ -495,16 +495,23 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
           <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h2 className="text-lg font-medium">Serviços</h2>
-                <Select onValueChange={handleServiceAdd}>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Adicionar serviço" />
-                  </SelectTrigger>
-                  <SelectContent>
+                <Command className="w-[200px]">
+                <CommandInput placeholder="Buscar serviço..." className="h-9" />
+                <CommandList>
+                  <CommandEmpty>Nenhum serviço encontrado.</CommandEmpty>
+                  <CommandGroup>
                     {TIPOS_SERVICO.map((tipo) => (
-                      <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
+                      <CommandItem
+                        key={tipo}
+                        value={tipo}
+                        onSelect={(value) => handleServiceAdd(value as any)}
+                      >
+                        {tipo}
+                      </CommandItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </CommandGroup>
+                </CommandList>
+              </Command>
               </div>
 
               <div className="space-y-4">
@@ -521,16 +528,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="space-y-2">
-                        <Label>Nome do serviço</Label>
-                        <Input
-                          value={item.nome}
-                          onChange={(e) => handleServiceChange(index, 'nome', e.target.value)}
-                          placeholder="Nome do serviço"
-                        />
-                      </div>
-
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label>Quantidade</Label>
                         <Input
@@ -614,42 +612,19 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="pesoEstrutura">Peso da Estrutura (kg)</Label>
-                <Input
-                  id="pesoEstrutura"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  {...form.register("pesoEstrutura")}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="valorPorQuilo">Valor por Quilo (R$)</Label>
-                <Input
-                  id="valorPorQuilo"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  {...form.register("valorPorQuilo")}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="valorTotalMaterial">Valor Total Material (R$)</Label>
-                <Input
-                  id="valorTotalMaterial"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  {...form.register("valorTotalMaterial")}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="valorTotalMaterial">Valor Total Material (R$)</Label>
+              <Input
+                id="valorTotalMaterial"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={serviceItems.reduce((total, item) => total + item.subtotal, 0).toFixed(2)}
+                disabled
+                className="bg-gray-50"
+              />
+              <p className="text-xs text-neutral-500 italic">Calculado automaticamente a partir dos subtotais dos serviços</p>
             </div>
           </div>
 
