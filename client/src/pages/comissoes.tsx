@@ -67,16 +67,6 @@ export default function Comissoes() {
               <a href="/partner-login" className="text-primary text-sm hover:underline">Portal do Parceiro</a>
             </div>
           </div>
-          
-          {/* Botão "+" para gerenciar serviços */}
-          <Button
-            variant="default"
-            size="icon"
-            className="w-10 h-10 bg-blue-500 hover:bg-blue-600 flex items-center justify-center"
-            onClick={() => setIsServiceModalOpen(true)}
-          >
-            <Plus className="h-6 w-6" />
-          </Button>
         </header>
         
         {/* Content area */}
@@ -98,13 +88,6 @@ export default function Comissoes() {
           </div>
         </div>
       </main>
-
-      
-      {/* Modal de Gerenciamento de Serviços */}
-      <ServiceManagerModal 
-        isOpen={isServiceModalOpen} 
-        onClose={() => setIsServiceModalOpen(false)} 
-      />
     </div>
   );
 }

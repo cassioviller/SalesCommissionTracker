@@ -24,11 +24,12 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { ProposalWithCalculations, SalesProposal } from '@shared/schema';
-import { Edit, FileText, FileDown, History } from 'lucide-react';
+import { Edit, FileText, FileDown, History, Plus } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import PaymentHistoryModal from './payment-history-modal';
+import ServiceManagerModal from '../proposal/service-manager-modal';
 
 interface CommissionTableProps {
   proposals: ProposalWithCalculations[];
@@ -74,6 +75,8 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
   const [selectedProposalId, setSelectedProposalId] = useState<number | null>(null);
   const [selectedProposalName, setSelectedProposalName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  // Estado para controlar a visibilidade do modal de serviços
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   
   // Estado para armazenar os dados da proposta selecionada com os pagamentos
   const { data: selectedProposalDetails } = useQuery({
@@ -428,29 +431,41 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       {/* Barra de ferramentas */}
       <div className="flex justify-between items-center gap-2 p-3 border-b">
-        {/* Campo de pesquisa */}
-        <div className="relative w-full max-w-md">
-          <Input
-            type="text"
-            placeholder="Pesquisar por número da proposta ou nome do cliente..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8 text-sm"
-          />
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        {/* Campo de pesquisa com botão de serviços */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Input
+              type="text"
+              placeholder="Pesquisar por número da proposta ou nome do cliente..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8 text-sm w-full max-w-md"
             />
-          </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+          
+          {/* Botão "+" para gerenciar serviços */}
+          <Button
+            variant="default"
+            size="icon"
+            className="w-10 h-10 bg-blue-500 hover:bg-blue-600 flex items-center justify-center"
+            onClick={() => setIsServiceModalOpen(true)}
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
         </div>
         
         {/* Botões de exportação */}
@@ -629,6 +644,12 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
           pagamentosComissao={selectedProposalDetails?.pagamentosComissao || []}
         />
       )}
+      
+      {/* Modal de gerenciamento de serviços */}
+      <ServiceManagerModal 
+        isOpen={isServiceModalOpen} 
+        onClose={() => setIsServiceModalOpen(false)} 
+      />
     </div>
   );
 });
