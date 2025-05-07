@@ -148,8 +148,6 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
   const watchPercentComissao = watch("percentComissao");
   const watchValorPago = watch("valorPago");
   const watchValorComissaoPaga = watch("valorComissaoPaga");
-  const watchPesoEstrutura = watch("pesoEstrutura");
-  const watchValorPorQuilo = watch("valorPorQuilo");
 
   // Cálculos em tempo real
   const valorTotalNum = Number(watchValorTotal) || 0;
@@ -161,16 +159,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
     ? (Number(watchValorComissaoPaga || 0) / valorComissaoTotal) * 100
     : 0;
     
-  // Calcular valor total do material quando peso e valor por quilo são preenchidos
-  useEffect(() => {
-    const pesoEstrutura = Number(watchPesoEstrutura) || 0;
-    const valorPorQuilo = Number(watchValorPorQuilo) || 0;
-    
-    if (pesoEstrutura > 0 && valorPorQuilo > 0) {
-      const valorTotalMaterial = pesoEstrutura * valorPorQuilo;
-      form.setValue("valorTotalMaterial", valorTotalMaterial.toString());
-    }
-  }, [watchPesoEstrutura, watchValorPorQuilo, form]);
+  // Cálculo de valor total de material é agora feito diretamente no ServiceSelector
 
   // Mutation para criar/editar proposta
   const mutation = useMutation({
@@ -490,42 +479,23 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="pesoEstrutura">Peso da Estrutura (kg)</Label>
-                <Input
-                  id="pesoEstrutura"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  {...form.register("pesoEstrutura")}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="valorPorQuilo">Valor por Quilo (R$)</Label>
-                <Input
-                  id="valorPorQuilo"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  {...form.register("valorPorQuilo")}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="valorTotalMaterial">Valor Total Material (R$)</Label>
-                <Input
-                  id="valorTotalMaterial"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  {...form.register("valorTotalMaterial")}
-                />
-              </div>
+            {/* Os valores de peso e material são agora gerenciados pelo ServiceSelector */}
+            <div className="hidden">
+              <input
+                id="pesoEstrutura"
+                type="hidden"
+                {...form.register("pesoEstrutura")}
+              />
+              <input
+                id="valorPorQuilo"
+                type="hidden"
+                {...form.register("valorPorQuilo")}
+              />
+              <input
+                id="valorTotalMaterial"
+                type="hidden"
+                {...form.register("valorTotalMaterial")}
+              />
             </div>
           </div>
 

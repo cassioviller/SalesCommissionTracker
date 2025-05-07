@@ -24,7 +24,7 @@ const UNIDADES_MEDIDA: Record<string, string> = {
 
 // Interface para detalhes de um serviço
 interface ServicoDetalhe {
-  tipo: string;
+  tipo: typeof TIPOS_SERVICO[number];
   quantidade: number;
   precoUnitario: number;
   subtotal: number;
@@ -107,7 +107,7 @@ export default function ServiceSelector({
   };
 
   // Remover serviço
-  const removeService = (tipo: string) => {
+  const removeService = (tipo: typeof TIPOS_SERVICO[number]) => {
     setServiceDetails(prev => prev.filter(d => d.tipo !== tipo));
     setSelectedServices(prev => prev.filter(s => s !== tipo));
   };
