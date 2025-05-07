@@ -128,12 +128,25 @@ export default function ServiceSelector({
   const addOrUpdateServiceDetail = () => {
     if (!validateForm()) return;
 
+    // Garantir que estamos trabalhando com números
+    const qtdNumerica = Number(quantidade);
+    const precoNumerico = Number(precoUnitario);
+    const subtotalCalculado = qtdNumerica * precoNumerico;
+
+    console.log("Valores sendo usados:", {
+      tipo: currentService,
+      quantidade: qtdNumerica,
+      unidade,
+      precoUnitario: precoNumerico,
+      subtotal: subtotalCalculado
+    });
+
     const newDetail: ServicoDetalhe = {
       tipo: currentService! as string,
-      quantidade,
+      quantidade: qtdNumerica,
       unidade: unidade as any,
-      precoUnitario,
-      subtotal
+      precoUnitario: precoNumerico,
+      subtotal: subtotalCalculado
     };
 
     // Verificar se o serviço já existe
@@ -167,8 +180,17 @@ export default function ServiceSelector({
     const updatedServiceTypes = updatedDetails.map(detail => detail.tipo);
     setSelectedServices(updatedServiceTypes);
     
+    // Calcular o total correto garantindo valores numéricos
+    const total = updatedDetails.reduce((sum, detail) => {
+      // Garantir que os valores são numéricos
+      const detailSubtotal = Number(detail.quantidade) * Number(detail.precoUnitario);
+      return sum + detailSubtotal;
+    }, 0);
+    
+    console.log("Novo total calculado:", total);
+    console.log("Detalhes atualizados:", updatedDetails);
+    
     // Notificar o componente pai sobre a mudança imediatamente
-    const total = updatedDetails.reduce((sum, detail) => sum + detail.subtotal, 0);
     onChange(updatedServiceTypes, total, updatedDetails);
 
     // Limpar campos
@@ -193,8 +215,16 @@ export default function ServiceSelector({
     setServiceDetails(updatedDetails);
     setSelectedServices(updatedServices as any);
     
-    // Calcular o novo total e notificar o componente pai imediatamente
-    const total = updatedDetails.reduce((sum, detail) => sum + detail.subtotal, 0);
+    // Calcular o novo total garantindo valores numéricos
+    const total = updatedDetails.reduce((sum, detail) => {
+      const detailSubtotal = Number(detail.quantidade) * Number(detail.precoUnitario);
+      return sum + detailSubtotal;
+    }, 0);
+    
+    console.log("Total após remoção:", total);
+    console.log("Detalhes após remoção:", updatedDetails);
+    
+    // Notificar o componente pai sobre a mudança imediatamente
     onChange(updatedServices, total, updatedDetails);
     
     toast({
@@ -219,7 +249,12 @@ export default function ServiceSelector({
 
   // Atualizar valor total material quando os detalhes mudarem
   useEffect(() => {
-    const total = serviceDetails.reduce((sum, detail) => sum + detail.subtotal, 0);
+    // Garantindo que estamos trabalhando com números
+    const total = serviceDetails.reduce((sum, detail) => {
+      const detailSubtotal = Number(detail.quantidade) * Number(detail.precoUnitario);
+      return sum + detailSubtotal;
+    }, 0);
+    console.log("Atualizando valor total material:", total);
     setValorTotalMaterial(total);
   }, [serviceDetails]);
 
@@ -233,9 +268,17 @@ export default function ServiceSelector({
       let services: Array<string> = [];
       
       if (initialDetails && initialDetails.length > 0) {
-        details = [...initialDetails];
+        // Garantir que estamos lidando com valores numéricos para todos os detalhes
+        details = initialDetails.map(detail => ({
+          tipo: detail.tipo,
+          quantidade: Number(detail.quantidade),
+          unidade: detail.unidade,
+          precoUnitario: Number(detail.precoUnitario),
+          subtotal: Number(detail.quantidade) * Number(detail.precoUnitario)
+        }));
+        
         // Extrair tipos de serviço dos detalhes
-        services = initialDetails.map(detail => detail.tipo);
+        services = details.map(detail => detail.tipo);
         console.log("Inicializando com detalhes:", details, "Serviços:", services);
       } else if (initialServices && initialServices.length > 0) {
         // Se não temos detalhes, mas temos serviços, criar detalhes iniciais com valores padrão
@@ -262,8 +305,13 @@ export default function ServiceSelector({
       setServiceDetails(details);
       setSelectedServices(services as any);
       
-      // Calcula o valor total para os detalhes iniciais
-      const total = details.reduce((sum, detail) => sum + detail.subtotal, 0);
+      // Calcula o valor total garantindo que estamos usando números
+      const total = details.reduce((sum, detail) => {
+        const subtotal = Number(detail.quantidade) * Number(detail.precoUnitario);
+        return sum + subtotal;
+      }, 0);
+      
+      console.log("Valor total material inicial calculado:", total);
       setValorTotalMaterial(total);
       
       // Notifica o componente pai sobre os valores iniciais
