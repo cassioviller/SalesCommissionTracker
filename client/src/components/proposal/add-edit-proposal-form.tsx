@@ -116,6 +116,14 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
     proposal?.detalhesServicos || []
   );
   
+  // Log para depuração inicial
+  useEffect(() => {
+    if (proposal) {
+      console.log("Proposta recebida:", proposal);
+      console.log("Detalhes de serviço:", proposal.detalhesServicos);
+    }
+  }, [proposal]);
+  
   // Atualizar o formulário quando a proposta mudar (importante para edições)
   useEffect(() => {
     if (editMode && proposal) {
@@ -307,6 +315,30 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
       comissaoHabilitada: comissaoHabilitada ? "true" : "false" // Enviar como string conforme esperado pelo schema
     };
     
+    // Garantir que detalhesServicos estejam completos e com subtotais calculados
+    if (serviceDetails && serviceDetails.length > 0) {
+      // Recalcular subtotais para evitar inconsistências
+      formattedData.detalhesServicos = serviceDetails.map(detalhe => ({
+        ...detalhe,
+        subtotal: detalhe.quantidade * detalhe.precoUnitario
+      }));
+      
+      // Calcular o valor total do material
+      const valorTotalMaterial = formattedData.detalhesServicos.reduce(
+        (total: number, detalhe: ServicoDetalhe) => total + detalhe.subtotal, 0
+      );
+      formattedData.valorTotalMaterial = valorTotalMaterial.toString();
+      
+      // Calcular o peso da estrutura (total de itens com unidade kg)
+      const pesoTotal = formattedData.detalhesServicos
+        .filter((detalhe: ServicoDetalhe) => detalhe.unidade === 'kg')
+        .reduce((total: number, detalhe: ServicoDetalhe) => total + detalhe.quantidade, 0);
+        
+      if (pesoTotal > 0) {
+        formattedData.pesoEstrutura = pesoTotal.toString();
+      }
+    }
+    
     console.log("Enviando dados para API:", formattedData);
     mutation.mutate(formattedData);
   };
@@ -443,10 +475,19 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
               initialMaterialValue={form.getValues("valorTotalMaterial")}
               initialDetails={serviceDetails}
               onChange={(services, valorTotalMaterial, detalhes) => {
-                setSelectedServices(services);
+                // Atualizando estado e formulário com os novos valores
+                setSelectedServices(services as any);
                 setServiceDetails(detalhes);
+                
+                // Atualizar valores no formulário
+                form.setValue("tiposServico", services as any);
                 form.setValue("valorTotalMaterial", valorTotalMaterial.toString());
                 form.setValue("detalhesServicos", detalhes);
+                
+                // Log para depuração
+                console.log("Serviços atualizados:", services);
+                console.log("Detalhes atualizados:", detalhes);
+                console.log("Valor total material:", valorTotalMaterial);
                 
                 // Calcular o peso da estrutura baseado em serviços com unidade "kg"
                 const pesoTotal = detalhes
@@ -455,6 +496,7 @@ export default function AddEditProposalForm({ editMode = false, proposal, onSucc
                 
                 if (pesoTotal > 0) {
                   form.setValue('pesoEstrutura', pesoTotal.toString());
+                  console.log("Peso total estrutura:", pesoTotal);
                 }
               }}
             />

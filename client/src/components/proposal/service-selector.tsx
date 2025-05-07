@@ -184,14 +184,14 @@ export default function ServiceSelector({
   };
 
   // Remover serviço
-  const removeService = (tipo: typeof TIPOS_SERVICO[number]) => {
+  const removeService = (tipo: string) => {
     // Filtrar os arrays em uma única operação para manter consistência
     const updatedDetails = serviceDetails.filter(d => d.tipo !== tipo);
     const updatedServices = updatedDetails.map(d => d.tipo);
     
     // Atualizar ambos os estados
     setServiceDetails(updatedDetails);
-    setSelectedServices(updatedServices);
+    setSelectedServices(updatedServices as any);
     
     // Calcular o novo total e notificar o componente pai imediatamente
     const total = updatedDetails.reduce((sum, detail) => sum + detail.subtotal, 0);
