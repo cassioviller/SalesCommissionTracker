@@ -15,7 +15,11 @@ import {
   type PagamentoProposta,
   type PagamentoComissao,
   type InsertPagamentoProposta,
-  type InsertPagamentoComissao
+  type InsertPagamentoComissao,
+  servicos,
+  type Servico,
+  type InsertServico,
+  TIPOS_SERVICO
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
@@ -50,6 +54,11 @@ export interface IStorage {
   getPagamentosComissaoByPropostaId(propostaId: number): Promise<PagamentoComissao[]>;
   addPagamentoComissao(pagamento: InsertPagamentoComissao): Promise<PagamentoComissao>;
   deletePagamentoComissao(id: number): Promise<boolean>;
+  
+  // Gerenciamento de Serviços
+  getServicos(): Promise<string[]>;
+  addServico(nome: string): Promise<string[]>;
+  removeServico(nome: string): Promise<string[]>;
 }
 
 export class DatabaseStorage implements IStorage {

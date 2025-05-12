@@ -72,6 +72,14 @@ export const TIPOS_CLIENTE = ["Arquiteto", "Construtor", "Cliente Final", "Trafe
 export let TIPOS_SERVICO = ["Estrutura", "Telha", "Manta PVC", "Manta Termo Plástica", "Cobertura Metálica", 
                               "Cobertura Policarbonato", "Escada Metálica", "Pergolado", "Beiral", 
                               "Escada Helicoidal", "Mezanino", "Reforço Metálico", "Laje"];
+
+// Tabela para armazenar serviços de forma persistente no banco de dados
+export const servicos = pgTable("servicos", {
+  id: serial("id").primaryKey(),
+  nome: text("nome").notNull().unique(),
+  unidadePadrao: text("unidade_padrao").notNull().default("kg"),
+  createdAt: timestamp("created_at").notNull().defaultNow()
+});
 export const TIPOS_UNIDADE = ["kg", "m²", "m", "uni", "vb", "pç"] as const;
 export const TIPOS_PROJETO = ["PE", "PE + PC", "Nenhum"] as const;
 export const TIPOS_CONTRATO = ["MP", "MO", "MP + MO"] as const;
@@ -226,6 +234,10 @@ export type PagamentoProposta = typeof pagamentoPropostas.$inferSelect;
 
 export type InsertPagamentoComissao = z.infer<typeof insertPagamentoComissaoSchema>;
 export type PagamentoComissao = typeof pagamentoComissoes.$inferSelect;
+
+// Tipos para serviços
+export type Servico = typeof servicos.$inferSelect;
+export type InsertServico = typeof servicos.$inferInsert;
 
 export interface ProposalWithCalculations extends Omit<SalesProposal, 'detalhesServicos'> {
   saldoAberto: number;
