@@ -431,7 +431,7 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       {/* Barra de ferramentas */}
       <div className="flex justify-between items-center gap-2 p-3 border-b">
-        {/* Campo de pesquisa com botão de serviços */}
+        {/* Campo de pesquisa */}
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <Input
@@ -456,16 +456,6 @@ const CommissionTable = forwardRef<TableRefHandle, CommissionTableProps>(functio
               />
             </svg>
           </div>
-          
-          {/* Botão "+" para gerenciar serviços */}
-          <Button
-            variant="default"
-            size="icon"
-            className="w-10 h-10 bg-blue-500 hover:bg-blue-600 flex items-center justify-center"
-            onClick={() => setIsServiceModalOpen(true)}
-          >
-            <Plus className="h-6 w-6" />
-          </Button>
         </div>
         
         {/* Botões de exportação */}
