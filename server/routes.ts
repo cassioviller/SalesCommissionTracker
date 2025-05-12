@@ -19,6 +19,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log("Database initialized with sample data if needed");
   }
   
+  // Rotas para gerenciamento de serviços
+  app.get("/api/servicos", async (_req, res) => {
+    try {
+      const servicos = await storage.getServicos();
+      res.json(servicos);
+    } catch (error) {
+      console.error("Erro ao obter serviços:", error);
+      res.status(500).json({ message: "Erro ao obter lista de serviços" });
+    }
+  });
+  
+  app.post("/api/servicos", async (req, res) => {
+    try {
+      const { nome } = req.body;
+      
+      if (!nome || typeof nome !== "string" || nome.trim() === "") {
+        return res.status(400).json({ message: "Nome do serviço é obrigatório" });
+      }
+      
+      const servicos = await storage.addServico(nome.trim());
+      res.status(201).json(servicos);
+    } catch (error) {
+      console.error("Erro ao adicionar serviço:", error);
+      res.status(500).json({ message: "Erro ao adicionar serviço" });
+    }
+  });
+  
+  app.delete("/api/servicos/:nome", async (req, res) => {
+    try {
+      const { nome } = req.params;
+      
+      if (!nome || nome.trim() === "") {
+        return res.status(400).json({ message: "Nome do serviço é obrigatório" });
+      }
+      
+      const servicos = await storage.removeServico(nome);
+      res.json(servicos);
+    } catch (error) {
+      console.error("Erro ao remover serviço:", error);
+      res.status(500).json({ message: "Erro ao remover serviço" });
+    }
+  });
+  
   // Get all proposals
   app.get("/api/proposals", async (_req, res) => {
     try {

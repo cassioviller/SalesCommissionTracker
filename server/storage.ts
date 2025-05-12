@@ -327,7 +327,120 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Helper method to seed the database with initial data if needed
+  // Implementação dos métodos de gerenciamento de serviços
+  async getServicos(): Promise<string[]> {
+    try {
+      // Primeiro verifica se já existe a tabela de serviços no banco
+      try {
+        await db.execute(sql`SELECT * FROM servicos LIMIT 1`);
+      } catch (error) {
+        console.log("Criando tabela de serviços...");
+        await db.execute(sql`
+          CREATE TABLE IF NOT EXISTS servicos (
+            id SERIAL PRIMARY KEY,
+            nome TEXT NOT NULL UNIQUE,
+            unidade_padrao TEXT NOT NULL DEFAULT 'kg',
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+          )
+        `);
+        
+        // Inserir os serviços padrão
+        for (const servico of TIPOS_SERVICO) {
+          await this.addServico(servico);
+        }
+      }
+      
+      // Buscar todos os serviços do banco
+      const servicosList = await db.select().from(servicos);
+      
+      // Atualizar a lista global em memória
+      const servicoNames = servicosList.map(s => s.nome);
+      
+      // Limpar e adicionar todos os serviços do banco à lista global TIPOS_SERVICO
+      // Isso garante que a memória e o banco de dados estejam sincronizados
+      TIPOS_SERVICO.length = 0;
+      TIPOS_SERVICO.push(...servicoNames);
+      
+      return servicoNames;
+    } catch (error) {
+      console.error("Erro ao obter lista de serviços:", error);
+      return [...TIPOS_SERVICO]; // Retorna a cópia da lista em memória em caso de erro
+    }
+  }
+  
+  async addServico(nome: string): Promise<string[]> {
+    try {
+      // Verificar se o serviço já existe
+      const [existingServico] = await db
+        .select()
+        .from(servicos)
+        .where(eq(servicos.nome, nome));
+      
+      if (!existingServico) {
+        // Adicionar o serviço no banco
+        await db.insert(servicos).values({
+          nome: nome,
+          unidadePadrao: "kg" // Unidade padrão para novos serviços
+        });
+        
+        // Se não estiver na lista em memória, adicionar
+        if (!TIPOS_SERVICO.includes(nome)) {
+          TIPOS_SERVICO.push(nome);
+        }
+      }
+      
+      // Retornar a lista atualizada
+      return await this.getServicos();
+    } catch (error) {
+      console.error("Erro ao adicionar serviço:", error);
+      
+      // Se não foi possível adicionar no banco, tentar adicionar apenas na memória
+      if (!TIPOS_SERVICO.includes(nome)) {
+        TIPOS_SERVICO.push(nome);
+      }
+      
+      return [...TIPOS_SERVICO]; // Retorna a cópia da lista em memória
+    }
+  }
+  
+  async removeServico(nome: string): Promise<string[]> {
+    try {
+      // Verificar se o serviço existe
+      const [existingServico] = await db
+        .select()
+        .from(servicos)
+        .where(eq(servicos.nome, nome));
+      
+      if (existingServico) {
+        // Remover do banco de dados
+        await db.delete(servicos).where(eq(servicos.nome, nome));
+      }
+      
+      // Remover da lista em memória
+      const index = TIPOS_SERVICO.indexOf(nome);
+      if (index !== -1) {
+        TIPOS_SERVICO.splice(index, 1);
+      }
+      
+      // Retornar a lista atualizada
+      return await this.getServicos();
+    } catch (error) {
+      console.error("Erro ao remover serviço:", error);
+      
+      // Se não foi possível remover do banco, tentar remover apenas da memória
+      const index = TIPOS_SERVICO.indexOf(nome);
+      if (index !== -1) {
+        TIPOS_SERVICO.splice(index, 1);
+      }
+      
+      return [...TIPOS_SERVICO]; // Retorna a cópia da lista em memória
+    }
+  }
+  
   async seedInitialData(): Promise<void> {
+    // Sincronizar lista de serviços
+    await this.getServicos();
+    
     // Verificar e criar propostas de exemplo
     const proposalResult = await db.select({ 
       count: sql<number>`COUNT(*)` 

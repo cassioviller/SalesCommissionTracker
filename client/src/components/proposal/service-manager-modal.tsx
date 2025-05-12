@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Search, Trash, Plus } from "lucide-react";
+import { X, Search, Trash, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,8 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { TIPOS_SERVICO } from "@shared/schema";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 // Precisamos manter uma versão editável dos serviços
 interface ServiceManagerModalProps {
@@ -23,10 +25,91 @@ export default function ServiceManagerModal({
   onClose,
 }: ServiceManagerModalProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
-  const [services, setServices] = useState<string[]>([...TIPOS_SERVICO]);
   const [newServiceName, setNewServiceName] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+
+  // Consultar serviços do servidor
+  const { 
+    data: services = [], 
+    isLoading,
+    isError,
+    refetch
+  } = useQuery({
+    queryKey: ["/api/servicos"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/servicos");
+      const data = await response.json();
+      return data;
+    },
+    // Isso garante que os serviços sejam sempre atualizados quando o modal é aberto
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    staleTime: 0
+  });
+
+  // Mutation para adicionar um serviço
+  const addServiceMutation = useMutation({
+    mutationFn: async (nome: string) => {
+      const response = await apiRequest("POST", "/api/servicos", { nome });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Atualizar a lista global TIPOS_SERVICO para manter sincronizado
+      TIPOS_SERVICO.length = 0;
+      TIPOS_SERVICO.push(...data);
+      
+      // Atualizar a cache do React Query
+      queryClient.setQueryData(["/api/servicos"], data);
+      
+      toast({
+        title: "Serviço adicionado",
+        description: `O serviço "${newServiceName}" foi adicionado com sucesso.`,
+      });
+      
+      // Limpar o formulário
+      setNewServiceName("");
+      setIsAdding(false);
+    },
+    onError: (error) => {
+      console.error("Erro ao adicionar serviço:", error);
+      toast({
+        title: "Erro ao adicionar serviço",
+        description: "Ocorreu um erro ao adicionar o serviço. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Mutation para remover um serviço
+  const removeServiceMutation = useMutation({
+    mutationFn: async (nome: string) => {
+      const response = await apiRequest("DELETE", `/api/servicos/${encodeURIComponent(nome)}`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Atualizar a lista global TIPOS_SERVICO para manter sincronizado
+      TIPOS_SERVICO.length = 0;
+      TIPOS_SERVICO.push(...data);
+      
+      // Atualizar a cache do React Query
+      queryClient.setQueryData(["/api/servicos"], data);
+      
+      toast({
+        title: "Serviço removido",
+        description: "O serviço foi removido com sucesso.",
+      });
+    },
+    onError: (error) => {
+      console.error("Erro ao remover serviço:", error);
+      toast({
+        title: "Erro ao remover serviço",
+        description: "Ocorreu um erro ao remover o serviço. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  });
 
   // Filtra os serviços com base no termo de busca
   const filteredServices = services.filter((service) =>
@@ -35,14 +118,7 @@ export default function ServiceManagerModal({
 
   // Função para remover um serviço
   const removeService = (serviceName: string) => {
-    // Aqui precisaria de uma chamada de API para remover efetivamente o serviço
-    // Por enquanto, apenas atualizamos a lista local
-    setServices((prev) => prev.filter((s) => s !== serviceName));
-    
-    toast({
-      title: "Serviço removido",
-      description: `O serviço "${serviceName}" foi removido com sucesso.`,
-    });
+    removeServiceMutation.mutate(serviceName);
   };
 
   // Função para adicionar um novo serviço
@@ -66,23 +142,8 @@ export default function ServiceManagerModal({
       return;
     }
 
-    // Adicionar o serviço à lista global TIPOS_SERVICO
-    // Esta é uma modificação temporária da lista em memória
-    // Uma solução completa exigiria que esses serviços fossem armazenados no banco de dados
-    // @ts-ignore - Isso permite modificar TIPOS_SERVICO mesmo sendo const
-    TIPOS_SERVICO.push(newServiceName);
-    
-    // Atualizar a lista local de serviços
-    setServices((prev) => [...prev, newServiceName]);
-    
-    toast({
-      title: "Serviço adicionado",
-      description: `O serviço "${newServiceName}" foi adicionado com sucesso.`,
-    });
-
-    // Limpar o formulário
-    setNewServiceName("");
-    setIsAdding(false);
+    // Adicionar o serviço via API
+    addServiceMutation.mutate(newServiceName);
   };
 
   return (
@@ -111,7 +172,24 @@ export default function ServiceManagerModal({
           {/* Lista de serviços */}
           <div className="border rounded-md overflow-hidden">
             <div className="max-h-[200px] overflow-y-auto">
-              {filteredServices.length > 0 ? (
+              {isLoading ? (
+                <div className="p-4 text-center text-gray-500">
+                  <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                  <p>Carregando serviços...</p>
+                </div>
+              ) : isError ? (
+                <div className="p-4 text-center text-red-500">
+                  <p>Erro ao carregar serviços.</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => refetch()}
+                    className="mt-2"
+                  >
+                    Tentar novamente
+                  </Button>
+                </div>
+              ) : filteredServices.length > 0 ? (
                 <div className="divide-y">
                   {filteredServices.map((service) => (
                     <div
@@ -124,8 +202,13 @@ export default function ServiceManagerModal({
                         size="sm"
                         className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
                         onClick={() => removeService(service)}
+                        disabled={removeServiceMutation.isPending}
                       >
-                        <Trash className="h-4 w-4" />
+                        {removeServiceMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash className="h-4 w-4" />
+                        )}
                       </Button>
                     </div>
                   ))}
@@ -163,7 +246,11 @@ export default function ServiceManagerModal({
                   variant="default"
                   size="sm"
                   onClick={addService}
+                  disabled={addServiceMutation.isPending}
                 >
+                  {addServiceMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  ) : null}
                   OK
                 </Button>
               </div>
